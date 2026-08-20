@@ -1,4 +1,4 @@
-const CACHE = 'genseki-shell-v0.1.0';
+const CACHE = 'hotaru-shell-v0.1.0';
 const APP_SHELL = [
   './', './index.html', './style.css?v=0.1.0', './app.js?v=0.1.0', './manifest.json',
   './icons/icon-48.png', './icons/icon-72.png', './icons/icon-96.png',
@@ -17,7 +17,7 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(key => key.startsWith('genseki-shell-') && key !== CACHE).map(key => caches.delete(key))))
+      .then(keys => Promise.all(keys.filter(key => (key.startsWith('hotaru-shell-') || key.startsWith('genseki-shell-')) && key !== CACHE).map(key => caches.delete(key))))
       .then(() => self.clients.claim())
   );
 });
