@@ -1,16 +1,23 @@
 {
   "name": "Hotaru — Character Build Companion",
   "short_name": "Hotaru",
-  "description": "An unofficial Genshin character build companion for weapons, artifacts, stats, builds and roster planning.",
+  "description": "An unofficial Genshin Impact character build companion for weapons, artifacts, stats, roster planning and farming guidance.",
   "id": "./",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui"],
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
   "orientation": "portrait-primary",
   "background_color": "#fff8fb",
   "theme_color": "#f58fb0",
-  "categories": ["games", "utilities", "reference"],
+  "categories": [
+    "games",
+    "utilities",
+    "reference"
+  ],
   "icons": [
     {"src":"icons/icon-48.png","sizes":"48x48","type":"image/png"},
     {"src":"icons/icon-72.png","sizes":"72x72","type":"image/png"},
@@ -21,8 +28,8 @@
     {"src":"icons/maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
   ],
   "shortcuts": [
-    {"name":"Characters","short_name":"Characters","url":"./?tab=characters","icons":[{"src":"icons/icon-96.png","sizes":"96x96"}]},
-    {"name":"Build Check","short_name":"Build","url":"./?tab=build","icons":[{"src":"icons/icon-96.png","sizes":"96x96"}]},
-    {"name":"My Roster","short_name":"Roster","url":"./?tab=roster","icons":[{"src":"icons/icon-96.png","sizes":"96x96"}]}
+    {"name":"Characters","short_name":"Characters","url":"./?tab=characters","icons":[{"src":"icons/icon-96.png","sizes":"96x96","type":"image/png"}]},
+    {"name":"Build Check","short_name":"Build","url":"./?tab=build","icons":[{"src":"icons/icon-96.png","sizes":"96x96","type":"image/png"}]},
+    {"name":"My Roster","short_name":"Roster","url":"./?tab=roster","icons":[{"src":"icons/icon-96.png","sizes":"96x96","type":"image/png"}]}
   ]
 }

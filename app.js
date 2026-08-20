@@ -1,234 +1,146 @@
-(() => {
-  'use strict';
+import { APP_VERSION, loadState, saveState, upsertBy, exportState, importState } from './js/core/state.js';
+import { loadCatalog, refreshCatalog, getCharacterDetail, hydrateWeaponCandidates } from './js/data/game-data.js';
+import { importShowcase, parseShowcase, validateUID } from './js/data/enka.js';
+import { inferBuildProfile, rankWeapons, rankArtifactSets, evaluateBuild, scoreArtifact } from './js/features/build-engine.js';
+import { ascensionTotals, talentTotals, mergeNeeds } from './js/features/farming.js';
 
-  const APP_VERSION = '0.1.0';
-  const STORAGE_KEY = 'hotaru.app.v1';
-  const $app = document.getElementById('app');
-  const $toast = document.getElementById('toast');
+const $app=document.getElementById('app'),$toast=document.getElementById('toast'),$modal=document.getElementById('modal-root');
+const tabs=[['home','⌂','Home'],['characters','✦','Characters'],['build','◇','Build'],['roster','♙','Roster'],['more','•••','More']];
+let state=loadState(),catalog=null,sourceStatus='loading',toastTimer=null,characterDetail=null,latestBuildResult=null;
+let buildRuntime={weaponRanks:[],artifactRanks:[],loadingWeapons:false};
+const initialTab=new URLSearchParams(location.search).get('tab');if(tabs.some(([id])=>id===initialTab))state.ui.tab=initialTab;
 
-  const DEFAULT_STATE = {
-    schemaVersion: 1,
-    roster: [],
-    weapons: [],
-    builds: [],
-    settings: { haptics: true },
-    ui: { tab: 'home' }
-  };
+function esc(value=''){return String(value).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+function n(value,fallback=0){const x=Number(value);return Number.isFinite(x)?x:fallback}
+function haptic(){if(state.settings.haptics&&navigator.vibrate)navigator.vibrate(8)}
+function persist(){saveState(state)}
+function toast(message){clearTimeout(toastTimer);$toast.textContent=message;$toast.classList.add('show');toastTimer=setTimeout(()=>$toast.classList.remove('show'),2200)}
+function setTab(tab){if(!tabs.some(([id])=>id===tab))tab='home';state.ui.tab=tab;persist();haptic();render();scrollTo({top:0,behavior:'instant'})}
+function topbar(){const statusClass=sourceStatus==='ready'?'ready':sourceStatus==='warn'?'warn':sourceStatus==='error'?'error':'';return`<header class="topbar"><div class="brand"><div class="brand-left"><img class="brand-icon" src="icons/icon-192.png" alt="" /><div><h2 class="brand-title">Hotaru</h2><p class="brand-subtitle">Character build companion</p></div></div><span class="source-dot ${statusClass}" title="Game data status" aria-label="Game data status"></span></div></header>`}
+function nav(){return`<nav class="bottom-nav" aria-label="Primary navigation">${tabs.map(([id,icon,label])=>`<button class="nav-btn ${state.ui.tab===id?'active':''}" data-tab="${id}" aria-label="${label}"><span class="nav-icon" aria-hidden="true">${icon}</span><span class="nav-label">${label}</span></button>`).join('')}</nav>`}
+function image(url,alt,cls=''){if(!url)return`<div class="fallback ${cls}">✦</div>`;return`<img class="${cls}" src="${esc(url)}" alt="${esc(alt)}" loading="lazy" decoding="async" onerror="this.style.display='none';this.parentElement?.classList.add('image-error')" />`}
+function catalogNotice(){if(!catalog)return'';if(catalog.warning)return`<div class="notice">${esc(catalog.warning)}</div>`;return`<div class="notice good">Game catalog: ${esc(catalog.source)} · ${esc(catalog.version||'current')} · ${catalog.characters.length} characters</div>`}
 
-  const tabs = [
-    ['home', '⌂', 'Home'],
-    ['characters', '✦', 'Characters'],
-    ['build', '◇', 'Build'],
-    ['roster', '♙', 'Roster'],
-    ['more', '•••', 'More']
-  ];
+function homeView(){
+  const currentId=state.ui.buildCharacterId||state.builds.at(-1)?.characterId||state.roster[0]?.id,current=catalog?.characters?.find(c=>String(c.id)===String(currentId));
+  return`<main>
+  <section class="hero"><img class="hero-logo" src="icons/icon-192.png" alt="" /><div class="eyebrow" style="color:rgba(255,255,255,.8)">Your Teyvat build companion</div><h1>Build smarter.</h1><p>Weapons, artifacts, stat targets, roster and farming guidance—organized around the characters you actually use.</p></section>
+  <section class="section"><div class="section-head"><div><div class="eyebrow">Start here</div><h2>What do you want to do?</h2></div></div><div class="grid two">
+    <button class="card card-button" data-go="characters"><div class="card-icon">✦</div><strong>Find a character</strong><span>Open live character data and build guidance.</span></button>
+    <button class="card card-button" data-go="build"><div class="card-icon">◇</div><strong>Check my build</strong><span>Review weapon, artifacts and stats together.</span></button>
+    <button class="card card-button" data-go="roster"><div class="card-icon">♙</div><strong>My roster</strong><span>Track characters and weapons you own.</span></button>
+    <button class="card card-button" data-action="uid-modal"><div class="card-icon">⌁</div><strong>Import showcase</strong><span>Use your public Enka/Genshin showcase by UID.</span></button>
+  </div></section>
+  ${current?`<section class="section"><div class="section-head"><h2>Continue building</h2><span class="pill">Saved locally</span></div><button class="card card-button" data-character="${esc(current.id)}" data-open-build="1"><div class="row-title">${esc(current.name)}</div><div class="row-sub">${esc(current.element)} · ${esc(current.weapon)} · ${current.rarity}★</div></button></section>`:''}
+  <section class="section"><div class="section-head"><h2>Your progress</h2><span class="pill gray">On device</span></div><div class="card status-grid">
+    <div class="status-box"><strong>${state.roster.length}</strong><span>Characters saved</span></div><div class="status-box"><strong>${state.weapons.length}</strong><span>Weapons saved</span></div><div class="status-box"><strong>${state.builds.length}</strong><span>Builds saved</span></div><div class="status-box"><strong>${state.artifacts.length}</strong><span>Artifacts checked</span></div>
+  </div></section><section class="section">${catalogNotice()}</section></main>`}
 
-  let state = loadState();
-  const initialTab = new URLSearchParams(location.search).get('tab');
-  if (tabs.some(([id]) => id === initialTab)) state.ui.tab = initialTab;
-  let toastTimer = null;
+function filteredCharacters(){
+  if(!catalog)return[];const q=String(state.ui.search||'').toLowerCase().trim();
+  return catalog.characters.filter(c=>{if(q&&!`${c.name} ${c.element} ${c.weapon}`.toLowerCase().includes(q))return false;if(state.ui.element!=='All'&&c.element!==state.ui.element)return false;if(state.ui.weapon!=='All'&&c.weapon!==state.ui.weapon)return false;if(state.ui.rarity!=='All'&&String(c.rarity)!==String(state.ui.rarity))return false;return true}).sort((a,b)=>b.rarity-a.rarity||a.name.localeCompare(b.name))
+}
+function charactersView(){
+  if(state.ui.characterId)return characterDetailView();
+  if(!catalog)return`<main><div class="page-head"><div class="eyebrow">Database</div><h1>Characters</h1></div><div class="grid auto">${Array.from({length:8},()=>'<div class="skeleton"></div>').join('')}</div></main>`;
+  const all=filteredCharacters(),perPage=24,pages=Math.max(1,Math.ceil(all.length/perPage));state.ui.page=Math.min(pages,Math.max(1,n(state.ui.page,1)));const page=state.ui.page,shown=all.slice((page-1)*perPage,page*perPage),elements=['All',...new Set(catalog.characters.map(x=>x.element).filter(Boolean))],weapons=['All','Sword','Claymore','Polearm','Bow','Catalyst'];
+  return`<main><div class="page-head"><div class="eyebrow">Live catalog</div><h1>Characters</h1><p class="muted">Search the current released catalog. Build recommendations are Hotaru heuristics, not official HoYoverse guidance.</p></div>
+  <label class="search"><span>⌕</span><input id="character-search" value="${esc(state.ui.search)}" type="search" placeholder="Search character, element or weapon" autocomplete="off" /></label>
+  <div class="filters"><div class="field"><label>Element</label><select id="filter-element">${elements.map(x=>`<option ${state.ui.element===x?'selected':''}>${esc(x)}</option>`).join('')}</select></div><div class="field"><label>Weapon</label><select id="filter-weapon">${weapons.map(x=>`<option ${state.ui.weapon===x?'selected':''}>${esc(x)}</option>`).join('')}</select></div><div class="field"><label>Rarity</label><select id="filter-rarity">${['All','5','4'].map(x=>`<option ${String(state.ui.rarity)===x?'selected':''}>${x==='All'?'All':x+'★'}</option>`).join('')}</select></div></div>
+  <div class="section-head"><span class="muted small">${all.length} matching characters</span><button class="ghost" data-action="refresh-catalog">Refresh data</button></div>
+  <div class="grid auto">${shown.map(c=>`<button class="card character-card" data-character="${esc(c.id)}"><div class="character-art">${image(c.icon,c.name)}</div><div class="character-info"><div class="character-name">${esc(c.name)}</div><div class="character-meta"><span>${esc(c.element)}</span><span>·</span><span>${esc(c.weapon)}</span><span>·</span><span>${c.rarity}★</span></div></div></button>`).join('')||`<div class="card empty"><div class="empty-symbol">⌕</div><h3>No matches</h3><p>Try another filter.</p></div>`}</div>
+  <div class="pagination"><button class="secondary" data-page="${page-1}" ${page<=1?'disabled':''}>Previous</button><span>${page} / ${pages}</span><button class="secondary" data-page="${page+1}" ${page>=pages?'disabled':''}>Next</button></div></main>`}
 
-  function loadState() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return structuredClone(DEFAULT_STATE);
-      const parsed = JSON.parse(raw);
-      return {
-        ...structuredClone(DEFAULT_STATE),
-        ...parsed,
-        settings: { ...DEFAULT_STATE.settings, ...(parsed.settings || {}) },
-        ui: { ...DEFAULT_STATE.ui, ...(parsed.ui || {}) },
-        roster: Array.isArray(parsed.roster) ? parsed.roster : [],
-        weapons: Array.isArray(parsed.weapons) ? parsed.weapons : [],
-        builds: Array.isArray(parsed.builds) ? parsed.builds : []
-      };
-    } catch (_) {
-      return structuredClone(DEFAULT_STATE);
-    }
-  }
+function rosterEntry(id){return state.roster.find(x=>String(x.id)===String(id))}
+function ownedWeaponNames(){return state.weapons.map(x=>x.name).filter(Boolean)}
+function characterDetailView(){
+  const character=catalog?.characters?.find(c=>String(c.id)===String(state.ui.characterId));if(!character){state.ui.characterId='';persist();return charactersView()}
+  if(!characterDetail||String(characterDetail.id)!==String(character.id)){queueMicrotask(()=>loadDetail(character));return`<main><button class="ghost" data-action="back-characters">← Characters</button><div class="section skeleton" style="height:160px"></div><div class="section skeleton" style="height:260px"></div></main>`}
+  const profile=inferBuildProfile(characterDetail),section=state.ui.characterSection||'build',owned=rosterEntry(character.id);
+  return`<main><button class="ghost" data-action="back-characters">← Characters</button>
+  <section class="section card detail-head"><div class="character-art" style="border-radius:24px">${image(characterDetail.icon,characterDetail.name,'detail-portrait')}</div><div><div class="chips"><span class="pill">${esc(characterDetail.element)}</span><span class="pill gray">${esc(characterDetail.weapon)}</span><span class="pill gray">${characterDetail.rarity}★</span></div><h1 class="detail-name">${esc(characterDetail.name)}</h1><div class="row-sub">${esc(profile.role)} · ${esc(profile.scaling)} scaling · ${esc(profile.focus)}</div><p class="detail-desc">${esc(characterDetail.description)}</p></div></section>
+  <section class="section segmented">${['overview','build','materials'].map(x=>`<button data-char-section="${x}" class="${section===x?'active':''}">${x[0].toUpperCase()+x.slice(1)}</button>`).join('')}</section>
+  ${section==='overview'?overviewSection(characterDetail,profile):section==='materials'?materialsSection(characterDetail):buildGuideSection(characterDetail,profile)}
+  <section class="section grid two"><button class="${owned?'secondary':'primary'}" data-action="toggle-roster" data-id="${esc(character.id)}">${owned?'Update roster entry':'Add to My Roster'}</button><button class="secondary" data-action="use-build" data-id="${esc(character.id)}">Check my build</button></section></main>`}
 
-  function saveState() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
-  }
+function overviewSection(detail,profile){return`<section class="section"><div class="card"><div class="section-head"><h2>Hotaru profile</h2><span class="pill warn">${profile.confidence}% inferred</span></div><div class="status-grid"><div class="status-box"><strong>${esc(profile.role)}</strong><span>Role</span></div><div class="status-box"><strong>${esc(profile.scaling)}</strong><span>Primary scaling</span></div><div class="status-box"><strong>${esc(profile.focus)}</strong><span>Likely damage/support focus</span></div><div class="status-box"><strong>${profile.energyCost}</strong><span>Estimated burst cost</span></div></div><p class="muted small">Hotaru infers this from the current kit text. Character-specific theorycrafting may recommend a different role or rotation.</p></div><div class="section card"><h2>Talents</h2><div class="list">${(detail.skills||[]).map(s=>`<div class="list-row"><div class="row-main"><div class="row-title">${esc(s.name)}</div><div class="row-sub">${esc((s.description||'').slice(0,180))}${(s.description||'').length>180?'…':''}</div></div></div>`).join('')||'<p class="muted small">Talent detail unavailable from the active source.</p>'}</div></div></section>`}
 
-  function escapeHTML(value = '') {
-    return String(value).replace(/[&<>'"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[c]));
-  }
+function buildGuideSection(detail,profile){
+  const targets=profile.targets,weaponHtml=buildRuntime.loadingWeapons?'<div class="skeleton" style="height:170px"></div>':buildRuntime.weaponRanks.length?`<div class="list">${buildRuntime.weaponRanks.slice(0,6).map((w,i)=>`<div class="list-row"><div class="row-main"><div class="row-title">${i===0?'👑 ':''}${esc(w.name)} ${w.owned?'<span class="pill good">Owned</span>':''}</div><div class="row-sub">${w.rarity}★ · ${esc(w.subStat||'Stat details limited')} · ${esc(w.hotaruReasons?.[0]||'')}</div></div><div class="score-badge">${w.hotaruScore}</div></div>`).join('')}</div>`:'<div class="notice info">Weapon ranking will load when current compatible weapon metadata is available.</div>',artifacts=buildRuntime.artifactRanks.length?buildRuntime.artifactRanks.slice(0,5):rankArtifactSets(catalog?.artifacts||[],profile);
+  return`<section class="section">
+    <div class="card"><div class="section-head"><h2>Artifact main stats</h2><span class="pill">Hotaru heuristic</span></div><div class="status-grid"><div class="status-box"><strong>Sands</strong><span>${profile.mainStats.sands.map(esc).join(' → ')}</span></div><div class="status-box"><strong>Goblet</strong><span>${profile.mainStats.goblet.map(esc).join(' → ')}</span></div><div class="status-box"><strong>Circlet</strong><span>${profile.mainStats.circlet.map(esc).join(' → ')}</span></div><div class="status-box"><strong>Substats</strong><span>${profile.substats.map(esc).join(' → ')}</span></div></div></div>
+    <div class="section card"><div class="section-head"><h2>General stat targets</h2><span class="pill gray">Team adjustable</span></div><div class="list">${[['CRIT Rate',targets.cr],['CRIT DMG',targets.cd],['Energy Recharge',targets.er],['Elemental Mastery',targets.em]].map(([name,t])=>`<div class="list-row"><div class="row-title">${name}</div><div class="row-sub">Min ${t.min}${t.unit} · Good ${t.good}${t.unit} · Great ${t.great}${t.unit}</div></div>`).join('')}</div><p class="muted small">These are broad build-quality targets. ER in particular changes with team energy, rotations and Favonius procs.</p></div>
+    <div class="section card"><div class="section-head"><h2>Artifact sets</h2><span class="pill warn">Fit score</span></div><div class="list">${artifacts.map((a,i)=>`<div class="list-row"><div class="row-main"><div class="row-title">${i===0?'❀ ':''}${esc(a.name)}</div><div class="row-sub">${esc(a.twoPiece||'')} ${a.fourPiece?('· '+esc(a.fourPiece).slice(0,120)):''}</div></div><div class="score-badge">${a.hotaruScore}</div></div>`).join('')||'<p class="muted small">No artifact data loaded.</p>'}</div></div>
+    <div class="section card"><div class="section-head"><h2>Weapons</h2><span class="pill warn">Fit score</span></div>${weaponHtml}</div><div class="section notice info">Hotaru's set/weapon scores are deterministic kit-fit guidance, not a damage simulation. Use character-specific theorycrafting for exact rankings.</div>
+  </section>`}
+function materialsSection(detail){const asc=ascensionTotals(detail),talents=talentTotals(detail,9,3),merged=mergeNeeds(asc,talents);return`<section class="section"><div class="card"><div class="section-head"><h2>Level & ascension materials</h2><span class="pill gray">${asc.length} types</span></div>${materialList(asc)}</div><div class="section card"><div class="section-head"><h2>Talent estimate</h2><span class="pill gray">Up to 9/9/9 where data supports it</span></div>${materialList(talents)}</div><div class="section card"><div class="section-head"><h2>Combined farm list</h2></div>${materialList(merged)}</div></section>`}
+function materialList(list){return list.length?`<div class="list">${list.slice(0,30).map(x=>`<div class="list-row"><div class="row-title">${esc(x.name)}</div><strong>${Math.round(x.count).toLocaleString()}</strong></div>`).join('')}</div>`:'<div class="empty"><p>Material totals are not exposed by the active data source for this character yet.</p></div>'}
 
-  function haptic() {
-    if (state.settings.haptics && navigator.vibrate) navigator.vibrate(8);
-  }
+function buildView(){
+  if(!catalog)return`<main><div class="page-head"><div class="eyebrow">Build Intelligence</div><h1>Build Check</h1></div><div class="skeleton" style="height:280px"></div></main>`;
+  const charId=state.ui.buildCharacterId||state.roster[0]?.id||'',character=catalog.characters.find(c=>String(c.id)===String(charId));if(character&&(!characterDetail||String(characterDetail.id)!==String(character.id)))queueMicrotask(()=>loadDetail(character,false));const detail=characterDetail&&String(characterDetail.id)===String(charId)?characterDetail:null,profile=detail?inferBuildProfile(detail):null,saved=state.builds.find(x=>String(x.characterId)===String(charId))||{},availableChars=[...catalog.characters].sort((a,b)=>a.name.localeCompare(b.name)),artifactOptions=catalog.artifacts.slice().sort((a,b)=>a.name.localeCompare(b.name));
+  return`<main><div class="page-head"><div class="eyebrow">Core feature</div><h1>Build Check</h1><p class="muted">Enter your real stats. Hotaru evaluates ER, CRIT balance, main stats, weapon fit and artifact fit together.</p></div>
+  <section class="card"><div class="field"><label>Character</label><select id="build-character"><option value="">Choose a character</option>${availableChars.map(c=>`<option value="${esc(c.id)}" ${String(c.id)===String(charId)?'selected':''}>${esc(c.name)}</option>`).join('')}</select></div>${character?`<div class="section-head" style="margin-top:13px"><div><h2>${esc(character.name)}</h2><span class="muted small">${profile?esc(profile.role):'Loading build profile…'}</span></div><button class="secondary" data-character="${esc(character.id)}">Open guide</button></div>`:''}</section>
+  ${profile?buildForm(character,profile,saved,artifactOptions):`<section class="section card empty"><div class="empty-symbol">◇</div><h3>Choose a character</h3><p>Hotaru will load its current kit before evaluating your build.</p></section>`}
+  ${latestBuildResult&&character?buildResultView(latestBuildResult):''}${profile?artifactEvaluator(profile):''}</main>`}
 
-  function toast(message) {
-    clearTimeout(toastTimer);
-    $toast.textContent = message;
-    $toast.classList.add('show');
-    toastTimer = setTimeout(() => $toast.classList.remove('show'), 1800);
-  }
+function buildForm(character,profile,saved,artifactOptions){
+  const stats=saved.stats||rosterEntry(character.id)?.stats||{},mains=saved.mainStats||{},context=saved.context||{},ownedWeapons=state.weapons.filter(w=>!w.type||w.type===character.weapon||w.weapon===character.weapon);
+  return`<section class="section card"><div class="section-head"><h2>Your build</h2><span class="pill">${esc(profile.scaling)} · ${esc(profile.focus)}</span></div><div class="form-grid">
+    <div class="field"><label>Weapon</label><select id="build-weapon"><option value="">Not selected</option>${ownedWeapons.map(w=>`<option ${saved.weaponName===w.name?'selected':''}>${esc(w.name)}</option>`).join('')}</select></div>
+    <div class="field"><label>Artifact set</label><select id="build-artifact-set"><option value="">Not selected</option>${artifactOptions.map(a=>`<option ${saved.artifactSet===a.name?'selected':''}>${esc(a.name)}</option>`).join('')}</select></div>
+    <div class="field"><label>Sands</label><select id="main-sands">${mainStatOptions(mains.sands,['ATK%','HP%','DEF%','ER%','Elemental Mastery'])}</select></div>
+    <div class="field"><label>Goblet</label><select id="main-goblet">${mainStatOptions(mains.goblet,[`${character.element} DMG%`,'ATK%','HP%','DEF%','Elemental Mastery'])}</select></div>
+    <div class="field"><label>Circlet</label><select id="main-circlet">${mainStatOptions(mains.circlet,['CRIT Rate','CRIT DMG','Healing Bonus','ATK%','HP%','DEF%','Elemental Mastery'])}</select></div>
+    <div class="field"><label>Same-element teammates</label><input id="ctx-same" type="number" min="0" max="3" step="1" value="${n(context.sameElement,0)}" /></div><div class="field"><label>Favonius procs / rotation</label><input id="ctx-fav" type="number" min="0" max="4" step="1" value="${n(context.favonius,0)}" /></div>
+    <div class="field"><label>CRIT Rate %</label><input id="stat-cr" inputmode="decimal" type="number" step="0.1" value="${n(stats.cr,'')}" /></div><div class="field"><label>CRIT DMG %</label><input id="stat-cd" inputmode="decimal" type="number" step="0.1" value="${n(stats.cd,'')}" /></div>
+    <div class="field"><label>Energy Recharge %</label><input id="stat-er" inputmode="decimal" type="number" step="0.1" value="${n(stats.er,'')}" /></div><div class="field"><label>Elemental Mastery</label><input id="stat-em" inputmode="numeric" type="number" step="1" value="${n(stats.em,'')}" /></div>
+    <div class="field"><label>HP</label><input id="stat-hp" inputmode="numeric" type="number" step="1" value="${n(stats.hp,'')}" /></div><div class="field"><label>ATK</label><input id="stat-atk" inputmode="numeric" type="number" step="1" value="${n(stats.atk,'')}" /></div><div class="field"><label>DEF</label><input id="stat-def" inputmode="numeric" type="number" step="1" value="${n(stats.def,'')}" /></div>
+  </div><div class="section grid two"><button class="primary" data-action="evaluate-build">Evaluate build</button><button class="secondary" data-action="save-build">Save build</button></div></section>`}
+function mainStatOptions(selected,options){return`<option value="">Not selected</option>${options.map(x=>`<option ${selected===x?'selected':''}>${esc(x)}</option>`).join('')}`}
+function collectBuildForm(){const get=id=>document.getElementById(id)?.value||'';return{weaponName:get('build-weapon'),artifactSet:get('build-artifact-set'),mainStats:{sands:get('main-sands'),goblet:get('main-goblet'),circlet:get('main-circlet')},context:{sameElement:n(get('ctx-same')),favonius:n(get('ctx-fav'))},stats:{cr:n(get('stat-cr'),NaN),cd:n(get('stat-cd'),NaN),er:n(get('stat-er'),NaN),em:n(get('stat-em'),NaN),hp:n(get('stat-hp'),NaN),atk:n(get('stat-atk'),NaN),def:n(get('stat-def'),NaN)}}}
+function evaluateCurrentBuild(save=false){const id=state.ui.buildCharacterId,character=catalog?.characters.find(c=>String(c.id)===String(id));if(!character||!characterDetail)return toast('Choose a character first.');const profile=inferBuildProfile(characterDetail),form=collectBuildForm(),weapon=[...state.weapons,...(buildRuntime.weaponRanks||[])].find(w=>w.name===form.weaponName)||null,artifactSet=catalog.artifacts.find(a=>a.name===form.artifactSet)||null;latestBuildResult=evaluateBuild({profile,stats:form.stats,mainStats:form.mainStats,context:form.context,weapon,artifactSet});if(save){state.builds=upsertBy(state.builds,{id:String(id),characterId:String(id),characterName:character.name,...form,score:latestBuildResult.score,updatedAt:new Date().toISOString()});persist();toast('Build saved.')}else toast('Build evaluated.');render()}
+function buildResultView(result){return`<section class="section card"><div class="score-wrap"><div class="score-big">${result.score}</div><div><h2>${esc(result.grade)} build</h2><p class="muted small">${esc(result.biggestImprovement)}</p></div></div><div class="progress"><i style="width:${result.score}%"></i></div><div class="section status-grid">${Object.entries(result.checks).map(([key,c])=>`<div class="status-box"><strong>${key.toUpperCase()}</strong><span class="state-${c.state}">${esc(c.label)}</span></div>`).join('')}</div>${result.issues.length?`<div class="section"><h3>Priority improvements</h3><div class="list">${result.issues.map(i=>`<div class="list-row"><div class="row-main"><div class="row-title">${esc(i.stat)}</div><div class="row-sub">${esc(i.message)}</div></div></div>`).join('')}</div></div>`:''}</section>`}
+function artifactEvaluator(profile){return`<section class="section card"><div class="section-head"><div><div class="eyebrow">Artifact helper</div><h2>Evaluate one artifact</h2></div></div><div class="form-grid"><div class="field"><label>Main stat</label><select id="artifact-main">${mainStatOptions('',['ATK%','HP%','DEF%','ER%','Elemental Mastery','CRIT Rate','CRIT DMG','Healing Bonus'])}</select></div><div class="field"><label>CRIT Rate %</label><input id="artifact-cr" type="number" step="0.1" /></div><div class="field"><label>CRIT DMG %</label><input id="artifact-cd" type="number" step="0.1" /></div><div class="field"><label>ER %</label><input id="artifact-er" type="number" step="0.1" /></div><div class="field"><label>Elemental Mastery</label><input id="artifact-em" type="number" step="1" /></div><div class="field"><label>${esc(profile.scaling)}% substat</label><input id="artifact-scaling" type="number" step="0.1" /></div></div><button class="secondary section" data-action="evaluate-artifact">Evaluate artifact</button><div id="artifact-result"></div></section>`}
 
-  function setTab(tab) {
-    if (!tabs.some(([id]) => id === tab)) tab = 'home';
-    state.ui.tab = tab;
-    saveState();
-    haptic();
-    render();
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  }
+function rosterView(){
+  if(!catalog)return`<main><div class="page-head"><div class="eyebrow">Your account</div><h1>My Roster</h1></div><div class="skeleton" style="height:240px"></div></main>`;
+  const rows=state.roster.map(entry=>{const c=catalog.characters.find(x=>String(x.id)===String(entry.id));return c?`<div class="list-row"><div class="row-main"><div class="row-title">${esc(c.name)}</div><div class="row-sub">${esc(c.element)} · ${esc(c.weapon)} · Lv ${n(entry.level,1)} · C${n(entry.constellation,0)}</div></div><div class="section-actions"><button class="secondary" data-action="edit-roster" data-id="${esc(entry.id)}">Edit</button><button class="ghost" data-character="${esc(entry.id)}">Guide</button></div></div>`:''}).join(''),weapons=state.weapons.map((w,i)=>`<div class="list-row"><div class="row-main"><div class="row-title">${esc(w.name)}</div><div class="row-sub">${esc(w.type||w.weapon||'')} · Lv ${n(w.level,1)} · R${n(w.refinement,1)}</div></div><button class="danger" data-remove-weapon="${i}">Remove</button></div>`).join('');
+  return`<main><div class="page-head"><div class="eyebrow">Your account</div><h1>My Roster</h1><p class="muted">Saved locally. UID import only adds characters exposed in your public showcase.</p></div><section class="card"><div class="section-head"><h2>Characters</h2><div class="section-actions"><button class="secondary" data-action="uid-modal">Import UID</button><button class="primary" data-action="add-roster-modal">Add character</button></div></div><div class="list">${rows||'<div class="empty"><div class="empty-symbol">♙</div><h3>Your roster is empty</h3><p>Add a character or import your public showcase.</p></div>'}</div></section><section class="section card"><div class="section-head"><h2>Owned weapons</h2><button class="primary" data-action="add-weapon-modal">Add weapon</button></div><div class="list">${weapons||'<div class="empty"><p>Add the weapons you own so Hotaru can prioritize practical recommendations.</p></div>'}</div></section></main>`}
+function moreView(){return`<main><div class="page-head"><div class="eyebrow">Hotaru</div><h1>More</h1><p class="muted">Import, backup, source diagnostics and app preferences.</p></div><section class="card"><div class="list-row"><div><div class="row-title">Version</div><div class="row-sub">User-facing Version 1</div></div><span>${APP_VERSION}</span></div><div class="list-row"><div><div class="row-title">Game data</div><div class="row-sub">${catalog?`${esc(catalog.source)} · ${esc(catalog.version)}`:'Loading'}</div></div><button class="secondary" data-action="refresh-catalog">Refresh</button></div><div class="list-row"><div><div class="row-title">Haptics</div><div class="row-sub">Navigation feedback</div></div><button class="secondary" data-action="toggle-haptics">${state.settings.haptics?'On':'Off'}</button></div></section><section class="section grid two"><button class="card card-button" data-action="uid-modal"><div class="card-icon">⌁</div><strong>UID / Enka import</strong><span>Import public showcase characters and stats.</span></button><button class="card card-button" data-action="export-data"><div class="card-icon">⇩</div><strong>Backup Hotaru</strong><span>Download your local roster, weapons and builds.</span></button><label class="card card-button" style="display:block"><div class="card-icon">⇧</div><strong>Restore backup</strong><span>Select a Hotaru JSON backup.</span><input id="restore-file" type="file" accept="application/json,.json" hidden /></label><button class="card card-button" data-action="source-info"><div class="card-icon">i</div><strong>Data sources</strong><span>See what is verified game data vs Hotaru guidance.</span></button></section><section class="section card"><strong>Unofficial fan companion</strong><p class="muted small">Hotaru is independent and is not affiliated with, authorized by, or endorsed by HoYoverse. Game data and third-party APIs can change. Build scores are general heuristics and are not damage simulations.</p></section></main>`}
 
-  function topbar() {
-    return `
-      <header class="topbar">
-        <div class="brand">
-          <img class="brand-icon" src="icons/icon-192.png" alt="" />
-          <div class="brand-copy">
-            <h2 class="brand-title">Hotaru</h2>
-            <p class="brand-subtitle">Character build companion</p>
-          </div>
-        </div>
-      </header>`;
-  }
+function view(){if(state.ui.tab==='characters')return charactersView();if(state.ui.tab==='build')return buildView();if(state.ui.tab==='roster')return rosterView();if(state.ui.tab==='more')return moreView();return homeView()}
+function render(){$app.innerHTML=`${topbar()}${view()}${nav()}`}
 
-  function nav() {
-    return `
-      <nav class="bottom-nav" aria-label="Primary navigation">
-        ${tabs.map(([id, icon, label]) => `
-          <button class="nav-btn ${state.ui.tab === id ? 'active' : ''}" data-tab="${id}" aria-label="${label}">
-            <span class="nav-icon" aria-hidden="true">${icon}</span>
-            <span class="nav-label">${label}</span>
-          </button>`).join('')}
-      </nav>`;
-  }
+async function loadDetail(character,loadRanks=true){try{characterDetail=await getCharacterDetail(character);const profile=inferBuildProfile(characterDetail);buildRuntime.artifactRanks=rankArtifactSets(catalog?.artifacts||[],profile);if(loadRanks){buildRuntime.loadingWeapons=true;render();const candidates=await hydrateWeaponCandidates(characterDetail,14);buildRuntime.weaponRanks=rankWeapons(candidates,profile,ownedWeaponNames());buildRuntime.loadingWeapons=false}render()}catch(error){buildRuntime.loadingWeapons=false;toast(`Could not load character detail: ${error.message}`);render()}}
+function openCharacter(id,openBuild=false){state.ui.characterId=String(id);state.ui.tab='characters';state.ui.characterSection=openBuild?'build':(state.ui.characterSection||'build');characterDetail=null;buildRuntime={weaponRanks:[],artifactRanks:[],loadingWeapons:false};persist();render();scrollTo({top:0,behavior:'instant'})}
+function showModal(title,body){$modal.innerHTML=`<div class="modal-backdrop" data-action="close-modal"><div class="modal" onclick="event.stopPropagation()"><div class="modal-head"><h2>${esc(title)}</h2><button class="ghost" data-action="close-modal">Close</button></div>${body}</div></div>`}
+function closeModal(){$modal.innerHTML=''}
+function rosterModal(entry=null){const options=(catalog?.characters||[]).slice().sort((a,b)=>a.name.localeCompare(b.name));showModal(entry?'Edit roster character':'Add roster character',`<div class="field"><label>Character</label><select id="modal-char" ${entry?'disabled':''}>${options.map(c=>`<option value="${esc(c.id)}" ${String(c.id)===String(entry?.id)?'selected':''}>${esc(c.name)}</option>`).join('')}</select></div><div class="form-grid section"><div class="field"><label>Level</label><input id="modal-level" type="number" min="1" max="100" value="${n(entry?.level,1)}" /></div><div class="field"><label>Constellation</label><input id="modal-c" type="number" min="0" max="6" value="${n(entry?.constellation,0)}" /></div></div><button class="primary section" data-action="save-roster-modal">Save character</button>`)}
+function weaponModal(){const options=(catalog?.weapons||[]).slice().sort((a,b)=>a.name.localeCompare(b.name));showModal('Add owned weapon',`<div class="field"><label>Weapon</label><select id="modal-weapon">${options.map(w=>`<option value="${esc(w.id)}">${esc(w.name)} · ${w.rarity}★ · ${esc(w.weapon)}</option>`).join('')}</select></div><div class="form-grid section"><div class="field"><label>Level</label><input id="modal-wlevel" type="number" min="1" max="100" value="90" /></div><div class="field"><label>Refinement</label><input id="modal-refine" type="number" min="1" max="5" value="1" /></div></div><button class="primary section" data-action="save-weapon-modal">Save weapon</button>`)}
+function uidModal(){showModal('Import public showcase',`<div class="notice info">Enka can only import characters currently exposed in your Genshin Character Showcase. It cannot read your full account inventory.</div><div class="field section"><label>Genshin UID</label><input id="uid-input" inputmode="numeric" placeholder="e.g. 800123456" value="${esc(state.uid||'')}" /></div><button class="primary" data-action="import-uid">Import with Enka</button><div class="section"><div class="field"><label>Manual Enka JSON fallback</label><textarea id="enka-json" placeholder="Paste the JSON response here if browser/API restrictions block direct import."></textarea></div><button class="secondary section" data-action="import-enka-json">Import pasted JSON</button></div>`)}
+function sourceInfoModal(){showModal('Hotaru data architecture',`<div class="list"><div class="list-row"><div><div class="row-title">Hakush / Nanoka</div><div class="row-sub">Version-aware released character, weapon, artifact and material data.</div></div><span class="pill good">Primary</span></div><div class="list-row"><div><div class="row-title">Enka.Network</div><div class="row-sub">Public player showcase + metadata enrichment. Never cached by Hotaru's service worker.</div></div><span class="pill">Optional</span></div><div class="list-row"><div><div class="row-title">genshin.dev</div><div class="row-sub">Fallback static data when the current-source endpoint is unavailable.</div></div><span class="pill gray">Fallback</span></div><div class="list-row"><div><div class="row-title">Hotaru Build Intelligence</div><div class="row-sub">Deterministic kit-fit heuristics. Not official game data or a damage simulator.</div></div><span class="pill warn">Guidance</span></div></div>`)}
+async function doUIDImport(dataOverride=null){try{const uid=document.getElementById('uid-input')?.value||state.uid;if(!dataOverride&&!validateUID(uid))return toast('Enter a valid 9–10 digit UID.');const result=dataOverride?parseShowcase(dataOverride,uid):await importShowcase(uid);state.uid=result.uid||uid;result.roster.forEach(entry=>{state.roster=upsertBy(state.roster,entry);if(entry.equippedWeaponId){const w=catalog?.weapons?.find(item=>String(item.id)===String(entry.equippedWeaponId));if(w)state.weapons=upsertBy(state.weapons,{id:String(w.id),name:w.name,type:w.weapon,rarity:w.rarity,level:entry.equippedWeaponLevel||1,refinement:entry.equippedWeaponRefinement||1,source:'Enka showcase'},'id')}});persist();closeModal();toast(`Imported ${result.roster.length} showcased character${result.roster.length===1?'':'s'}.`);render()}catch(error){toast(error.message)}}
+function exportBackup(){const blob=new Blob([exportState(state)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`hotaru-backup-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);toast('Backup downloaded.')}
 
-  function homeView() {
-    return `
-      <main>
-        <section class="hero">
-          <img class="hero-logo" src="icons/icon-192.png" alt="" />
-          <div class="eyebrow" style="color:rgba(255,255,255,.78)">Your Teyvat build companion</div>
-          <h1>Build smarter.</h1>
-          <p>Weapons, artifacts and stat targets—organized around the characters you actually use.</p>
-        </section>
-
-        <section class="section">
-          <div class="section-head">
-            <div><div class="eyebrow">Start here</div><h2>What do you want to check?</h2></div>
-          </div>
-          <div class="grid two">
-            <button class="card card-button" data-go="characters">
-              <div class="card-icon">✦</div><strong>Find a character</strong><span>Open a character build guide.</span>
-            </button>
-            <button class="card card-button" data-go="build">
-              <div class="card-icon">◇</div><strong>Check my build</strong><span>Review weapon, artifacts and stats.</span>
-            </button>
-            <button class="card card-button" data-go="roster">
-              <div class="card-icon">♙</div><strong>My roster</strong><span>Keep track of characters you own.</span>
-            </button>
-            <button class="card card-button" data-action="coming-soon">
-              <div class="card-icon">⌁</div><strong>Team-aware builds</strong><span>Recommendations that adapt to your team.</span>
-            </button>
-          </div>
-        </section>
-
-        <section class="section">
-          <div class="section-head"><h2>Your progress</h2><span class="pill">Local-first</span></div>
-          <div class="card status-list">
-            <div class="status-row"><div><strong>Characters saved</strong><br><span>Owned roster</span></div><strong>${state.roster.length}</strong></div>
-            <div class="status-row"><div><strong>Weapons saved</strong><br><span>Your available options</span></div><strong>${state.weapons.length}</strong></div>
-            <div class="status-row"><div><strong>Builds saved</strong><br><span>Character loadouts</span></div><strong>${state.builds.length}</strong></div>
-          </div>
-        </section>
-      </main>`;
-  }
-
-  function charactersView() {
-    return `
-      <main>
-        <div class="page-head"><div class="eyebrow">Database</div><h1>Characters</h1><p class="muted">Search by character, element, weapon or role once the live game-data layer is connected.</p></div>
-        <label class="search"><span aria-hidden="true">⌕</span><input id="character-search" type="search" placeholder="Search characters" autocomplete="off" /></label>
-        <section class="section card empty">
-          <div class="empty-symbol">✦</div><h3>Character data comes next</h3><p>The app shell is ready. The next update will connect the source data and build-guide layer without using fake sample characters.</p>
-        </section>
-      </main>`;
-  }
-
-  function buildView() {
-    return `
-      <main>
-        <div class="page-head"><div class="eyebrow">Core feature</div><h1>Build Check</h1><p class="muted">Hotaru will evaluate the whole build together instead of scoring isolated stats.</p></div>
-        <div class="feature-row">
-          <div class="card"><div class="card-icon">⚔</div><div><strong>Weapon ranking</strong><span>Best overall, 4★, F2P and best option you own.</span></div></div>
-          <div class="card"><div class="card-icon">❀</div><div><strong>Artifact setup</strong><span>Sets, main stats and substat priorities by playstyle.</span></div></div>
-          <div class="card"><div class="card-icon">▥</div><div><strong>Stat targets</strong><span>Minimum, good and strong targets with build-aware warnings.</span></div></div>
-        </div>
-        <section class="section card empty">
-          <div class="empty-symbol">◇</div><h3>No build selected</h3><p>Once character data is connected, choose a character here and Hotaru can begin guiding the build.</p>
-        </section>
-      </main>`;
-  }
-
-  function rosterView() {
-    return `
-      <main>
-        <div class="page-head"><div class="eyebrow">Your account</div><h1>My Roster</h1><p class="muted">Your owned characters and weapons will live here, saved locally first.</p></div>
-        <section class="card empty">
-          <div class="empty-symbol">♙</div><h3>Your roster is empty</h3><p>We’ll enable character selection after the database connection so your first entries are real Genshin data, not placeholders.</p>
-        </section>
-      </main>`;
-  }
-
-  function moreView() {
-    return `
-      <main>
-        <div class="page-head"><div class="eyebrow">Hotaru</div><h1>More</h1><p class="muted">App preferences, data tools and information.</p></div>
-        <section class="card">
-          <div class="status-row"><div><strong>Version</strong><br><span>Foundation build</span></div><span>${escapeHTML(APP_VERSION)}</span></div>
-          <div class="status-row"><div><strong>Storage</strong><br><span>Roster and preferences</span></div><span>On device</span></div>
-          <div class="status-row"><div><strong>Haptics</strong><br><span>Navigation feedback</span></div><button class="secondary" data-action="toggle-haptics">${state.settings.haptics ? 'On' : 'Off'}</button></div>
-        </section>
-        <section class="section card">
-          <strong>Unofficial fan companion</strong>
-          <p class="muted small">Hotaru is an independent fan-made tool and is not affiliated with or endorsed by HoYoverse.</p>
-        </section>
-      </main>`;
-  }
-
-  function view() {
-    switch (state.ui.tab) {
-      case 'characters': return charactersView();
-      case 'build': return buildView();
-      case 'roster': return rosterView();
-      case 'more': return moreView();
-      default: return homeView();
-    }
-  }
-
-  function render() {
-    $app.innerHTML = `${topbar()}${view()}${nav()}`;
-  }
-
-  document.addEventListener('click', event => {
-    const tab = event.target.closest('[data-tab]');
-    if (tab) return setTab(tab.dataset.tab);
-    const go = event.target.closest('[data-go]');
-    if (go) return setTab(go.dataset.go);
-    const action = event.target.closest('[data-action]')?.dataset.action;
-    if (action === 'coming-soon') toast('This feature is planned for a later update.');
-    if (action === 'toggle-haptics') {
-      state.settings.haptics = !state.settings.haptics;
-      saveState();
-      render();
-      toast(`Haptics ${state.settings.haptics ? 'on' : 'off'}.`);
-    }
-  });
-
-  window.addEventListener('dblclick', event => event.preventDefault(), { passive: false });
-  document.addEventListener('gesturestart', event => event.preventDefault(), { passive: false });
-  document.addEventListener('gesturechange', event => event.preventDefault(), { passive: false });
-  document.addEventListener('gestureend', event => event.preventDefault(), { passive: false });
-
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(() => {}));
-  }
-
-  render();
-})();
+document.addEventListener('click',async event=>{
+  const tab=event.target.closest('[data-tab]');if(tab)return setTab(tab.dataset.tab);const go=event.target.closest('[data-go]');if(go)return setTab(go.dataset.go);const char=event.target.closest('[data-character]');if(char)return openCharacter(char.dataset.character,!!char.dataset.openBuild);const page=event.target.closest('[data-page]');if(page){state.ui.page=n(page.dataset.page,1);persist();render();scrollTo({top:0,behavior:'instant'});return}const section=event.target.closest('[data-char-section]');if(section){state.ui.characterSection=section.dataset.charSection;persist();render();return}const removeW=event.target.closest('[data-remove-weapon]');if(removeW){state.weapons.splice(Number(removeW.dataset.removeWeapon),1);persist();render();return}
+  const action=event.target.closest('[data-action]')?.dataset.action;if(!action)return;
+  if(action==='close-modal')return closeModal();if(action==='back-characters'){state.ui.characterId='';characterDetail=null;persist();render();return}
+  if(action==='toggle-haptics'){state.settings.haptics=!state.settings.haptics;persist();render();toast(`Haptics ${state.settings.haptics?'on':'off'}.`);return}
+  if(action==='refresh-catalog'){sourceStatus='loading';render();try{catalog=await refreshCatalog();sourceStatus=catalog.warning?'warn':'ready';toast('Game data refreshed.')}catch(e){sourceStatus='error';toast(e.message)}render();return}
+  if(action==='toggle-roster'){const id=event.target.closest('[data-id]')?.dataset.id,entry=rosterEntry(id);if(entry)return rosterModal(entry);const c=catalog.characters.find(x=>String(x.id)===String(id));state.roster=upsertBy(state.roster,{id:String(id),name:c?.name||'',level:1,constellation:0,source:'Manual'});persist();toast('Added to roster.');render();return}
+  if(action==='use-build'){const id=event.target.closest('[data-id]')?.dataset.id;state.ui.buildCharacterId=String(id);state.ui.tab='build';state.ui.characterId='';characterDetail=null;latestBuildResult=null;persist();render();return}
+  if(action==='evaluate-build')return evaluateCurrentBuild(false);if(action==='save-build')return evaluateCurrentBuild(true);
+  if(action==='evaluate-artifact'){if(!characterDetail)return;const profile=inferBuildProfile(characterDetail),gv=id=>n(document.getElementById(id)?.value,0),result=scoreArtifact({profile,mainStat:document.getElementById('artifact-main')?.value||'',substats:{cr:gv('artifact-cr'),cd:gv('artifact-cd'),er:gv('artifact-er'),em:gv('artifact-em'),scaling:gv('artifact-scaling')}}),box=document.getElementById('artifact-result');if(box)box.innerHTML=`<div class="section notice good"><strong>${result.grade} · ${result.score}/100</strong><br>CRIT Value: ${result.critValue}<br>${esc(result.note)}</div>`;state.artifacts.push({characterId:String(state.ui.buildCharacterId),score:result.score,checkedAt:new Date().toISOString()});state.artifacts=state.artifacts.slice(-100);persist();return}
+  if(action==='add-roster-modal')return rosterModal();if(action==='edit-roster')return rosterModal(rosterEntry(event.target.closest('[data-id]')?.dataset.id));
+  if(action==='save-roster-modal'){const id=document.getElementById('modal-char')?.value||document.getElementById('modal-char')?.selectedOptions?.[0]?.value;if(!id)return;const c=catalog.characters.find(x=>String(x.id)===String(id));state.roster=upsertBy(state.roster,{id:String(id),name:c?.name||'',level:n(document.getElementById('modal-level')?.value,1),constellation:n(document.getElementById('modal-c')?.value,0),source:rosterEntry(id)?.source||'Manual'});persist();closeModal();toast('Roster updated.');render();return}
+  if(action==='add-weapon-modal')return weaponModal();if(action==='save-weapon-modal'){const id=document.getElementById('modal-weapon')?.value,w=catalog.weapons.find(x=>String(x.id)===String(id));if(!w)return;state.weapons=upsertBy(state.weapons,{id:String(id),name:w.name,type:w.weapon,rarity:w.rarity,level:n(document.getElementById('modal-wlevel')?.value,90),refinement:n(document.getElementById('modal-refine')?.value,1)},'id');persist();closeModal();toast('Weapon saved.');render();return}
+  if(action==='uid-modal')return uidModal();if(action==='import-uid')return doUIDImport();if(action==='import-enka-json'){try{return doUIDImport(JSON.parse(document.getElementById('enka-json')?.value||'{}'))}catch{return toast('Invalid JSON.')}}
+  if(action==='export-data')return exportBackup();if(action==='source-info')return sourceInfoModal();
+});
+document.addEventListener('input',event=>{if(event.target?.id==='character-search'){state.ui.search=event.target.value;state.ui.page=1;persist();clearTimeout(window.__hotaruSearch);window.__hotaruSearch=setTimeout(render,120)}})
+document.addEventListener('change',async event=>{const id=event.target?.id;if(id==='filter-element'){state.ui.element=event.target.value;state.ui.page=1;persist();render()}if(id==='filter-weapon'){state.ui.weapon=event.target.value;state.ui.page=1;persist();render()}if(id==='filter-rarity'){state.ui.rarity=event.target.value.replace('★','');state.ui.page=1;persist();render()}if(id==='build-character'){state.ui.buildCharacterId=event.target.value;characterDetail=null;latestBuildResult=null;buildRuntime={weaponRanks:[],artifactRanks:[],loadingWeapons:false};persist();render()}if(id==='restore-file'&&event.target.files?.[0]){try{const text=await event.target.files[0].text();state=importState(text);persist();toast('Backup restored.');render()}catch(e){toast(e.message)}}})
+window.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});for(const evt of['gesturestart','gesturechange','gestureend'])document.addEventListener(evt,e=>e.preventDefault(),{passive:false});
+if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
+async function init(){render();try{catalog=await loadCatalog();sourceStatus=catalog.warning?'warn':'ready'}catch(e){sourceStatus='error';toast(e.message)}render()}init();

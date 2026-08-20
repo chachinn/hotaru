@@ -1,0 +1,36 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { inferBuildProfile, statTargets, scoreWeapon, scoreArtifactSet, evaluateBuild, scoreArtifact } from '../js/features/build-engine.js';
+import { ascensionTotals, mergeNeeds } from '../js/features/farming.js';
+
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const furinaLike={element:'Hydro',description:'A Hydro character.',skills:[{name:'Salon',description:'Summons members that deal Elemental Skill DMG based on Max HP. Nearby party HP increases or decreases. The summon attacks nearby opponents at intervals.'},{name:'Burst',description:'Elemental Burst. Energy Cost 60. Increases party DMG based on HP changes.'}],passives:[{name:'Confession',description:'Every 1000 points of Max HP increases Salon Member DMG.'}],raw:{energy:'Energy Cost 60'}};
+const profile=inferBuildProfile(furinaLike);
+assert.equal(profile.scaling,'HP');
+assert.ok(profile.mainStats.sands.length>=1);
+const targets=statTargets({...profile,energyCost:80},{sameElement:1,favonius:1});
+assert.ok(targets.er.good>=110&&targets.er.good<180);
+const weapon=scoreWeapon({rarity:5,subStat:'CRIT DMG',passiveDesc:'Elemental Skill DMG increases when HP changes.'},profile);
+assert.ok(weapon.score>35);
+const artifactScore=scoreArtifactSet({twoPiece:'Increases Elemental Skill DMG',fourPiece:'When not on the field, Elemental Skill DMG increases.'},profile);
+assert.ok(artifactScore>20);
+const result=evaluateBuild({profile,stats:{cr:70,cd:160,er:115,em:0},mainStats:{sands:'HP%',goblet:'Hydro DMG%',circlet:'CRIT Rate'},context:{sameElement:0,favonius:0},weapon:{rarity:5,subStat:'CRIT DMG',passiveDesc:'Elemental Skill DMG increases.'},artifactSet:{twoPiece:'Elemental Skill DMG',fourPiece:'Off-field Elemental Skill DMG'}});
+assert.ok(result.score>=50);
+assert.match(result.biggestImprovement,/ER|Energy/i);
+const piece=scoreArtifact({profile,mainStat:'HP%',substats:{cr:10,cd:20,er:12,em:0,scaling:5}});
+assert.equal(piece.critValue,40);
+assert.ok(piece.score>40);
+const mats=ascensionTotals({materials:{ascensions:[{mats:[{name:'Flower',count:3}],cost:20000},{mats:[{name:'Flower',count:10}],cost:40000}]}});
+assert.equal(mats.find(x=>x.name==='Flower')?.count,13);
+assert.equal(mergeNeeds([{name:'A',count:2}],[{name:'A',count:3}])[0].count,5);
+
+const manifest=JSON.parse(fs.readFileSync(path.join(root,'manifest.json'),'utf8'));
+assert.equal(manifest.short_name,'Hotaru');
+for(const icon of manifest.icons) assert.ok(fs.existsSync(path.join(root,icon.src)),`missing ${icon.src}`);
+const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
+assert.match(sw,/enka\.network\/api\//);assert.match(sw,/NEVER_CACHE/);
+const index=fs.readFileSync(path.join(root,'index.html'),'utf8');assert.match(index,/type="module"/);assert.match(index,/Hotaru/);
+const app=fs.readFileSync(path.join(root,'app.js'),'utf8');assert.match(app,/Build Check/);assert.match(app,/Import public showcase/);assert.doesNotMatch(app,new RegExp('Gen'+'seki'));
+console.log('Hotaru QA: all deterministic/static tests passed.');
