@@ -2,7 +2,8 @@
   'use strict';
 
   const APP_VERSION = '0.1.0';
-  const STORAGE_KEY = 'genseki.app.v1';
+  const STORAGE_KEY = 'hotaru.app.v1';
+  const LEGACY_STORAGE_KEY = 'genseki.app.v1';
   const $app = document.getElementById('app');
   const $toast = document.getElementById('toast');
 
@@ -30,10 +31,10 @@
 
   function loadState() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
       if (!raw) return structuredClone(DEFAULT_STATE);
       const parsed = JSON.parse(raw);
-      return {
+      const migrated = {
         ...structuredClone(DEFAULT_STATE),
         ...parsed,
         settings: { ...DEFAULT_STATE.settings, ...(parsed.settings || {}) },
@@ -42,6 +43,11 @@
         weapons: Array.isArray(parsed.weapons) ? parsed.weapons : [],
         builds: Array.isArray(parsed.builds) ? parsed.builds : []
       };
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+        localStorage.removeItem(LEGACY_STORAGE_KEY);
+      } catch (_) {}
+      return migrated;
     } catch (_) {
       return structuredClone(DEFAULT_STATE);
     }
@@ -81,7 +87,7 @@
         <div class="brand">
           <img class="brand-icon" src="icons/icon-192.png" alt="" />
           <div class="brand-copy">
-            <h2 class="brand-title">Genseki</h2>
+            <h2 class="brand-title">Hotaru</h2>
             <p class="brand-subtitle">Character build companion</p>
           </div>
         </div>
@@ -154,14 +160,14 @@
   function buildView() {
     return `
       <main>
-        <div class="page-head"><div class="eyebrow">Core feature</div><h1>Build Check</h1><p class="muted">Genseki will evaluate the whole build together instead of scoring isolated stats.</p></div>
+        <div class="page-head"><div class="eyebrow">Core feature</div><h1>Build Check</h1><p class="muted">Hotaru will evaluate the whole build together instead of scoring isolated stats.</p></div>
         <div class="feature-row">
           <div class="card"><div class="card-icon">⚔</div><div><strong>Weapon ranking</strong><span>Best overall, 4★, F2P and best option you own.</span></div></div>
           <div class="card"><div class="card-icon">❀</div><div><strong>Artifact setup</strong><span>Sets, main stats and substat priorities by playstyle.</span></div></div>
           <div class="card"><div class="card-icon">▥</div><div><strong>Stat targets</strong><span>Minimum, good and strong targets with build-aware warnings.</span></div></div>
         </div>
         <section class="section card empty">
-          <div class="empty-symbol">◇</div><h3>No build selected</h3><p>Once character data is connected, choose a character here and Genseki can begin guiding the build.</p>
+          <div class="empty-symbol">◇</div><h3>No build selected</h3><p>Once character data is connected, choose a character here and Hotaru can begin guiding the build.</p>
         </section>
       </main>`;
   }
@@ -179,7 +185,7 @@
   function moreView() {
     return `
       <main>
-        <div class="page-head"><div class="eyebrow">Genseki</div><h1>More</h1><p class="muted">App preferences, data tools and information.</p></div>
+        <div class="page-head"><div class="eyebrow">Hotaru</div><h1>More</h1><p class="muted">App preferences, data tools and information.</p></div>
         <section class="card">
           <div class="status-row"><div><strong>Version</strong><br><span>Foundation build</span></div><span>${escapeHTML(APP_VERSION)}</span></div>
           <div class="status-row"><div><strong>Storage</strong><br><span>Roster and preferences</span></div><span>On device</span></div>
@@ -187,7 +193,7 @@
         </section>
         <section class="section card">
           <strong>Unofficial fan companion</strong>
-          <p class="muted small">Genseki is an independent fan-made tool and is not affiliated with or endorsed by HoYoverse.</p>
+          <p class="muted small">Hotaru is an independent fan-made tool and is not affiliated with or endorsed by HoYoverse.</p>
         </section>
       </main>`;
   }
