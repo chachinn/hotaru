@@ -1,20 +1,16 @@
 name: Apply Build Intelligence 2 final
 
 on:
-  push:
-    branches:
-      - feature/build-intelligence-2-final
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: write
 
-concurrency:
-  group: bi2-final-apply
-  cancel-in-progress: true
-
 jobs:
   apply:
-    if: github.actor != 'github-actions[bot]'
+    if: github.head_ref == 'feature/build-intelligence-2-final' && github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -32,7 +28,6 @@ jobs:
           echo "9a466cc1f33a2975457a7e7bbddd9b2aa373d974113dacb5cb7f66c2c52efaae  /tmp/bi2.tar.gz" | sha256sum -c -
           tar -xzf /tmp/bi2.tar.gz -C .
           rm -f .bi2-final-payload.b64
-          rm -f .bi2-trigger
           rm -f .github/workflows/bi2-final-apply.yml
       - name: Full deterministic QA
         run: npm test
