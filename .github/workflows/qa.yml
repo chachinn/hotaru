@@ -28,6 +28,7 @@ jobs:
           name: hotaru-v1-tested
           compression-level: 9
           if-no-files-found: error
+          include-hidden-files: true
           path: |
             .nojekyll
             .github/workflows/qa.yml
