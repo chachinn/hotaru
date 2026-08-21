@@ -18,16 +18,23 @@ function numberFromRow(row){const text=row.querySelector('strong')?.textContent|
 function materialRows(section){return[...section.querySelectorAll('.list-row')].map(row=>({row,name:row.querySelector('.row-title')?.textContent?.trim()||'',count:numberFromRow(row)})).filter(x=>x.name)}
 function knownMapNames(){return getMapFilterOptions('All')}
 
-function installImage(container,{src='',fallback='',alt=''}){
-  if(!container||container.querySelector(':scope > .hotaru-content-thumb'))return null;
-  const image=document.createElement('img');image.className='hotaru-content-thumb';image.alt=alt;image.loading='lazy';image.decoding='async';image.src=src||fallback;if(fallback&&fallback!==image.src)image.dataset.fallback=fallback;
-  image.addEventListener('error',()=>{const next=image.dataset.fallback;if(next&&image.src!==next){delete image.dataset.fallback;image.src=next;return}image.hidden=true},{passive:true});
-  container.prepend(image);return image;
+function uniqueSources(values=[]){return [...new Set(values.map(value=>String(value||'').trim()).filter(Boolean))]}
+function armImageSources(image,sources=[]){
+  if(!image)return image;const queue=uniqueSources(sources);if(!queue.length)return image;
+  image.hidden=false;image.style.display='';image.dataset.hotaruSources=JSON.stringify(queue);image.dataset.hotaruSourceIndex='0';image.src=queue[0];
+  image.onerror=()=>{const list=JSON.parse(image.dataset.hotaruSources||'[]'),index=Number(image.dataset.hotaruSourceIndex||0)+1;if(index<list.length){image.dataset.hotaruSourceIndex=String(index);image.src=list[index];return}image.hidden=true;image.style.display='none';image.parentElement?.classList.add('image-error');image.nextElementSibling?.removeAttribute?.('hidden')};
+  return image;
+}
+function installImage(container,{src='',fallback='',sources=[],alt=''}){
+  if(!container)return null;const all=uniqueSources([...(sources||[]),src,fallback]);
+  let image=container.querySelector(':scope > .hotaru-content-thumb');if(!image){image=document.createElement('img');image.className='hotaru-content-thumb';image.alt=alt;image.loading='lazy';image.decoding='async';container.prepend(image)}
+  if(alt)image.alt=alt;armImageSources(image,all);return image;
 }
 function ensureCharacterPortrait(character){
-  const art=app.querySelector('.detail-head .character-art');if(!art||art.querySelector('img:not([hidden])'))return;
+  const art=app.querySelector('.detail-head .character-art');if(!art)return;const stable=fallbackCharacterIcon(character?.slug||character?.name),existing=art.querySelector('img');
   const old=art.querySelector('.fallback');if(old)old.hidden=true;
-  installImage(art,{src:character?.icon||'',fallback:fallbackCharacterIcon(character?.slug||character?.name),alt:character?.name||'Character'});
+  if(existing){armImageSources(existing,[stable,character?.icon]);return}
+  installImage(art,{sources:[stable,character?.icon],alt:character?.name||'Character'});
 }
 
 async function ensureDetail(){
@@ -56,7 +63,7 @@ function augmentMaterialArtwork(){
   const sections=[...app.querySelectorAll('main .section.card')];
   for(const section of sections){const title=section.querySelector('h2')?.textContent||'';if(!/materials|farm list|talent estimate/i.test(title))continue;
     for(const {row,name,count} of materialRows(section)){
-      const media=mediaMap.get(keyName(name));installImage(row,{src:media?.icon||'',fallback:fallbackItemIcon(media?.id||name),alt:name});
+      const media=mediaMap.get(keyName(name));installImage(row,{sources:[fallbackItemIcon(name),media?.icon],alt:name});
       const mapButton=row.querySelector('[data-hotaru-material]');if(mapButton){const sources=materialSourceNames(name,{count,knownMapNames:knownMapNames()});if(!sources.length){mapButton.hidden=true;mapButton.setAttribute('aria-hidden','true')}else{mapButton.hidden=false;mapButton.dataset.hotaruMaterial=sources[0];mapButton.title=`Show ${sources.join(', ')} on map`}}
     }
     const all=section.querySelector('[data-hotaru-map-all]');if(all){const rows=materialRows(section),sources=resolveMaterialSources(rows,{knownMapNames:knownMapNames()});if(sources.length)all.dataset.hotaruMapAll=sources.join('|')}
@@ -67,19 +74,19 @@ function augmentBuildArtwork(){
   if(!catalog)return;
   for(const section of app.querySelectorAll('main .section.card')){
     const title=section.querySelector('h2')?.textContent?.trim()||'';
-    if(title==='Weapons')for(const row of section.querySelectorAll('.list-row')){const item=findNamedEntry(row.querySelector('.row-title')?.textContent,catalog.weapons);if(item)installImage(row,{src:item.icon||'',fallback:fallbackWeaponIcon(item.slug||item.name),alt:item.name})}
-    if(title==='Artifact sets')for(const row of section.querySelectorAll('.list-row')){const item=findNamedEntry(row.querySelector('.row-title')?.textContent,catalog.artifacts);if(item)installImage(row,{src:item.icon||'',fallback:fallbackArtifactIcon(item.name),alt:item.name})}
+    if(title==='Weapons')for(const row of section.querySelectorAll('.list-row')){const item=findNamedEntry(row.querySelector('.row-title')?.textContent,catalog.weapons);if(item)installImage(row,{sources:[fallbackWeaponIcon(item.slug||item.name),item.icon],alt:item.name})}
+    if(title==='Artifact sets')for(const row of section.querySelectorAll('.list-row')){const item=findNamedEntry(row.querySelector('.row-title')?.textContent,catalog.artifacts);if(item)installImage(row,{sources:[fallbackArtifactIcon(item.name),item.icon],alt:item.name})}
   }
 }
-function augmentCharacterCardImages(){if(!catalog)return;for(const card of app.querySelectorAll('.character-card[data-character]')){const art=card.querySelector('.character-art');if(!art||art.querySelector('img:not([hidden])'))continue;const character=catalog.characters.find(c=>String(c.id)===String(card.dataset.character));if(character)installImage(art,{src:character.icon||'',fallback:fallbackCharacterIcon(character.slug||character.name),alt:character.name})}}
+function augmentCharacterCardImages(){if(!catalog)return;for(const card of app.querySelectorAll('.character-card[data-character]')){const art=card.querySelector('.character-art');if(!art)continue;const character=catalog.characters.find(c=>String(c.id)===String(card.dataset.character));if(!character)continue;const stable=fallbackCharacterIcon(character.slug||character.name),existing=art.querySelector('img');if(existing){existing.loading='lazy';existing.decoding='async';armImageSources(existing,[stable,character.icon]);art.classList.remove('image-error');continue}installImage(art,{sources:[stable,character.icon],alt:character.name})}}
 
 function buildFarmContext(button){
-  const section=button.closest('.section.card');if(!section)return null;const materials=materialRows(section).map(({name,count})=>{const media=mediaMap.get(keyName(name));return{name,count,icon:media?.icon||fallbackItemIcon(media?.id||name),sources:materialSourceNames(name,{count,knownMapNames:knownMapNames()})}}),sources=resolveMaterialSources(materials,{knownMapNames:knownMapNames()});
+  const section=button.closest('.section.card');if(!section)return null;const materials=materialRows(section).map(({name,count})=>{const media=mediaMap.get(keyName(name));return{name,count,icon:fallbackItemIcon(name)||media?.icon||'',sources:materialSourceNames(name,{count,knownMapNames:knownMapNames()})}}),sources=resolveMaterialSources(materials,{knownMapNames:knownMapNames()});
   return{character:currentCharacterName(),materials,sources,createdAt:new Date().toISOString()};
 }
 function primeMapClick(target){
   const all=target.closest('[data-hotaru-map-all]');if(all){const context=buildFarmContext(all);if(context){saveContext(context);if(context.sources.length)all.dataset.hotaruMapAll=context.sources.join('|')}return}
-  const one=target.closest('[data-hotaru-material]');if(!one)return;const row=one.closest('.list-row'),name=row?.querySelector('.row-title')?.textContent?.trim()||one.dataset.hotaruMaterial,count=numberFromRow(row),sources=materialSourceNames(name,{count,knownMapNames:knownMapNames()});if(sources.length){saveContext({character:currentCharacterName(),materials:[{name,count,icon:mediaMap.get(keyName(name))?.icon||fallbackItemIcon(name),sources}],sources,createdAt:new Date().toISOString()});one.dataset.hotaruMaterial=sources[0]}}
+  const one=target.closest('[data-hotaru-material]');if(!one)return;const row=one.closest('.list-row'),name=row?.querySelector('.row-title')?.textContent?.trim()||one.dataset.hotaruMaterial,count=numberFromRow(row),sources=materialSourceNames(name,{count,knownMapNames:knownMapNames()});if(sources.length){saveContext({character:currentCharacterName(),materials:[{name,count,icon:fallbackItemIcon(name)||mediaMap.get(keyName(name))?.icon||'',sources}],sources,createdAt:new Date().toISOString()});one.dataset.hotaruMaterial=sources[0]}}
 window.addEventListener('click',event=>{primeMapClick(event.target);setTimeout(queue,0)},true);
 
 function mapContextChips(context){const sources=normalizeMarkerNames(context?.sources||[]);if(!sources.length)return'';return`<div class="hotaru-character-map-sources"><div><strong>${esc(context.character||'Character')} farming sources</strong><small>These map filters come from the character's actual farm list.</small></div><div class="hotaru-source-chip-row"><button class="active" data-hotaru-content-map-sources="${esc(sources.join('|'))}">All sources</button>${sources.map(source=>`<button data-hotaru-content-map-sources="${esc(source)}">${esc(source)}</button>`).join('')}</div></div>`}
