@@ -1,10 +1,11 @@
+import { MAP_PROVIDER_BROWSE_URL, MAP_COMMON_MARKERS, MAP_OCULUS_MARKERS, MAP_AREA_MARKERS, sanitizeProviderBrowseUrl } from '../data/map-registry.js';
 export const MAP_BASE='https://genshin-impact-map.appsample.com/location';
-export const MAP_BROWSE_URL='https://genshin-impact-map.appsample.com/?lang=EN';
+export const MAP_BROWSE_URL=MAP_PROVIDER_BROWSE_URL;
 export const MAP_STORAGE_KEY='hotaru.map.v1';
 
 export const MAP_FILTER_GROUPS={
-  'Exploration':['Shrine of Depth','Teleport Waypoint','Statue of The Seven','Domain','Common Chest','Exquisite Chest','Precious Chest','Luxurious Chest','Seelie','Viewpoint','World Quests'],
-  'Oculi & Collectibles':['Anemoculus','Geoculus','Electroculus','Dendroculus','Hydroculus','Pyroculus','Crimson Agate','Sacred Seal','Radiant Spincrystal'],
+  'Exploration':[MAP_COMMON_MARKERS.shrine,MAP_COMMON_MARKERS.waypoint,MAP_COMMON_MARKERS.statue,MAP_COMMON_MARKERS.domain,'Common Chest','Exquisite Chest','Precious Chest','Luxurious Chest','Seelie','Viewpoint',MAP_COMMON_MARKERS.quests],
+  'Oculi & Collectibles':[...MAP_OCULUS_MARKERS,'Crimson Agate','Spirit Carp','Lumenspar','Key Sigil I','Key Sigil II','Key Sigil III','Key Sigil IV','Key Sigil V','Sacred Seal','Radiant Spincrystal','Mnemonic Cluster'],
   'Local Specialties':['Dandelion Seed','Cecilia','Calla Lily','Small Lamp Grass','Philanemo Mushroom','Valberry','Windwheel Aster','Wolfhook','Cor Lapis','Glaze Lily','Jueyun Chili','Noctilucous Jade','Qingxin','Silk Flower','Starconch','Violetgrass','Amakumo Fruit','Crystal Marrow','Dendrobium','Naku Weed','Onikabuto','Sakura Bloom','Sango Pearl','Sea Ganoderma','Scarab','Redcrest','Tidalga','Lakelight Lily','Rainbow Rose','Romaritime Flower','Spring of the First Dewdrop','Beryl Conch','Subdetection Unit','Lumidouce Bell','Marcotte','Cacahuatl','Grainfruit','Candlecap Mushroom','Embercore Flower','Spinel Fruit','Lakkaberry','Midsommar Berry','Icy Pebble','Windrest Flower'],
   'General Materials':['Mist Flower Corolla','Flaming Flower Stamen','Electro Crystal','Crystal Core','Butterfly Wings','Snapdragon','Horsetail','Frog','Lizard Tail','Crab','Raw Meat','Fowl','Matsutake','Pinecone','Bird Egg','Sweet Flower','Mint','Mushroom','Berry','Sunsettia','Apple','Lotus Head','Carrot','Radish','Cooking Ingredient','Harvestable Plant'],
   'Artifacts':['Artifact'],
@@ -16,7 +17,7 @@ export const MAP_FILTER_GROUPS={
 
 export const MAP_QUICK_MARKERS=[
   ['All map',''],['Teleport Waypoints','Teleport Waypoint'],['Statues','Statue of The Seven'],
-  ['Oculi','Anemoculus,Geoculus,Electroculus,Dendroculus,Hydroculus,Pyroculus'],['Local specialties','Sakura Bloom,Qingxin,Lakelight Lily,Windrest Flower'],
+  ['Oculi',MAP_OCULUS_MARKERS.join(',')],['Local specialties','Sakura Bloom,Qingxin,Lakelight Lily,Windrest Flower'],
   ['Ore','Ores'],['Artifacts','Artifact'],['Ingredients','Cooking Ingredient'],['Fishing','Fish']
 ];
 
@@ -30,7 +31,7 @@ export function normalizeMarkerNames(value){
   return [...new Set(list.map(x=>String(x).trim()).filter(Boolean))].slice(0,24);
 }
 export function buildMapUrl(names=[],options={}){
-  if(options?.browseAll)return MAP_BROWSE_URL;
+  if(options?.browseAll)return sanitizeProviderBrowseUrl(options?.browseUrl)||MAP_BROWSE_URL;
   const params=new URLSearchParams();
   const clean=normalizeMarkerNames(names);if(clean.length)params.set('names',clean.join(','));
   params.set('no_heading','1');
@@ -42,7 +43,7 @@ export function normalizeTarget(input={}){
   return {id:String(input.id||`${Date.now()}-${Math.random().toString(36).slice(2,8)}`),name,needed:Math.max(0,Number(input.needed||0)),owned:Math.max(0,Number(input.owned||0)),complete:Boolean(input.complete)||(!Number.isNaN(Number(input.needed))&&Number(input.needed)>0&&remainingTarget(input)<=0),createdAt:input.createdAt||new Date().toISOString()};
 }
 export function loadMapState(){
-  const base={names:[],targets:[],lastOpenedAt:'',browseAll:false};
-  try{const parsed=JSON.parse(localStorage.getItem(MAP_STORAGE_KEY)||'{}');return {...base,...parsed,browseAll:Boolean(parsed.browseAll),names:normalizeMarkerNames(parsed.names),targets:Array.isArray(parsed.targets)?parsed.targets.map(normalizeTarget).slice(-100):[]}}catch{return base}
+  const base={names:[],targets:[],lastOpenedAt:'',browseAll:false,browseUrl:''};
+  try{const parsed=JSON.parse(localStorage.getItem(MAP_STORAGE_KEY)||'{}');return {...base,...parsed,browseAll:Boolean(parsed.browseAll),browseUrl:sanitizeProviderBrowseUrl(parsed.browseUrl),names:normalizeMarkerNames(parsed.names),targets:Array.isArray(parsed.targets)?parsed.targets.map(normalizeTarget).slice(-100):[]}}catch{return base}
 }
-export function saveMapState(state){try{localStorage.setItem(MAP_STORAGE_KEY,JSON.stringify({...state,browseAll:Boolean(state.browseAll),names:normalizeMarkerNames(state.names),targets:(state.targets||[]).slice(-100)}));return true}catch{return false}}
+export function saveMapState(state){try{localStorage.setItem(MAP_STORAGE_KEY,JSON.stringify({...state,browseAll:Boolean(state.browseAll),browseUrl:sanitizeProviderBrowseUrl(state.browseUrl),names:normalizeMarkerNames(state.names),targets:(state.targets||[]).slice(-100)}));return true}catch{return false}}

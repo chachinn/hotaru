@@ -18,6 +18,8 @@ Validated in this update:
 - Missing released characters can be merged from the latest candidate dataset without duplicating existing roster entries.
 - The safe live Hakush/Nanoka catalog remains the base, so latest candidate data is not exposed unless release-gated.
 - AppSample interactive-map URLs are encoded safely and use its documented embed query format.
+- A shared map registry prevents the character guide from overwriting map markers with stale aliases; runtime code contains no guessed `Cryoculus` marker.
+- Current provider area coverage includes Ancient Sacred Mountain, Temple of Space, and Frost Moon, with dedicated provider browse URLs where verified.
 - Map category and material/marker dropdown helpers expose browseable choices instead of requiring typed names.
 - The provider-maintained full-map filter mode has a deterministic URL path.
 - Material target Needed / Owned / Remaining math is deterministic.
@@ -31,7 +33,7 @@ Validated in this update:
 ## Performance safeguards
 
 - Interactive map is not loaded during normal Home / Characters / Build / Roster use.
-- Region metadata is locally cached for 24 hours.
+- Region metadata is locally cached for 7 days.
 - Release-feed checks use a short cache and only fetch the latest character candidate dataset if a currently released slug is missing.
 - Base catalog keeps its longer cache instead of being fully re-downloaded every release check.
 - Character list remains paginated at 24 results per page.
