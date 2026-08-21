@@ -1,0 +1,153 @@
+ function view(){if(state.ui.tab==='characters')return charactersView();if(state.ui.tab==='build')return buildView();if(state.ui.tab==='roster')return rosterView();if(state.ui.tab==='more')return moreView();return homeView()}
+ function render(){$app.innerHTML=`${topbar()}${view()}${nav()}`}
+ 
++async function generateSmartFarmPlan(){
++  if(!catalog||farmRuntime.loading)return;
++  state.ui.farmResin=Math.min(RESIN_CAP,Math.max(0,n(document.getElementById('farm-resin')?.value,RESIN_CAP)));
++  state.ui.weeklyDiscountedClaimsUsed=Math.max(0,n(document.getElementById('farm-weekly-claims')?.value,0));persist();
++  const active=sortRoster(normalizeRoster(state.roster,catalog.characters)).filter(entry=>entry.status!=='Not Building'&&entry.status!=='Finished');
++  farmRuntime={loading:true,plan:null,error:''};render();
++  try{
++    const entries=[];
++    for(let i=0;i<active.length;i+=3){
++      const batch=active.slice(i,i+3),results=await Promise.allSettled(batch.map(async entry=>{const character=catalog.characters.find(c=>String(c.id)===String(entry.id));if(!character)return null;const detail=await getCharacterDetail(character),profile=resolvedBuildProfile(detail,{buildVariant:entry.buildVariant}),weapon=state.weapons.find(w=>String(w.id)===String(entry.weaponId))||null;return{entry:{...entry,name:character.name},character,detail,profile,weapon}}));
++      results.forEach(result=>{if(result.status==='fulfilled'&&result.value)entries.push(result.value)});
++    }
++    farmRuntime={loading:false,error:'',plan:buildSmartFarmPlan({entries,inventory:state.inventory,resin:state.ui.farmResin,weeklyDiscountedClaimsUsed:state.ui.weeklyDiscountedClaimsUsed,knownMapNames:getMapFilterOptions('All')})};
++  }catch(error){farmRuntime={loading:false,plan:null,error:`Could not build the farm plan: ${error.message}`}}
++  render();
++}
++
+ async function loadDetail(character,loadRanks=true){try{characterDetail=await getCharacterDetail(character);const saved=state.builds.find(x=>String(x.characterId)===String(character.id))||{},draft=buildDraftFor(character.id,saved),profile=resolvedBuildProfile(characterDetail,draft.context||{});buildRuntime.artifactRanks=rankArtifactSets(catalog?.artifacts||[],profile);if(loadRanks){buildRuntime.loadingWeapons=true;render();buildRuntime.weaponCandidates=await hydrateWeaponCandidates(characterDetail,14);buildRuntime.weaponRanks=rankWeapons(buildRuntime.weaponCandidates,profile,ownedWeaponNames());buildRuntime.loadingWeapons=false}render()}catch(error){buildRuntime.loadingWeapons=false;toast(`Could not load character detail: ${error.message}`);render()}}
+ function openCharacter(id,openBuild=false){state.ui.characterId=String(id);state.ui.tab='characters';state.ui.characterSection=openBuild?'build':(state.ui.characterSection||'build');characterDetail=null;buildRuntime={weaponCandidates:[],weaponRanks:[],artifactRanks:[],loadingWeapons:false,formDraft:null};persist();render();scrollTo({top:0,behavior:'instant'})}
+ function showModal(title,body){$modal.innerHTML=`<div class="modal-backdrop" data-action="close-modal"><div class="modal" onclick="event.stopPropagation()"><div class="modal-head"><h2>${esc(title)}</h2><button class="ghost" data-action="close-modal">Close</button></div>${body}</div></div>`}
+@@ -141,6 +171,7 @@ document.addEventListener('click',async event=>{
+   if(action==='refresh-catalog'){sourceStatus='loading';render();try{catalog=await refreshCatalog();sourceStatus=catalog.warning?'warn':'ready';toast('Game data refreshed.')}catch(e){sourceStatus='error';toast(e.message)}render();return}
+   if(action==='toggle-roster'){const id=event.target.closest('[data-id]')?.dataset.id,entry=rosterEntry(id);if(entry)return rosterModal(entry);const c=catalog.characters.find(x=>String(x.id)===String(id));state.roster=upsertBy(state.roster,normalizeRosterEntry({id:String(id),name:c?.name||'',level:1,constellation:0,source:'Manual'},c||{}));persist();toast('Added to roster.');render();return}
+   if(action==='use-build'){const id=event.target.closest('[data-id]')?.dataset.id;state.ui.buildCharacterId=String(id);state.ui.tab='build';state.ui.characterId='';characterDetail=null;latestBuildResult=null;persist();render();return}
++  if(action==='generate-smart-farm')return generateSmartFarmPlan();
+   if(action==='evaluate-build')return evaluateCurrentBuild(false);if(action==='save-build')return evaluateCurrentBuild(true);
+   if(action==='evaluate-artifact'){if(!characterDetail)return;const formContext=buildRuntime.formDraft?.context||state.builds.find(x=>String(x.characterId)===String(state.ui.buildCharacterId))?.context||{},profile=resolvedBuildProfile(characterDetail,formContext),gv=id=>n(document.getElementById(id)?.value,0),result=scoreArtifact({profile,mainStat:document.getElementById('artifact-main')?.value||'',substats:{cr:gv('artifact-cr'),cd:gv('artifact-cd'),er:gv('artifact-er'),em:gv('artifact-em'),scaling:gv('artifact-scaling')}}),box=document.getElementById('artifact-result');if(box)box.innerHTML=`<div class="section notice good"><strong>${result.grade} · ${result.score}/100</strong><br>CRIT Value: ${result.critValue}<br>${esc(result.note)}</div>`;state.artifacts.push({characterId:String(state.ui.buildCharacterId),score:result.score,checkedAt:new Date().toISOString()});state.artifacts=state.artifacts.slice(-100);persist();return}
+   if(action==='add-roster-modal')return rosterModal();if(action==='edit-roster')return rosterModal(rosterEntry(event.target.closest('[data-id]')?.dataset.id));
+diff --git a/docs/SMART_BUILD_PLAN.md b/docs/SMART_BUILD_PLAN.md
+index c3f0c2e3bfdf8bbbce60091a2089482322d511ab..b1ed5631f1bce7738cb90b936b1e0006fd964994 100644
+--- a/docs/SMART_BUILD_PLAN.md
++++ b/docs/SMART_BUILD_PLAN.md
+@@ -48,3 +48,9 @@ Each gate must pass deterministic regression QA and a tested packaged-artifact r
+ - `js/features/build-goals.js` converts a roster entry into deterministic guaranteed progression tasks and respects reviewed talent priority when available.
+ - Build Check inherits the roster-selected build variant and equipped owned weapon when the user has not saved a conflicting Build Check choice. Saving a reviewed Build Check variant syncs it back to the roster entry.
+ - Storage schema v3 migrates v2/v1 data additively and reserves `inventory` plus `teamPresets` for the Smart Farming and Smart Team Creator gates; existing roster, weapon, build and artifact records are preserved.
++
++## Smart Farming core (release candidate)
++
++Smart Farming now derives an on-demand farm plan from Personal Roster 2.0 goals without changing the storage schema. It skips `Not Building` and `Finished` entries, respects reviewed build variants/talent priority, aggregates shared material needs, subtracts inventory only when exact quantities are available, uses the current 200 Original Resin cap, and models the first three weekly-boss reward claims at 30 Resin before the 60-Resin standard cost.
++
++Material quantities are deliberately conservative: Hotaru only displays exact remaining amounts when the active game-data source exposes the relevant staged ascension/talent costs. It does not invent weapon/EXP quantities from incomplete data. Weekly-boss classification requires explicit source metadata and does not infer weekly drops from high-tier enemy-drop names. Map handoff is enabled only when the material name exactly matches a marker already present in Hotaru's AppSample registry.
+diff --git a/index.html b/index.html
+index eb29e16d7437994e7c3e73ce59bebec4c3751028..0e301ddcbab05dbd38ce839aa5927b58f04c7451 100644
+--- a/index.html
++++ b/index.html
+@@ -14,7 +14,7 @@
+   <link rel="manifest" href="manifest.json" />
+   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+   <link rel="icon" href="icons/icon-192.png" sizes="192x192" />
+-  <link rel="stylesheet" href="style.css?v=1.2.0" />
++  <link rel="stylesheet" href="style.css?v=1.3.0" />
+   <link rel="stylesheet" href="css/enhancements.css?v=1.3.0" />
+   <link rel="stylesheet" href="css/content-enhancements.css?v=1.0.0" />
+   <link rel="stylesheet" href="css/guide-ui.css?v=1.2.0" />
+@@ -25,7 +25,7 @@
+   <div id="app" class="app-shell" aria-live="polite"></div>
+   <div id="toast" class="toast" role="status" aria-live="polite"></div>
+   <div id="modal-root"></div>
+-  <script type="module" src="app.js?v=1.5.0"></script>
++  <script type="module" src="app.js?v=1.6.0"></script>
+   <script type="module" src="js/enhancements.js?v=1.6.0"></script>
+   <script type="module" src="js/content-enhancements.js?v=1.2.0"></script>
+   <script type="module" src="js/features/guide-loader.js?v=1.1.0"></script>
+diff --git a/js/features/farm-planner.js b/js/features/farm-planner.js
+new file mode 100644
+index 0000000000000000000000000000000000000000..3052f8e72c25e0a3ff72878c1301ddee09dde098
+--- /dev/null
++++ b/js/features/farm-planner.js
+@@ -0,0 +1,140 @@
++import { buildGoal } from './build-goals.js';
++import { priorityWeight } from './roster-intelligence.js';
++
++export const RESIN_CAP=200;
++export const WEEKLY_DISCOUNTED_CLAIMS=3;
++export const WEEKLY_DISCOUNTED_COST=30;
++export const WEEKLY_STANDARD_COST=60;
++
++const TALENT_KINDS=new Set(['Normal Attack','Skill','Burst']);
++const BOOK_RE=/^(Teachings of|Guide (?:to|of)|Philosophies of)\b/i;
++const GEM_RE=/(Agnidus Agate|Varunada Lazurite|Vajrada Amethyst|Shivada Jade|Vayuda Turquoise|Prithiva Topaz|Nagadus Emerald)/i;
++const EXP_RE=/(Hero'?s Wit|Adventurer'?s Experience|Wanderer'?s Advice)/i;
++
++function num(value,fallback=0){const parsed=Number(value);return Number.isFinite(parsed)?parsed:fallback}
++function clamp(value,min,max){return Math.min(max,Math.max(min,num(value,min)))}
++function key(value=''){return String(value||'').trim().toLowerCase().replace(/[’']/g,"'").replace(/\s+/g,' ')}
++function amount(item={}){return Math.max(0,num(item.count??item.value??item.amount??item.item?.count??item.item?.value,0))}
++function itemName(item={}){return String(item.name??item.item?.name??item.id??'').trim()}
++function stageItems(stage={}){return Array.isArray(stage.mats)?stage.mats:Array.isArray(stage.materials)?stage.materials:Array.isArray(stage.items)?stage.items:[]}
++function explicitCategory(item={},stage={}){return [item.category,item.type,item.kind,item.source,item.item?.category,item.item?.type,stage.category,stage.type,stage.kind,stage.source].map(value=>String(value||'').toLowerCase()).join(' ')}
++function unique(values=[]){return [...new Set(values.map(value=>String(value||'').trim()).filter(Boolean))]}
++
++export function normalizeResin(value){return Math.round(clamp(value,0,RESIN_CAP))}
++export function normalizeWeeklyClaims(value){return Math.round(clamp(value,0,99))}
++export function weeklyBossResinCost(discountedClaimsUsed=0){return normalizeWeeklyClaims(discountedClaimsUsed)<WEEKLY_DISCOUNTED_CLAIMS?WEEKLY_DISCOUNTED_COST:WEEKLY_STANDARD_COST}
++export function remainingWeeklyDiscountedClaims(discountedClaimsUsed=0){return Math.max(0,WEEKLY_DISCOUNTED_CLAIMS-normalizeWeeklyClaims(discountedClaimsUsed))}
++
++export function normalizeInventory(inventory={}){
++  const out={};
++  if(Array.isArray(inventory))for(const entry of inventory){const name=String(entry?.name||'').trim();if(name)out[name]=Math.max(0,num(entry.owned??entry.count??entry.amount,0))}
++  else if(inventory&&typeof inventory==='object')for(const [name,value] of Object.entries(inventory)){const count=typeof value==='object'?value?.owned??value?.count??value?.amount:value;out[String(name).trim()]=Math.max(0,num(count,0))}
++  return out;
++}
++export function inventoryCount(inventory={},name=''){const normalized=normalizeInventory(inventory),wanted=key(name);for(const [label,count] of Object.entries(normalized))if(key(label)===wanted)return count;return 0}
++
++export function verifiedMapMarker(name='',knownMapNames=[]){const wanted=key(name);return unique(knownMapNames).find(value=>key(value)===wanted)||''}
++export function isExplicitWeeklyBossMaterial(item={},stage={}){return /weekly|trounce/.test(explicitCategory(item,stage))}
++
++function addNeed(map,{name,count=0,exact=true,character='',category='Material',goal='',weekly=false,mapMarker='',priority=0,goalRank=50}){
++  const clean=String(name||'').trim();if(!clean)return;
++  const id=key(clean),current=map.get(id)||{name:clean,required:0,exact:true,characters:[],categories:[],goals:[],weekly:false,mapMarker:'',priority:0,goalRank:99};
++  current.required+=Math.max(0,num(count,0));
++  current.exact=current.exact&&Boolean(exact);
++  current.characters=unique([...current.characters,character]);
++  current.categories=unique([...current.categories,category]);
++  current.goals=unique([...current.goals,goal]);
++  current.weekly=current.weekly||Boolean(weekly);
++  current.mapMarker=current.mapMarker||mapMarker||'';
++  current.priority=Math.max(current.priority,num(priority,0));
++  current.goalRank=Math.min(current.goalRank,num(goalRank,99));
++  map.set(id,current);
++}
++
++function ascensionStages(detail={}){return Array.isArray(detail?.materials?.ascensions)?detail.materials.ascensions:[]}
++function talentTracks(detail={}){return Array.isArray(detail?.materials?.talents)?detail.materials.talents:[]}
++function ascensionNameSet(detail={}){const names=new Set();for(const stage of ascensionStages(detail))for(const item of stageItems(stage)){const name=itemName(item);if(name)names.add(key(name))}return names}
++
++function classifyMaterial(name,{origin='',inAscension=false,item={},stage={},knownMapNames=[]}={}){
++  if(/^mora$/i.test(name))return'Mora';
++  if(EXP_RE.test(name))return'Character EXP';
++  if(/^Crown of Insight$/i.test(name))return'Talent Material';
++  if(BOOK_RE.test(name))return'Talent Book';
++  if(GEM_RE.test(name))return'Character Ascension';
++  const marker=verifiedMapMarker(name,knownMapNames);if(marker)return'Local Specialty';
++  if(origin==='talent'&&inAscension)return'Enemy Drop';
++  if(origin==='talent'&&isExplicitWeeklyBossMaterial(item,stage))return'Weekly Boss';
++  if(origin==='talent')return'Talent Material';
++  if(origin==='ascension')return'Ascension Material';
++  return'Material';
++}
++
++function collectAscensionNeeds(map,{entry,detail,priority,knownMapNames=[]}){
++  const stages=ascensionStages(detail),from=Math.max(0,Math.min(stages.length,num(entry.ascension,0))),to=Math.max(from,Math.min(stages.length,num(entry.targetAscension,from)));
++  if(to<=from)return false;
++  let added=false;
++  for(const stage of stages.slice(from,to)){
++    for(const item of stageItems(stage)){
++      const name=itemName(item),count=amount(item);if(!name||!count)continue;
++      addNeed(map,{name,count,character:entry.name,category:classifyMaterial(name,{origin:'ascension',item,stage,knownMapNames}),goal:`Ascension ${from} → ${to}`,mapMarker:verifiedMapMarker(name,knownMapNames),priority,goalRank:2});added=true;
++    }
