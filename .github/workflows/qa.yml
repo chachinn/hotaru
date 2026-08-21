@@ -37,6 +37,8 @@ jobs:
             style.css
             enhancements.js
             enhancements.css
+            content-enhancements.js
+            content-enhancements.css
             manifest.json
             package.json
             service-worker.js
