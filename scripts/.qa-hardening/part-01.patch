@@ -1,0 +1,107 @@
+-function applyMapSources(raw){const names=normalizeMarkerNames(String(raw||'').split('|'));if(!names.length)return;const view=document.getElementById('hotaru-map-view'),frame=view?.querySelector('.hotaru-map-frame');if(!frame)return;const state=loadMapState();state.names=names;state.browseAll=false;state.lastOpenedAt=new Date().toISOString();saveMapState(state);const loading=view.querySelector('.hotaru-map-loading');loading?.classList.remove('hidden');frame.src=buildMapUrl(names);frame.addEventListener('load',()=>loading?.classList.add('hidden'),{once:true});const label=view.querySelector('.hotaru-map-current span');if(label)label.textContent=names.join(', ');view.querySelectorAll('[data-hotaru-content-map-sources]').forEach(button=>button.classList.toggle('active',button.dataset.hotaruContentMapSources===raw))}
++function applyMapSources(raw){const names=normalizeMarkerNames(String(raw||'').split('|'));if(!names.length)return;const view=document.getElementById('hotaru-map-view'),frame=view?.querySelector('.hotaru-map-frame');if(!frame)return;const state=loadMapState();state.names=names;state.browseAll=false;state.browseUrl='';state.lastOpenedAt=new Date().toISOString();saveMapState(state);const loading=view.querySelector('.hotaru-map-loading');loading?.classList.remove('hidden');frame.src=buildMapUrl(names);frame.addEventListener('load',()=>loading?.classList.add('hidden'),{once:true});const label=view.querySelector('.hotaru-map-current span');if(label)label.textContent=names.join(', ');view.querySelectorAll('[data-hotaru-content-map-sources]').forEach(button=>button.classList.toggle('active',button.dataset.hotaruContentMapSources===raw))}
+ document.addEventListener('click',event=>{const button=event.target.closest('[data-hotaru-content-map-sources]');if(button){event.preventDefault();applyMapSources(button.dataset.hotaruContentMapSources)}},false);
+ document.addEventListener('change',event=>{if(event.target?.id==='hotaru-map-filter-category')requestAnimationFrame(injectMapContext)},false);
+ 
+diff --git a/hotaru_work/js/data/map-registry.js b/hotaru_work/js/data/map-registry.js
+new file mode 100644
+index 0000000..ae914a5
+--- /dev/null
++++ b/hotaru_work/js/data/map-registry.js
+@@ -0,0 +1,77 @@
++export const MAP_PROVIDER_ORIGIN='https://genshin-impact-map.appsample.com';
++export const MAP_PROVIDER_BROWSE_URL=`${MAP_PROVIDER_ORIGIN}/?lang=EN`;
++
++export const MAP_COMMON_MARKERS={
++  shrine:'Shrine of Depth',
++  waypoint:'Teleport Waypoint',
++  statue:'Statue of The Seven',
++  domain:'Domain',
++  quests:'World Quests'
++};
++
++export const MAP_NATIONS=['Mondstadt','Liyue','Inazuma','Sumeru','Fontaine','Natlan','Nod-Krai','Snezhnaya'];
++export const MAP_OCULI={
++  Mondstadt:'Anemoculus',
++  Liyue:'Geoculus',
++  Inazuma:'Electroculus',
++  Sumeru:'Dendroculus',
++  Fontaine:'Hydroculus',
++  Natlan:'Pyroculus'
++};
++
++export const MAP_SPECIAL_AREAS=[
++  'Dragonspine','The Chasm','Enkanomiya','Chenyu Vale','Sea of Bygone Eras',
++  'Ancient Sacred Mountain','Temple of Space','Frost Moon'
++];
++
++export const MAP_AREA_DEFINITIONS={
++  Dragonspine:{markers:[['Crimson Agate',['Crimson Agate'],'Area collectible']]},
++  'The Chasm':{markers:[['Lumenspar',['Lumenspar'],'Area collectible']]},
++  Enkanomiya:{markers:[['Key Sigils',['Key Sigil I','Key Sigil II','Key Sigil III','Key Sigil IV','Key Sigil V'],'Area collectible']]},
++  'Chenyu Vale':{markers:[['Spirit Carp',['Spirit Carp'],'Area collectible']]},
++  'Sea of Bygone Eras':{
++    browseUrl:`${MAP_PROVIDER_ORIGIN}/?map=sea-of-bygone-eras`,
++    markers:[['Hydroculus',['Hydroculus'],'Area collectible']]
++  },
++  'Ancient Sacred Mountain':{
++    browseUrl:`${MAP_PROVIDER_ORIGIN}/?map=ancient_sacred_mountain`,
++    markers:[['Pyroculus',['Pyroculus'],'Area collectible']]
++  },
++  'Temple of Space':{
++    browseUrl:`${MAP_PROVIDER_ORIGIN}/?map=temple_of_space`,
++    markers:[['Mnemonic Cluster',[],'Provider area filter']]
++  },
++  'Frost Moon':{
++    browseUrl:`${MAP_PROVIDER_ORIGIN}/?map=frost_moon`,
++    markers:[['Lunoculus',['Lunoculus'],'Area collectible']]
++  }
++};
++
++export const MAP_OCULUS_MARKERS=[...new Set([...Object.values(MAP_OCULI),'Lunoculus'])];
++export const MAP_AREA_MARKERS=[...new Set(Object.values(MAP_AREA_DEFINITIONS).flatMap(area=>(area.markers||[]).flatMap(([,names])=>names||[])).filter(Boolean))];
++
++export function mapOculusForRegion(region=''){return MAP_OCULI[String(region||'').trim()]||''}
++export function mapAreaDefinition(area=''){return MAP_AREA_DEFINITIONS[String(area||'').trim()]||null}
++export function mapAreaBrowseUrl(area=''){return mapAreaDefinition(area)?.browseUrl||''}
++export function mapAreaMarkers(area=''){
++  return (mapAreaDefinition(area)?.markers||[]).map(([label,names,kind])=>({label,names:[...(names||[])],kind}));
++}
++export function isKnownMapNation(value=''){return MAP_NATIONS.includes(String(value||'').trim())}
++export function isKnownMapArea(value=''){return MAP_SPECIAL_AREAS.includes(String(value||'').trim())}
++
++export function guideExplorationMarkers(region=''){
++  const rows=[{label:'Shrines of Depths',name:MAP_COMMON_MARKERS.shrine}];
++  const oculus=mapOculusForRegion(region);if(oculus)rows.push({label:oculus,name:oculus});
++  rows.push(
++    {label:'Teleport Waypoints',name:MAP_COMMON_MARKERS.waypoint},
++    {label:'Statues',name:MAP_COMMON_MARKERS.statue},
++    {label:'Domains',name:MAP_COMMON_MARKERS.domain},
++    {label:'World Quests',name:MAP_COMMON_MARKERS.quests}
++  );
++  return rows;
++}
++
++export function sanitizeProviderBrowseUrl(value=''){
++  const text=String(value||'').trim();if(!text)return'';
++  try{const url=new URL(text);return url.origin===MAP_PROVIDER_ORIGIN?url.href:''}catch{return''}
++}
+diff --git a/hotaru_baseline/js/enhancements.js b/hotaru_work/js/enhancements.js
+index cbb63de..dba5b15 100644
+--- a/hotaru_baseline/js/enhancements.js
++++ b/hotaru_work/js/enhancements.js
+@@ -110,7 +110,7 @@ async function resetAllFilters(){
+ 
+ function augmentMaterialRows(){const sections=[...app.querySelectorAll('main .section.card')];for(const section of sections){const title=section.querySelector('h2')?.textContent||'';if(!/materials|farm list/i.test(title))continue;const head=section.querySelector('.section-head');if(head&&!head.querySelector('[data-hotaru-map-all]')){const names=[...section.querySelectorAll('.list-row .row-title')].map(x=>x.textContent.trim()).filter(Boolean).slice(0,20);if(names.length){const b=document.createElement('button');b.className='secondary hotaru-map-materials-btn';b.dataset.hotaruMapAll=names.join('|');b.textContent='Show on Map';head.appendChild(b)}}section.querySelectorAll('.list-row').forEach(row=>{if(row.querySelector('[data-hotaru-material]'))return;const name=row.querySelector('.row-title')?.textContent?.trim();if(!name)return;const b=document.createElement('button');b.className='ghost hotaru-material-pin';b.dataset.hotaruMaterial=name;b.textContent='Map';b.setAttribute('aria-label',`Show ${name} on map`);row.appendChild(b)})}}
+ 
+-function openMap(names=[]){closeMenu();mapOpen=true;mapState.browseAll=false;mapState.names=normalizeMarkerNames(names);mapState.lastOpenedAt=new Date().toISOString();saveMapState(mapState);renderMapView()}
++function openMap(names=[]){closeMenu();mapOpen=true;mapState.browseAll=false;mapState.browseUrl='';mapState.names=normalizeMarkerNames(names);mapState.lastOpenedAt=new Date().toISOString();saveMapState(mapState);renderMapView()}
+ function closeMap(){mapOpen=false;document.getElementById('hotaru-map-view')?.remove();app.querySelector('main:not(#hotaru-map-view)')?.classList.remove('hotaru-under-map');syncMenuNavActive()}
+ function renderTargets(){if(!mapState.targets.length)return '<div class="hotaru-map-empty">No material targets yet. Add one below or send a character material here.</div>';return mapState.targets.map(t=>`<div class="hotaru-target-row ${t.complete?'complete':''}"><div><strong>${esc(t.name)}</strong><span>${remainingTarget(t)} remaining · ${Number(t.owned)||0}/${Number(t.needed)||0}</span></div><div class="hotaru-target-actions"><button class="ghost" data-hotaru-show-target="${esc(t.id)}">Map</button><button class="ghost" data-hotaru-complete-target="${esc(t.id)}">${t.complete?'Undo':'Done'}</button><button class="danger" data-hotaru-remove-target="${esc(t.id)}">×</button></div></div>`).join('')}
+ function mapOptionHtml(options=[],selected=''){return options.map(value=>`<option value="${esc(value)}" ${selected===value?'selected':''}>${esc(value)}</option>`).join('')}
+@@ -120,7 +120,7 @@ function plannerMaterialOptions(){const category=plannerCategory(),current=mapSt
+ function plannerCategoryOptions(){const selected=plannerCategory();return getMapFilterGroups().map(group=>`<option ${group===selected?'selected':''}>${esc(group)}</option>`).join('')}
+ function renderMapView(){
+   document.getElementById('hotaru-map-view')?.remove();const original=app.querySelector('main');if(original)original.classList.add('hotaru-under-map');const nav=app.querySelector('.bottom-nav');if(!nav)return;
+-  const main=document.createElement('main');main.id='hotaru-map-view';main.className='hotaru-map-view';const url=buildMapUrl(mapState.names,{browseAll:mapState.browseAll}),label=mapState.browseAll?'All built-in map filters':mapState.names.length?mapState.names.join(', '):'All map markers';
++  const main=document.createElement('main');main.id='hotaru-map-view';main.className='hotaru-map-view';const url=buildMapUrl(mapState.names,{browseAll:mapState.browseAll,browseUrl:mapState.browseUrl}),label=mapState.browseAll?(mapState.browseUrl?'Provider area filters':'All built-in map filters'):mapState.names.length?mapState.names.join(', '):'All map markers';
