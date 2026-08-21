@@ -1,0 +1,56 @@
+name: Apply Build Intelligence 2 final
+
+on:
+  push:
+    branches:
+      - feature/build-intelligence-2-final
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bi2-final-apply
+  cancel-in-progress: true
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/build-intelligence-2-final
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Apply exact locally-tested source payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          base64 -d .bi2-final-payload.b64 > /tmp/bi2.tar.gz
+          echo "9a466cc1f33a2975457a7e7bbddd9b2aa373d974113dacb5cb7f66c2c52efaae  /tmp/bi2.tar.gz" | sha256sum -c -
+          tar -xzf /tmp/bi2.tar.gz -C .
+          rm -f .bi2-final-payload.b64
+          rm -f .github/workflows/bi2-final-apply.yml
+      - name: Full deterministic QA
+        run: npm test
+      - name: Syntax and version integrity
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' file; do node --check "$file" >/dev/null; done < <(find . -type f \( -name '*.js' -o -name '*.mjs' \) -not -path './node_modules/*' -print0)
+          grep -q "hotaru-shell-v16" service-worker.js
+          grep -q "app.js?v=1.3.0" index.html
+          grep -q "app.js?v=1.3.0" service-worker.js
+          ! grep -RInE 'hotaru-shell-v15|app\.js\?v=1\.2\.0' . --exclude-dir=node_modules
+          git diff --check
+      - name: Commit verified source tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Build Intelligence 2: reviewed Build Check and upgrade priorities'
+          git push origin HEAD:feature/build-intelligence-2-final
