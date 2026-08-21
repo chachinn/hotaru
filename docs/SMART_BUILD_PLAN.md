@@ -40,3 +40,11 @@ Each gate must pass deterministic regression QA and a tested packaged-artifact r
 - `js/features/upgrade-priority.js` now separates guaranteed actions (for example, swapping to a better reviewed weapon the user already owns) from RNG artifact/stat improvements and tags the future farm category. This stays out of `app.js`/the scoring core and is the handoff boundary for Smart Farming.
 - Columbina is the first multi-playstyle reviewed profile used to exercise the variant architecture (off-field support/DPS vs on-field Lunar-Bloom DPS).
 - Release promotion is gated on the clean source head itself: the ordinary Hotaru QA workflow must package that final tree, and the exact artifact must be independently retested before merge.
+
+## Gate 3 implementation notes — Personal Roster 2.0
+
+- Roster entries now track current level, ascension, constellation, Normal/Skill/Burst talent levels, selected owned weapon, build status, priority, selected reviewed build variant, notes, and explicit target level/ascension/weapon/talent goals.
+- `js/features/roster-intelligence.js` owns roster normalization, migration-safe defaults, progress math, priority sorting, and current-to-target deltas.
+- `js/features/build-goals.js` converts a roster entry into deterministic guaranteed progression tasks and respects reviewed talent priority when available.
+- Build Check inherits the roster-selected build variant and equipped owned weapon when the user has not saved a conflicting Build Check choice. Saving a reviewed Build Check variant syncs it back to the roster entry.
+- Storage schema v3 migrates v2/v1 data additively and reserves `inventory` plus `teamPresets` for the Smart Farming and Smart Team Creator gates; existing roster, weapon, build and artifact records are preserved.
