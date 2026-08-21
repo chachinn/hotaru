@@ -20,8 +20,9 @@ function knownMapNames(){return getMapFilterOptions('All')}
 
 function uniqueSources(values=[]){return [...new Set(values.map(value=>String(value||'').trim()).filter(Boolean))]}
 function armImageSources(image,sources=[]){
-  if(!image)return image;const queue=uniqueSources(sources);if(!queue.length)return image;
-  image.hidden=false;image.style.display='';image.dataset.hotaruSources=JSON.stringify(queue);image.dataset.hotaruSourceIndex='0';image.src=queue[0];
+  if(!image)return image;const queue=uniqueSources(sources);if(!queue.length)return image;const signature=queue.join('|');
+  if(image.dataset.hotaruSourceSignature===signature&&!image.hidden&&image.src)return image;
+  image.hidden=false;image.style.display='';image.dataset.hotaruSourceSignature=signature;image.dataset.hotaruSources=JSON.stringify(queue);image.dataset.hotaruSourceIndex='0';image.src=queue[0];
   image.onerror=()=>{const list=JSON.parse(image.dataset.hotaruSources||'[]'),index=Number(image.dataset.hotaruSourceIndex||0)+1;if(index<list.length){image.dataset.hotaruSourceIndex=String(index);image.src=list[index];return}image.hidden=true;image.style.display='none';image.parentElement?.classList.add('image-error');image.nextElementSibling?.removeAttribute?.('hidden')};
   return image;
 }
