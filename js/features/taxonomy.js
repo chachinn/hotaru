@@ -1,5 +1,5 @@
 const FETTER_URL='https://raw.githubusercontent.com/DimbreathBot/AnimeGameData/main/ExcelBinOutput/FetterInfoExcelConfigData.json';
-const REGION_CACHE_KEY='hotaru.region-map.v1';
+const REGION_CACHE_KEY='hotaru.region-map.v2';
 const REGION_CACHE_TTL=7*24*60*60*1000;
 const REGION_FETCH_TIMEOUT=8000;
 
@@ -12,11 +12,19 @@ const ASSOC_REGION={
   ASSOC_TYPE_NATLAN:'Natlan',
   ASSOC_TYPE_NODKRAI:'Nod-Krai',
   ASSOC_TYPE_SNEZHNAYA:'Snezhnaya',
-  ASSOC_TYPE_FATUI:'Snezhnaya / Fatui',
+  // Fatui is an affiliation, not a geographic region. Keep it out of Region.
+  ASSOC_TYPE_FATUI:'',
   ASSOC_TYPE_MAINACTOR:'Traveler',
   ASSOC_TYPE_RANGER:'Other',
   ASSOC_TYPE_OMNI_SCOURGE:'Other',
   ASSOC_TYPE_UNKNOWN:'Other'
+};
+
+// Conservative nation fallbacks for newly released characters whose supplement data
+// can arrive before the numeric association metadata used by FetterInfo catches up.
+const REGION_OVERRIDES={
+  Odette:'Snezhnaya',
+  Alyosha:'Snezhnaya'
 };
 
 // Curated playable-character affiliations. Multi-tagged by design.
@@ -75,6 +83,13 @@ const TAGS={
   'Furina':['Archon-related','Court of Fontaine']
 };
 
+function normalizeRegion(value=''){
+  const region=String(value||'').trim();
+  if(!region||region==='Fatui')return'';
+  if(region==='Snezhnaya / Fatui')return'Snezhnaya';
+  return region;
+}
+
 function safeReadCache(){
   try{
     const raw=localStorage.getItem(REGION_CACHE_KEY);if(!raw)return null;
@@ -85,7 +100,7 @@ function safeReadCache(){
 function safeWriteCache(map){try{localStorage.setItem(REGION_CACHE_KEY,JSON.stringify({savedAt:Date.now(),map}))}catch{}}
 
 export function associationToRegion(value=''){
-  return ASSOC_REGION[String(value||'').toUpperCase()]||'';
+  return normalizeRegion(ASSOC_REGION[String(value||'').toUpperCase()]||'');
 }
 
 export async function loadRegionMap({force=false}={}){
@@ -111,18 +126,21 @@ export function affiliationsFor(characterOrName){
 }
 
 export function enrichCharacterTaxonomy(character,regionMap={}){
-  const direct=String(character?.region||'').trim();
-  const mapped=regionMap[String(character?.id)]||regionMap[String(character?.sourceId)]||'';
-  return {...character,region:direct||mapped||'Other',affiliations:affiliationsFor(character)};
+  const name=String(character?.name||'').trim();
+  const direct=normalizeRegion(character?.region);
+  const override=REGION_OVERRIDES[name]||'';
+  const mapped=normalizeRegion(regionMap[String(character?.id)]||regionMap[String(character?.sourceId)]||'');
+  const region=direct&&direct!=='Other'?direct:override||mapped||direct||'Other';
+  return {...character,region,affiliations:affiliationsFor(character)};
 }
 
 export function getAffiliationOptions(characters=[]){
   return [...new Set(characters.flatMap(c=>c.affiliations||affiliationsFor(c)))].sort((a,b)=>a.localeCompare(b));
 }
 export function getRegionOptions(characters=[]){
-  const preferred=['Mondstadt','Liyue','Inazuma','Sumeru','Fontaine','Natlan','Nod-Krai','Snezhnaya','Snezhnaya / Fatui','Traveler','Other'];
-  const set=new Set(characters.map(c=>c.region).filter(Boolean));
+  const preferred=['Mondstadt','Liyue','Inazuma','Sumeru','Fontaine','Natlan','Nod-Krai','Snezhnaya','Traveler','Other'];
+  const set=new Set(characters.map(c=>normalizeRegion(c.region)).filter(Boolean));
   return preferred.filter(x=>set.has(x)).concat([...set].filter(x=>!preferred.includes(x)).sort((a,b)=>a.localeCompare(b)));
 }
 
-export const taxonomyMeta={regionSource:FETTER_URL,affiliations:TAGS};
+export const taxonomyMeta={regionSource:FETTER_URL,affiliations:TAGS,regionOverrides:REGION_OVERRIDES};
