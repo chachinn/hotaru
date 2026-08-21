@@ -1,0 +1,31 @@
+name: Apply Build Intelligence 2 release payload
+
+on:
+  push:
+    branches:
+      - feature/build-intelligence-2-release
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply exact tested source payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat tools/.bi2-release-* | base64 -d > /tmp/bi2.tar.gz
+          tar -xzf /tmp/bi2.tar.gz -C .
+          rm -f tools/.bi2-release-*
+          rm -f .github/workflows/apply-build-intelligence-2-release.yml
+          npm test
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Implement reviewed Build Intelligence 2"
+          git push origin HEAD:feature/build-intelligence-2-release
