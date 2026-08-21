@@ -54,3 +54,15 @@ Each gate must pass deterministic regression QA and a tested packaged-artifact r
 Smart Farming now derives an on-demand farm plan from Personal Roster 2.0 goals without changing the storage schema. It skips `Not Building` and `Finished` entries, respects reviewed build variants/talent priority, aggregates shared material needs, subtracts inventory only when exact quantities are available, uses the current 200 Original Resin cap, and models the first three weekly-boss reward claims at 30 Resin before the 60-Resin standard cost.
 
 Material quantities are deliberately conservative: Hotaru only displays exact remaining amounts when the active game-data source exposes the relevant staged ascension/talent costs. It does not invent weapon/EXP quantities from incomplete data. Weekly-boss classification requires explicit source metadata and does not infer weekly drops from high-tier enemy-drop names. Map handoff is enabled only when the material name exactly matches a marker already present in Hotaru's AppSample registry.
+
+## Smart Team Creator foundation
+
+The post-Smart-Farming priority is Smart Team Creator before Farm Today / Resin Planner. The first gate uses explicit reviewed team archetypes and deterministic roster matching rather than free-form or AI-generated team guesses.
+
+- `js/data/team-profiles/index.js` stores reviewed archetypes and per-team source provenance.
+- `js/features/team-scoring.js` ranks reviewed templates by ownership plus Personal Roster readiness/priority without changing the underlying recommendation.
+- `js/features/roster-team-matcher.js` handles whole-roster matching, one-character locks, two-character locks, optional unowned previews, aliases, and review-coverage status.
+- Whole-roster mode returns only 4/4-owned reviewed teams unless the user explicitly enables `Allow unowned`.
+- Locked modes never force a bad pair into a fabricated team. If no reviewed template contains the selected lock(s), Hotaru reports no reviewed match.
+- Newly released catalogue characters do not require a Hotaru code update merely to appear. If team research has not been reviewed yet, Team Creator labels them `Team review pending` and does not infer recommendations.
+- Initial reviewed team coverage is anchored on Arlecchino, Tartaglia/Childe and Columbina so it remains consistent with the existing reviewed Build Intelligence coverage.
