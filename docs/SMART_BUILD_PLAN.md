@@ -48,3 +48,9 @@ Each gate must pass deterministic regression QA and a tested packaged-artifact r
 - `js/features/build-goals.js` converts a roster entry into deterministic guaranteed progression tasks and respects reviewed talent priority when available.
 - Build Check inherits the roster-selected build variant and equipped owned weapon when the user has not saved a conflicting Build Check choice. Saving a reviewed Build Check variant syncs it back to the roster entry.
 - Storage schema v3 migrates v2/v1 data additively and reserves `inventory` plus `teamPresets` for the Smart Farming and Smart Team Creator gates; existing roster, weapon, build and artifact records are preserved.
+
+## Smart Farming core (release candidate)
+
+Smart Farming now derives an on-demand farm plan from Personal Roster 2.0 goals without changing the storage schema. It skips `Not Building` and `Finished` entries, respects reviewed build variants/talent priority, aggregates shared material needs, subtracts inventory only when exact quantities are available, uses the current 200 Original Resin cap, and models the first three weekly-boss reward claims at 30 Resin before the 60-Resin standard cost.
+
+Material quantities are deliberately conservative: Hotaru only displays exact remaining amounts when the active game-data source exposes the relevant staged ascension/talent costs. It does not invent weapon/EXP quantities from incomplete data. Weekly-boss classification requires explicit source metadata and does not infer weekly drops from high-tier enemy-drop names. Map handoff is enabled only when the material name exactly matches a marker already present in Hotaru's AppSample registry.
