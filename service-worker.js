@@ -1,13 +1,13 @@
-const CACHE = 'hotaru-shell-v2';
+const CACHE = 'hotaru-shell-v3';
 const APP_SHELL = [
-  './','./index.html','./style.css?v=1.0.0','./enhancements.css?v=1.1.0','./app.js?v=1.0.0','./enhancements.js?v=1.1.0','./manifest.json',
+  './','./index.html','./style.css?v=1.0.0','./enhancements.css?v=1.2.0','./app.js?v=1.0.0','./enhancements.js?v=1.2.0','./manifest.json',
   './js/core/state.js','./js/core/cache.js','./js/data/game-data.js','./js/data/enka.js',
   './js/features/build-engine.js','./js/features/farming.js','./js/features/taxonomy.js','./js/features/interactive-map.js',
   './icons/icon-48.png','./icons/icon-72.png','./icons/icon-96.png',
   './icons/icon-192.png','./icons/icon-512.png','./icons/maskable-192.png',
   './icons/maskable-512.png','./icons/apple-touch-icon.png'
 ];
-const NEVER_CACHE = ['enka.network/api/','api/uid/','genshin-impact-map.appsample.com'];
+const NEVER_CACHE = ['enka.network/api/','api/uid/','genshin-impact-map.appsample.com','raw.githubusercontent.com/MadeBaruna/paimon-moe/'];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
@@ -25,8 +25,6 @@ self.addEventListener('fetch', event => {
   if (NEVER_CACHE.some(part => url.href.includes(part))) return;
 
   if (request.mode === 'navigate') {
-    // Only apply Hotaru's offline document fallback to Hotaru itself.
-    // Cross-origin iframe navigations (such as the interactive map) must fail independently.
     if (url.origin !== self.location.origin) return;
     event.respondWith(fetch(request).then(response => {
       const copy = response.clone();
