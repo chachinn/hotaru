@@ -22,3 +22,25 @@ jobs:
           node-version: '22'
       - name: Run deterministic/static QA
         run: npm test
+      - name: Package tested Hotaru tree
+        uses: actions/upload-artifact@v4
+        with:
+          name: hotaru-v1-tested
+          compression-level: 9
+          if-no-files-found: error
+          path: |
+            .nojekyll
+            .github/workflows/qa.yml
+            README.md
+            index.html
+            app.js
+            style.css
+            enhancements.js
+            enhancements.css
+            manifest.json
+            package.json
+            service-worker.js
+            docs/
+            icons/
+            js/
+            tests/
