@@ -1,7 +1,8 @@
 import arlecchino from './arlecchino.js';
 import tartaglia from './tartaglia.js';
+import columbina from './columbina.js';
 
-export const REVIEWED_BUILD_PROFILES=[arlecchino,tartaglia];
+export const REVIEWED_BUILD_PROFILES=[arlecchino,tartaglia,columbina];
 
 function key(value=''){return String(value||'').trim().toLowerCase()}
 const PROFILE_INDEX=new Map();

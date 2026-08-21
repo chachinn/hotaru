@@ -30,3 +30,13 @@ UI modules should remain separate from calculation/data modules rather than addi
 7. Team Builder 2.0.
 
 Each gate must pass deterministic regression QA and a tested packaged-artifact retest before promotion to `main`.
+
+
+## Gate 2 implementation notes — Build Intelligence 2
+
+- Build Check resolves reviewed profiles before generic inference when a reviewed character profile exists.
+- Reviewed profiles can expose selectable build variants and reusable context controls without character-specific UI code in `app.js`.
+- Reviewed ER/stat targets can react to saved build context while remaining source-labeled; generic targets remain the fallback.
+- Reviewed weapon/artifact priority influences Hotaru fit scoring, but the result remains deterministic guidance rather than a damage simulation.
+- `js/features/upgrade-priority.js` now separates guaranteed actions (for example, swapping to a better reviewed weapon the user already owns) from RNG artifact/stat improvements and tags the future farm category. This stays out of `app.js`/the scoring core and is the handoff boundary for Smart Farming.
+- Columbina is the first multi-playstyle reviewed profile used to exercise the variant architecture (off-field support/DPS vs on-field Lunar-Bloom DPS).

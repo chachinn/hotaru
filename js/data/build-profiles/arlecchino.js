@@ -18,6 +18,34 @@ export default {
   energyCost:60,
   reactionDriven:false,
   defaultErTarget:100,
+  defaultVariant:'standard',
+  targets:{
+    cr:{min:50,good:70,great:80,unit:'%'},
+    cd:{min:100,good:160,great:190,unit:'%'},
+    er:{min:100,good:100,great:110,unit:'%'},
+    em:{min:0,good:0,great:0,unit:''}
+  },
+  contextOptions:[
+    {key:'burstPolicy',label:'Burst usage',default:'emergency',options:[
+      {value:'emergency',label:'Emergency / not every rotation'},
+      {value:'every',label:'Every rotation'}
+    ]}
+  ],
+  targetOverrides:{
+    er:{
+      cases:[
+        {when:{burstPolicy:'every'},bySameElement:{
+          '0':{min:150,good:150,great:165,unit:'%'},
+          '1':{min:140,good:145,great:160,unit:'%'},
+          '2':{min:120,good:120,great:135,unit:'%'},
+          '3':{min:120,good:120,great:135,unit:'%'}
+        }}
+      ],
+      favoniusReductionPerProc:8,
+      favoniusReductionMax:20,
+      floor:100
+    }
+  },
   mainStats:{
     sands:['ATK%','Elemental Mastery'],
     goblet:['Pyro DMG%','ATK%'],
@@ -29,8 +57,8 @@ export default {
   f2pWeapon:'White Tassel',
   artifactPriority:['Fragment of Harmonic Whimsy',"Night of the Sky's Unveiling","Gladiator's Finale"],
   variants:[
-    {id:'standard',name:'Pyro Main DPS',note:'General on-field build focused on Bond of Life-enhanced Normal Attacks, CRIT and ATK.'},
-    {id:'reaction',name:'Vaporize / Melt',note:'Keeps the same core build while Elemental Mastery gains value when Arlecchino reliably triggers amplifying reactions.'}
+    {id:'standard',name:'Pyro Main DPS',note:'General on-field build focused on Bond of Life-enhanced Normal Attacks, CRIT and ATK.',overrides:{reactionDriven:false,mainStats:{sands:['ATK%','Elemental Mastery'],goblet:['Pyro DMG%','ATK%'],circlet:['CRIT Rate / CRIT DMG']},substats:['CRIT Rate','CRIT DMG','ATK%','Elemental Mastery']}},
+    {id:'reaction',name:'Vaporize / Melt',note:'Elemental Mastery gains value when Arlecchino reliably triggers amplifying reactions.',overrides:{reactionDriven:true,mainStats:{sands:['ATK%','Elemental Mastery'],goblet:['Pyro DMG%','ATK%'],circlet:['CRIT Rate / CRIT DMG']},substats:['CRIT Rate','CRIT DMG','Elemental Mastery','ATK%']}}
   ],
   goalStats:[
     {label:'ATK',value:'2,000+ practical target'},

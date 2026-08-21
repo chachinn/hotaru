@@ -18,6 +18,14 @@ export default {
   energyCost:60,
   reactionDriven:true,
   defaultErTarget:120,
+  defaultVariant:'vape',
+  targets:{
+    cr:{min:50,good:65,great:75,unit:'%'},
+    cd:{min:100,good:140,great:180,unit:'%'},
+    er:{min:100,good:120,great:130,unit:'%'},
+    em:{min:0,good:0,great:0,unit:''}
+  },
+  targetOverrides:{er:{favoniusReductionPerProc:5,favoniusReductionMax:15,floor:100}},
   mainStats:{
     sands:['ATK%'],
     goblet:['Hydro DMG%'],
@@ -29,8 +37,8 @@ export default {
   f2pWeapon:'Hamayumi',
   artifactPriority:["Nymph's Dream",'Heart of Depth'],
   variants:[
-    {id:'vape',name:'Vaporize / International Driver',note:'Uses fast Hydro application to enable off-field Pyro damage while contributing Burst and Melee Stance damage.'},
-    {id:'driver',name:'Electro-Charged / Reaction Driver',note:'Leans on fast Hydro application and multi-target Riptide interactions while teammates deal off-field damage.'}
+    {id:'vape',name:'Vaporize / International Driver',note:'Uses fast Hydro application to enable off-field Pyro damage while contributing Burst and Melee Stance damage.',overrides:{reactionDriven:true,substats:['Energy Recharge','CRIT Rate','CRIT DMG','ATK%','Elemental Mastery']}},
+    {id:'driver',name:'Electro-Charged / Reaction Driver',note:'Leans on fast Hydro application and multi-target Riptide interactions while teammates deal off-field damage.',overrides:{reactionDriven:true,substats:['Energy Recharge','CRIT Rate','CRIT DMG','ATK%','Elemental Mastery']}}
   ],
   goalStats:[
     {label:'Energy Recharge',value:'About 100–130% in common Ranged Burst rotations; team dependent'},
