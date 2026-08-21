@@ -11,7 +11,7 @@ Hotaru is an unofficial Genshin Impact character build companion focused on help
 - Build Check, saved builds, artifact evaluator, My Roster, and owned weapons.
 - Enka.Network public-showcase import with manual JSON fallback.
 - Farming material calculations and character-material map shortcuts.
-- Interactive Teyvat map powered through AppSample's embeddable map, with category/material dropdown filters, quick marker categories, and access to the provider's complete filter panel.
+- Interactive Teyvat map powered through AppSample's embeddable map, with category/material dropdown filters, quick marker categories, a shared verified marker registry, special-area shortcuts, and access to the provider's complete filter panel.
 - Local material planner with Needed / Owned / Remaining tracking.
 - Local backup/restore and migration-safe storage.
 - Installable mobile-first PWA with offline app shell.

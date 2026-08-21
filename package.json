@@ -4,6 +4,6 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "test": "node tests/run-tests.mjs && node tests/enhancements-tests.mjs && node tests/guide-tests.mjs && node tests/build-map-fixes-tests.mjs"
+    "test": "node tests/run-tests.mjs && node tests/enhancements-tests.mjs && node tests/guide-tests.mjs && node tests/build-map-fixes-tests.mjs && node tests/consistency-tests.mjs && node tests/smart-expansion-boundary-tests.mjs && node tests/qa-hardening-changelog-tests.mjs && node tests/source-policy-tests.mjs"
   }
 }

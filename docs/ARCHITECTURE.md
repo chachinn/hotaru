@@ -11,6 +11,7 @@ The Region / Affiliation / Interactive Map update remains additive rather than a
 - `enhancements.js` augments the existing rendered interface.
 - `enhancements.css` contains only the added filter/map/mobile styles.
 - `js/features/taxonomy.js` owns region association and conservative multi-affiliation tagging.
+- `js/data/map-registry.js` is the canonical provider-marker/area registry shared by the map and deep character guide.
 - `js/features/interactive-map.js` owns map URL/state/material-filter/material-target helpers.
 - `tests/enhancements-tests.mjs` provides separate regression coverage.
 
@@ -45,7 +46,7 @@ Hotaru stores its own material planner locally. Because the map runs cross-origi
 ## Performance
 
 - Map iframe is lazy-loaded and absent from normal build/character rendering.
-- Region metadata is cached locally for 24 hours.
+- Region metadata is cached locally for 7 days.
 - Release-gate data uses a short cache while the heavier game catalog keeps its longer cache.
 - Existing character pagination remains 24 cards per page.
 - Material planner stores at most 100 targets.
@@ -55,4 +56,4 @@ Hotaru stores its own material planner locally. Because the map runs cross-origi
 
 ## Storage compatibility
 
-Existing `hotaru.app.v2` state and the preserved `hotaru.app.v1` legacy key remain untouched. New features continue to use additive local keys (`hotaru.enhancements.v1`, `hotaru.region-map.v1`, `hotaru.map.v1`) and cache entries, so this update does not require a destructive user-data schema migration.
+Existing `hotaru.app.v2` state and the preserved `hotaru.app.v1` legacy key remain untouched. New features continue to use additive local keys (`hotaru.enhancements.v1`, `hotaru.region-map.v2`, `hotaru.map.v1`) and cache entries, so this update does not require a destructive user-data schema migration.

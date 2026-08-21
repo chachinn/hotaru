@@ -34,7 +34,7 @@ Hotaru remains a user-facing **Version 1** fan companion. This guide expansion i
 
 ## Exploration guide
 
-The Map screen adds region shortcuts for Shrines of Depths, Oculi, waypoints, Statues, domains, and world quests. For newly released regions such as Nod-Krai or Snezhnaya, Hotaru deliberately opens the provider-maintained full filter browser for Shrine/Oculus categories when exact marker-name support is not documented. It does not invent marker names.
+The Map screen adds region shortcuts for Shrines of Depths, Oculi, waypoints, Statues, domains, and world quests. The character guide and Map screen share one canonical marker registry. `Shrine of Depth` is provider-wide; nation-specific Oculus shortcuts are shown only when the nation mapping is verified. Hotaru does not infer an Oculus from a character's element. Provider-only area maps such as Temple of Space and Frost Moon are exposed through the Region / area selector instead of guessed labels.
 
 Exact route screenshots and third-party guide images are **not copied** from reference sites. Those screenshots were used as functional inspiration only. Hotaru uses live map markers instead; a future route-guide module should use a legally reusable location/route dataset or Hotaru-owned annotations.
 
