@@ -2,7 +2,7 @@ const CACHE = 'hotaru-shell-v7';
 const APP_SHELL = [
   './','./index.html','./style.css?v=1.0.0','./enhancements.css?v=1.3.0','./content-enhancements.css?v=1.0.0','./js/features/guide-ui.css?v=1.0.0','./js/features/exploration-ui.css?v=1.0.0','./app.js?v=1.0.0','./enhancements.js?v=1.4.0','./content-enhancements.js?v=1.0.0','./js/features/guide-loader.js?v=1.0.0','./manifest.json',
   './js/core/state.js','./js/core/cache.js','./js/data/game-data.js','./js/data/enka.js','./js/data/character-reference.js',
-  './js/features/build-engine.js','./js/features/farming.js','./js/features/taxonomy.js','./js/features/interactive-map.js','./js/features/content-media.js','./js/features/guide-engine.js','./js/features/guide-ui.js','./js/features/exploration-ui.js',
+  './js/features/build-engine.js','./js/features/farming.js','./js/features/taxonomy.js','./js/features/interactive-map.js','./js/features/content-media.js','./js/features/guide-engine.js','./js/features/guide-ui.js','./js/features/guide-taxonomy.js','./js/features/exploration-ui.js',
   './icons/icon-48.png','./icons/icon-72.png','./icons/icon-96.png',
   './icons/icon-192.png','./icons/icon-512.png','./icons/maskable-192.png',
   './icons/maskable-512.png','./icons/apple-touch-icon.png'
