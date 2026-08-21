@@ -1,6 +1,6 @@
-import { loadCatalog } from './js/data/game-data.js';
-import { loadRegionMap, enrichCharacterTaxonomy, getAffiliationOptions, getRegionOptions } from './js/features/taxonomy.js';
-import { MAP_QUICK_MARKERS, buildMapUrl, loadMapState, saveMapState, normalizeMarkerNames, normalizeTarget, remainingTarget, getMapFilterGroups, getMapFilterOptions } from './js/features/interactive-map.js';
+import { loadCatalog } from './data/game-data.js';
+import { loadRegionMap, enrichCharacterTaxonomy, getAffiliationOptions, getRegionOptions } from './features/taxonomy.js';
+import { MAP_QUICK_MARKERS, buildMapUrl, loadMapState, saveMapState, normalizeMarkerNames, normalizeTarget, remainingTarget, getMapFilterGroups, getMapFilterOptions } from './features/interactive-map.js';
 
 const EXTRA_KEY='hotaru.enhancements.v1';
 const app=document.getElementById('app');
@@ -9,7 +9,7 @@ let extra=loadExtra();
 
 function loadExtra(){try{return{region:'All',affiliation:'All',page:1,mapCategory:'Local Specialties',filtersOpen:false,...JSON.parse(localStorage.getItem(EXTRA_KEY)||'{}')}}catch{return{region:'All',affiliation:'All',page:1,mapCategory:'Local Specialties',filtersOpen:false}}}
 function saveExtra(){try{localStorage.setItem(EXTRA_KEY,JSON.stringify(extra))}catch{}}
-function esc(value=''){return String(value).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+function esc(value=''){return String(value).replace(/[&<>'\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 function currentScreenTitle(){return app.querySelector('main h1')?.textContent?.trim()||''}
 function queueEnhance(){if(renderQueued)return;renderQueued=true;requestAnimationFrame(()=>{renderQueued=false;enhance().catch(error=>console.warn('Hotaru enhancement skipped safely:',error))})}
 function runWhenIdle(callback){if('requestIdleCallback'in window)return window.requestIdleCallback(callback,{timeout:700});return window.setTimeout(callback,90)}

@@ -1,14 +1,14 @@
-import { loadCatalog, getCharacterDetail } from './js/data/game-data.js';
-import { cacheSet } from './js/core/cache.js';
-import { inferBuildProfile } from './js/features/build-engine.js';
-import { buildMapUrl, getMapFilterOptions, loadMapState, saveMapState, normalizeMarkerNames } from './js/features/interactive-map.js';
-import { safeCharacterRarity, fallbackItemIcon, fallbackCharacterIcon, fallbackWeaponIcon, fallbackArtifactIcon, extractMaterialMedia, materialSourceNames, resolveMaterialSources, rolePresentation, keyName } from './js/features/content-media.js';
+import { loadCatalog, getCharacterDetail } from './data/game-data.js';
+import { cacheSet } from './core/cache.js';
+import { inferBuildProfile } from './features/build-engine.js';
+import { buildMapUrl, getMapFilterOptions, loadMapState, saveMapState, normalizeMarkerNames } from './features/interactive-map.js';
+import { safeCharacterRarity, fallbackItemIcon, fallbackCharacterIcon, fallbackWeaponIcon, fallbackArtifactIcon, extractMaterialMedia, materialSourceNames, resolveMaterialSources, rolePresentation, keyName } from './features/content-media.js';
 
 const app=document.getElementById('app');
 const CONTEXT_KEY='hotaru.current-farm-context.v1';
 let catalog=null,detail=null,detailName='',mediaMap=new Map(),queued=false,workPromise=null;
 
-function esc(value=''){return String(value).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+function esc(value=''){return String(value).replace(/[&<>'\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 function queue(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;enhance().catch(error=>console.warn('Hotaru content enhancement skipped safely:',error))})}
 function readContext(){try{return JSON.parse(sessionStorage.getItem(CONTEXT_KEY)||'null')}catch{return null}}
 function saveContext(value){try{sessionStorage.setItem(CONTEXT_KEY,JSON.stringify(value))}catch{}}

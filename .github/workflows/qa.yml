@@ -2,7 +2,7 @@ name: Hotaru QA
 
 on:
   push:
-    branches: [main, 'fix/**', 'feature/**', 'release/**']
+    branches: [main, 'fix/**', 'feature/**', 'release/**', 'refactor/**']
   pull_request:
     branches: [main]
 
@@ -35,13 +35,10 @@ jobs:
             index.html
             app.js
             style.css
-            enhancements.js
-            enhancements.css
-            content-enhancements.js
-            content-enhancements.css
             manifest.json
             package.json
             service-worker.js
+            css/
             docs/
             icons/
             js/
