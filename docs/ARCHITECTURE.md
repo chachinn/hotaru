@@ -56,4 +56,4 @@ Hotaru stores its own material planner locally. Because the map runs cross-origi
 
 ## Storage compatibility
 
-Existing `hotaru.app.v2` state and the preserved `hotaru.app.v1` legacy key remain untouched. New features continue to use additive local keys (`hotaru.enhancements.v1`, `hotaru.region-map.v2`, `hotaru.map.v1`) and cache entries, so this update does not require a destructive user-data schema migration.
+Personal Roster 2.0 uses `hotaru.app.v3`. Existing `hotaru.app.v2` and `hotaru.app.v1` backups are migrated additively on first load; roster/weapons/builds/artifacts are preserved while new target, inventory, and team-preset fields receive safe defaults. Additive local keys (`hotaru.enhancements.v1`, `hotaru.region-map.v2`, `hotaru.map.v1`) remain separate.

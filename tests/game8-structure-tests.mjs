@@ -47,6 +47,6 @@ const loader=fs.readFileSync(path.join(root,'js/features/guide-loader.js'),'utf8
 assert.match(loader,/resolveBuildProfile/);
 assert.match(loader,/enhanceGame8Guide/);
 const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
-assert.match(sw,/hotaru-shell-v17/);
+assert.match(sw,/hotaru-shell-v18/);
 for(const asset of ['js/data/build-profiles/index.js','js/data/build-profiles/arlecchino.js','js/data/build-profiles/tartaglia.js','js/features/build-profiles.js','js/features/game8-guide-ui.js'])assert.match(sw,new RegExp(asset.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
 console.log('Hotaru Game8-style guide structure + reviewed-profile regression QA passed.');
