@@ -138,6 +138,11 @@ async function enhance(){
 // Observe only top-level app rerenders. Enhancement-owned descendant mutations must never retrigger enhancement work.
 const observer=new MutationObserver(queueEnhance);observer.observe(app,{childList:true});queueEnhance();
 
+document.addEventListener('hotaru:character-search-updated',()=>{
+  if(currentScreenTitle()!=='Characters')return;
+  extra.page=1;saveExtra();
+  if(enriched.length&&(extra.region!=='All'||extra.affiliation!=='All'))renderTaxonomyResults(true);
+});
 document.addEventListener('change',event=>{
   if(event.target?.id==='filter-region'){extra.region=event.target.value;extra.page=1;saveExtra();renderTaxonomyResults(true)}
   if(event.target?.id==='filter-affiliation'){extra.affiliation=event.target.value;extra.page=1;saveExtra();renderTaxonomyResults(true)}

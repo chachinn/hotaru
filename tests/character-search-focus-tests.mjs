@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const app=fs.readFileSync(new URL('../app.js',import.meta.url),'utf8');
+const enhancements=fs.readFileSync(new URL('../js/enhancements.js',import.meta.url),'utf8');
+const sw=fs.readFileSync(new URL('../service-worker.js',import.meta.url),'utf8');
+const index=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
+assert.ok(app.includes('function refreshCharacterSearchResults()'));
+assert.ok(app.includes('setTimeout(refreshCharacterSearchResults,70)'));
+assert.ok(!app.includes('window.__hotaruSearch=setTimeout(render'));
+assert.ok(app.includes("document.dispatchEvent(new CustomEvent('hotaru:character-search-updated'"));
+assert.ok(enhancements.includes("document.addEventListener('hotaru:character-search-updated'"));
+assert.ok(index.includes('app.js?v=1.4.0'));
+assert.ok(index.includes('js/enhancements.js?v=1.6.0'));
+assert.ok(sw.includes('hotaru-shell-v17'));
+console.log('Character search focus + mobile keyboard regression QA passed.');
