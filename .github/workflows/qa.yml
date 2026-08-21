@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: '22'
       - name: Apply staged fix batch
-        run: node scripts/apply-core-fixes-v2.mjs
+        run: node scripts/apply-core-fixes-v3.mjs
       - name: Commit staged fix batch
         env:
           TARGET_BRANCH: ${{ github.head_ref || github.ref_name }}
