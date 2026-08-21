@@ -30,6 +30,13 @@ Validated in this update:
 - PWA shell cache was bumped so installed copies fetch the new enhancement assets.
 - Original `app.js`, build engine, farming engine, manifest, icon tree, original storage state, and original base test file remain present.
 
+## Mobile character search focus regression
+
+- Typing in the Characters search field must update only the result grid, count, and pagination; it must not replace the active search input with a full `render()`.
+- The focused search field therefore remains mounted while typing on iPhone, preventing the software keyboard from being dismissed after each keystroke.
+- Search-result refreshes dispatch a dedicated event so Region and Affiliation enhancements remain synchronized without rebuilding the whole page.
+- Permanent regression coverage rejects the old `setTimeout(render, ...)` search path and verifies the PWA cache/version pair for this fix.
+
 ## Performance safeguards
 
 - Interactive map is not loaded during normal Home / Characters / Build / Roster use.
