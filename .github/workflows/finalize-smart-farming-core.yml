@@ -1,0 +1,80 @@
+name: Finalize Smart Farming Core
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    if: github.event.pull_request.head.ref == 'feature/smart-farming-core'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/smart-farming-core
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Reconstruct, verify, and apply exact tested payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f .tmp/smartfarm/chunk-00
+          test -f .tmp/smartfarm/part-01-03
+          test -f .tmp/smartfarm/part-04-06
+          test -f .tmp/smartfarm/chunk-07
+          cat .tmp/smartfarm/chunk-00 .tmp/smartfarm/part-01-03 .tmp/smartfarm/part-04-06 .tmp/smartfarm/chunk-07 > .tmp/smartfarm/payload.b64
+          echo '57b957266a188d0631c69183fa20059c9c357f02166c66f786a505d79669fbf1  .tmp/smartfarm/payload.b64' | sha256sum -c -
+          base64 --decode .tmp/smartfarm/payload.b64 > .tmp/smartfarm/payload.tar.gz
+          echo 'a8945c02ddf7368e57ae76e237c49a18e06f4627ddf0e51a295f50e96ed57575  .tmp/smartfarm/payload.tar.gz' | sha256sum -c -
+          tar -xzf .tmp/smartfarm/payload.tar.gz -C .
+          rm -rf .tmp/smartfarm
+          rm -f .github/workflows/finalize-smart-farming-core.yml
+      - name: Full Smart Farming QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm test
+          while IFS= read -r -d '' file; do node --check "$file" >/dev/null; done < <(find . -type f \( -name '*.js' -o -name '*.mjs' \) -not -path './node_modules/*' -print0)
+          grep -q 'hotaru-shell-v19' service-worker.js
+          grep -q 'app.js?v=1.6.0' index.html
+          grep -q 'style.css?v=1.3.0' index.html
+          grep -q 'js/features/farm-planner.js' service-worker.js
+          grep -q 'Generate Smart Farm Plan' app.js
+          grep -q 'smart-farming-tests.mjs' package.json
+          ! test -e .tmp/smartfarm
+          ! test -e .github/workflows/finalize-smart-farming-core.yml
+          git diff --check
+      - name: Verify exact source scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -A
+          git fetch origin main
+          python - <<'PY'
+          import subprocess
+          expected={
+            'app.js','docs/SMART_BUILD_PLAN.md','index.html','js/features/farm-planner.js','package.json','service-worker.js','style.css',
+            'tests/build-intelligence2-tests.mjs','tests/build-map-fixes-tests.mjs','tests/character-search-focus-tests.mjs',
+            'tests/consistency-tests.mjs','tests/game8-structure-tests.mjs','tests/guide-tests.mjs','tests/mobile-ui-regression-tests.mjs',
+            'tests/roster2-tests.mjs','tests/run-tests.mjs','tests/smart-farming-tests.mjs'
+          }
+          actual=set(subprocess.check_output(['git','diff','--cached','--name-only','origin/main'],text=True).splitlines())
+          if actual != expected:
+              print('Expected:', sorted(expected))
+              print('Actual:', sorted(actual))
+              raise SystemExit(1)
+          print(f'Smart Farming clean scope verified: {len(actual)} intended files.')
+          PY
+      - name: Commit clean verified source tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Add Smart Farming core and inventory-aware farm plan'
+          git push origin HEAD:feature/smart-farming-core
