@@ -74,20 +74,18 @@ function renderTaxonomyResults(){
 }
 
 function augmentMaterialRows(){
-  if(currentScreenTitle()==='Characters'){
-    const sections=[...app.querySelectorAll('main .section.card')];
-    for(const section of sections){
-      const title=section.querySelector('h2')?.textContent||'';if(!/materials|farm list/i.test(title))continue;
-      const head=section.querySelector('.section-head');
-      if(head&&!head.querySelector('[data-hotaru-map-all]')){
-        const names=[...section.querySelectorAll('.list-row .row-title')].map(x=>x.textContent.trim()).filter(Boolean).slice(0,20);
-        if(names.length){const b=document.createElement('button');b.className='secondary hotaru-map-materials-btn';b.dataset.hotaruMapAll=names.join('|');b.textContent='Show on Map';head.appendChild(b)}
-      }
-      section.querySelectorAll('.list-row').forEach(row=>{
-        if(row.querySelector('[data-hotaru-material]'))return;const name=row.querySelector('.row-title')?.textContent?.trim();if(!name)return;
-        const b=document.createElement('button');b.className='ghost hotaru-material-pin';b.dataset.hotaruMaterial=name;b.textContent='Map';b.setAttribute('aria-label',`Show ${name} on map`);row.appendChild(b);
-      });
+  const sections=[...app.querySelectorAll('main .section.card')];
+  for(const section of sections){
+    const title=section.querySelector('h2')?.textContent||'';if(!/materials|farm list/i.test(title))continue;
+    const head=section.querySelector('.section-head');
+    if(head&&!head.querySelector('[data-hotaru-map-all]')){
+      const names=[...section.querySelectorAll('.list-row .row-title')].map(x=>x.textContent.trim()).filter(Boolean).slice(0,20);
+      if(names.length){const b=document.createElement('button');b.className='secondary hotaru-map-materials-btn';b.dataset.hotaruMapAll=names.join('|');b.textContent='Show on Map';head.appendChild(b)}
     }
+    section.querySelectorAll('.list-row').forEach(row=>{
+      if(row.querySelector('[data-hotaru-material]'))return;const name=row.querySelector('.row-title')?.textContent?.trim();if(!name)return;
+      const b=document.createElement('button');b.className='ghost hotaru-material-pin';b.dataset.hotaruMaterial=name;b.textContent='Map';b.setAttribute('aria-label',`Show ${name} on map`);row.appendChild(b);
+    });
   }
 }
 
@@ -115,11 +113,12 @@ function rerenderTargetList(){const box=document.getElementById('hotaru-target-l
 
 async function enhance(){
   addMapNav();
-  if(mapOpen){renderMapView();return}
+  if(mapOpen){if(!document.getElementById('hotaru-map-view'))renderMapView();return}
   if(currentScreenTitle()==='Characters'){
-    await ensureCatalog();injectCharacterFilters();augmentMaterialRows();
+    await ensureCatalog();injectCharacterFilters();
     if(extra.region!=='All'||extra.affiliation!=='All')renderTaxonomyResults();
   }
+  augmentMaterialRows();
 }
 
 const observer=new MutationObserver(queueEnhance);observer.observe(app,{childList:true,subtree:true});queueEnhance();
