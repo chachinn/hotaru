@@ -1,6 +1,8 @@
 const HAKUSH_UI='https://static.nanoka.cc/gi/UI';
 const PAIMON_ITEMS='https://raw.githubusercontent.com/MadeBaruna/paimon-moe/main/static/images/items';
 const PAIMON_CHARACTERS='https://raw.githubusercontent.com/MadeBaruna/paimon-moe/main/static/images/characters';
+const PAIMON_WEAPONS='https://raw.githubusercontent.com/MadeBaruna/paimon-moe/main/static/images/weapons';
+const PAIMON_ARTIFACTS='https://raw.githubusercontent.com/MadeBaruna/paimon-moe/main/static/images/artifacts';
 
 const SOURCE_ALIASES=new Map([
   ['portable bearing',['Portable Bearing']],
@@ -41,6 +43,12 @@ export function fallbackItemIcon(nameOrId=''){
 }
 export function fallbackCharacterIcon(nameOrId=''){
   const id=assetSlug(nameOrId);return id?`${PAIMON_CHARACTERS}/${encodeURIComponent(id)}.png`:'';
+}
+export function fallbackWeaponIcon(nameOrId=''){
+  const id=assetSlug(nameOrId);return id?`${PAIMON_WEAPONS}/${encodeURIComponent(id)}.png`:'';
+}
+export function fallbackArtifactIcon(nameOrId=''){
+  const id=assetSlug(nameOrId);return id?`${PAIMON_ARTIFACTS}/${encodeURIComponent(id)}_flower.png`:'';
 }
 export function hakushItemIcon(id){const value=String(id??'').trim();return /^\d+$/.test(value)?`${HAKUSH_UI}/UI_ItemIcon_${value}.webp`:''}
 
@@ -94,4 +102,4 @@ export function rolePresentation(profile={}){
   return{role,group,reason,focus:profile.focus||'Flexible',scaling:profile.scaling||'ATK',confidence:Number(profile.confidence||0)};
 }
 
-export const contentMediaMeta={sourceAliases:SOURCE_ALIASES,hakushUi:HAKUSH_UI,paimonItems:PAIMON_ITEMS,paimonCharacters:PAIMON_CHARACTERS};
+export const contentMediaMeta={sourceAliases:SOURCE_ALIASES,hakushUi:HAKUSH_UI,paimonItems:PAIMON_ITEMS,paimonCharacters:PAIMON_CHARACTERS,paimonWeapons:PAIMON_WEAPONS,paimonArtifacts:PAIMON_ARTIFACTS};
