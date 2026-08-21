@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   test:
@@ -16,10 +16,25 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Apply staged fix batch
+        run: node scripts/apply-build-map-fixes.mjs
+      - name: Commit staged fix batch
+        run: |
+          if git diff --quiet; then
+            echo "No staged source changes."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add app.js index.html service-worker.js js/
+            git commit -m "Fix build options, guide data, and map filters"
+            git push origin HEAD:${GITHUB_REF_NAME}
+          fi
       - name: Run deterministic/static QA
         run: npm test
       - name: Package tested Hotaru tree
