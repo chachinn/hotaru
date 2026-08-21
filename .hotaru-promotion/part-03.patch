@@ -1,0 +1,106 @@
+@@ -27,7 +27,7 @@ for(const area of ['Sea of Bygone Eras','Ancient Sacred Mountain','Temple of Spa
+ for(const area of ['Sea of Bygone Eras','Ancient Sacred Mountain','Temple of Space','Frost Moon'])assert.match(mapAreaBrowseUrl(area),/^https:\/\/genshin-impact-map\.appsample\.com\//);
+ 
+ const sw=read('service-worker.js');
+-assert.match(sw,/hotaru-shell-v18/);
++assert.match(sw,/hotaru-shell-v19/);
+ assert.match(sw,/js\/data\/map-registry\.js/);
+ const architecture=read('docs/ARCHITECTURE.md');
+ assert.match(architecture,/Region metadata is cached locally for 7 days\./);
+diff --git a/tests/game8-structure-tests.mjs b/tests/game8-structure-tests.mjs
+index 651dbb361365b8e8975936e6dcddc58911921bdd..332be6e83625131c7394e798d17f5499dd3ecbc2 100644
+--- a/tests/game8-structure-tests.mjs
++++ b/tests/game8-structure-tests.mjs
+@@ -47,6 +47,6 @@ const loader=fs.readFileSync(path.join(root,'js/features/guide-loader.js'),'utf8
+ assert.match(loader,/resolveBuildProfile/);
+ assert.match(loader,/enhanceGame8Guide/);
+ const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
+-assert.match(sw,/hotaru-shell-v18/);
++assert.match(sw,/hotaru-shell-v19/);
+ for(const asset of ['js/data/build-profiles/index.js','js/data/build-profiles/arlecchino.js','js/data/build-profiles/tartaglia.js','js/features/build-profiles.js','js/features/game8-guide-ui.js'])assert.match(sw,new RegExp(asset.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
+ console.log('Hotaru Game8-style guide structure + reviewed-profile regression QA passed.');
+\ No newline at end of file
+diff --git a/tests/guide-tests.mjs b/tests/guide-tests.mjs
+index 74c311f2c83b175703d8dce19a2c187ea335194a..570f9a3ed5091774fbf6e23b19034385388a6d63 100644
+--- a/tests/guide-tests.mjs
++++ b/tests/guide-tests.mjs
+@@ -26,6 +26,6 @@ const taxonomy=fs.readFileSync(path.join(root,'js/features/guide-taxonomy.js'),'
+ const ui=fs.readFileSync(path.join(root,'js/features/guide-ui.js'),'utf8');assert.match(ui,/data-hotaru-sources/);assert.match(ui,/fallbackCharacterIcon/);assert.match(ui,/fallbackItemIcon/);for(const text of ['Character profile','Talent priority','Constellations','Recommended weapons','Artifacts ranked','Goal stat values','Team comps','Ascension by level','Talent level-up materials','Exploration shortcuts'])assert.match(ui,new RegExp(text.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
+ const explore=fs.readFileSync(path.join(root,'js/features/exploration-ui.js'),'utf8');for(const text of ['Shrines of Depths','Oculi','Teleport Waypoints','World Quests'])assert.match(explore,new RegExp(text));assert.match(explore,/MAP_NATIONS/);assert.match(explore,/MAP_SPECIAL_AREAS/);assert.match(explore,/mapAreaBrowseUrl/);assert.match(explore,/MAP_BROWSE_URL/);assert.doesNotMatch(explore,/Cryoculus/);assert.doesNotMatch(explore,/innerHTML\s*\+=/);
+ const index=fs.readFileSync(path.join(root,'index.html'),'utf8');assert.match(index,/guide-loader\.js\?v=1\.1\.0/);assert.match(index,/css\/guide-ui\.css\?v=1\.2\.0/);assert.match(index,/css\/exploration-ui\.css\?v=1\.0\.0/);
+-const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');assert.match(sw,/hotaru-shell-v18/);for(const file of ['character-reference.js','map-registry.js','guide-engine.js','guide-ui.js','guide-loader.js','guide-taxonomy.js','exploration-ui.js','css/guide-ui.css','css/exploration-ui.css'])assert.match(sw,new RegExp(file.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
++const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');assert.match(sw,/hotaru-shell-v19/);for(const file of ['character-reference.js','map-registry.js','guide-engine.js','guide-ui.js','guide-loader.js','guide-taxonomy.js','exploration-ui.js','css/guide-ui.css','css/exploration-ui.css'])assert.match(sw,new RegExp(file.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
+ for(const file of ['css/guide-ui.css','css/exploration-ui.css'])assert.ok(fs.existsSync(path.join(root,file)),`missing ${file}`);
+ console.log('Hotaru deep character + exploration guide QA: all deterministic/static tests passed.');
+\ No newline at end of file
+diff --git a/tests/mobile-ui-regression-tests.mjs b/tests/mobile-ui-regression-tests.mjs
+index eaa7006237cd8e93849ae6d9aa7c495128441a28..3f06cb6a709feb5ee4b8f09f8456906d47ac63e6 100644
+--- a/tests/mobile-ui-regression-tests.mjs
++++ b/tests/mobile-ui-regression-tests.mjs
+@@ -23,7 +23,7 @@ const guideCss=fs.readFileSync(path.join(root,'css/guide-ui.css'),'utf8');
+ assert.match(guideCss,/@media\(max-width:560px\)[\s\S]*\.hotaru-guide-row\{display:flex;/);
+ assert.match(guideCss,/\.hotaru-guide-copy\{min-width:0;width:100%;max-width:100%\}/);
+ const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
+-assert.match(sw,/hotaru-shell-v18/);assert.match(sw,/style\.css\?v=1\.2\.0/);assert.match(sw,/css\/guide-ui\.css\?v=1\.2\.0/);assert.match(sw,/app\.js\?v=1\.5\.0/);
++assert.match(sw,/hotaru-shell-v19/);assert.match(sw,/style\.css\?v=1\.3\.0/);assert.match(sw,/css\/guide-ui\.css\?v=1\.2\.0/);assert.match(sw,/app\.js\?v=1\.6\.0/);
+ const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
+-assert.match(index,/style\.css\?v=1\.2\.0/);assert.match(index,/css\/guide-ui\.css\?v=1\.2\.0/);assert.match(index,/app\.js\?v=1\.5\.0/);
++assert.match(index,/style\.css\?v=1\.3\.0/);assert.match(index,/css\/guide-ui\.css\?v=1\.2\.0/);assert.match(index,/app\.js\?v=1\.6\.0/);
+ console.log('Hotaru mobile UI + rarity + same-weapon-type regression QA passed.');
+diff --git a/tests/roster2-tests.mjs b/tests/roster2-tests.mjs
+index 48edb0979a6a78bdc59aa7d86796135f53d491c6..e7689ea8b5759721aa0f55b02b7352b23ba032cb 100644
+--- a/tests/roster2-tests.mjs
++++ b/tests/roster2-tests.mjs
+@@ -13,7 +13,7 @@ assert.equal(sortRoster([{name:'B',priority:'Low',status:'Building'},{name:'A',p
+ 
+ const state=fs.readFileSync(new URL('../js/core/state.js',import.meta.url),'utf8');assert.ok(state.includes("SCHEMA_VERSION=3"));assert.ok(state.includes("hotaru.app.v3"));assert.ok(state.includes("hotaru.app.v2"));assert.ok(state.includes('inventory:{}'));assert.ok(state.includes('teamPresets:[]'));
+ const app=fs.readFileSync(new URL('../app.js',import.meta.url),'utf8');assert.ok(app.includes('Build status'));assert.ok(app.includes('Current talents'));assert.ok(app.includes('Build goals'));assert.ok(app.includes('modal-build-variant'));assert.ok(app.includes('normalizeRoster(state.roster,catalog.characters)'));assert.ok(app.includes('rosterProgress(entry,weapon)'));assert.ok(app.includes('if(roster?.buildVariant&&!context.buildVariant)'));
+-const sw=fs.readFileSync(new URL('../service-worker.js',import.meta.url),'utf8');assert.ok(sw.includes('hotaru-shell-v18'));assert.ok(sw.includes('js/features/roster-intelligence.js'));assert.ok(sw.includes('js/features/build-goals.js'));assert.ok(sw.includes('app.js?v=1.5.0'));assert.ok(sw.includes('style.css?v=1.2.0'));
++const sw=fs.readFileSync(new URL('../service-worker.js',import.meta.url),'utf8');assert.ok(sw.includes('hotaru-shell-v19'));assert.ok(sw.includes('js/features/roster-intelligence.js'));assert.ok(sw.includes('js/features/build-goals.js'));assert.ok(sw.includes('app.js?v=1.6.0'));assert.ok(sw.includes('style.css?v=1.3.0'));
+ console.log('Personal Roster 2.0 + Build Goals QA passed.');
+ 
+ // Variant-aware roster goals and owned-weapon bounds.
+diff --git a/tests/run-tests.mjs b/tests/run-tests.mjs
+index 9ff81c2d422c32f4d9a4f431c6114a825cd4d660..20565db61c7a0930d99817d035044a0bebd2e6a1 100644
+--- a/tests/run-tests.mjs
++++ b/tests/run-tests.mjs
+@@ -30,7 +30,7 @@ const manifest=JSON.parse(fs.readFileSync(path.join(root,'manifest.json'),'utf8'
+ assert.equal(manifest.short_name,'Hotaru');
+ for(const icon of manifest.icons) assert.ok(fs.existsSync(path.join(root,icon.src)),`missing ${icon.src}`);
+ const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
+-assert.match(sw,/enka\.network\/api\//);assert.match(sw,/NEVER_CACHE/);assert.match(sw,/hotaru-shell-v18/);assert.match(sw,/genshin-impact-map\.appsample\.com/);assert.match(sw,/MadeBaruna\/paimon-moe/);assert.match(sw,/js\/content-enhancements\.js\?v=1\.2\.0/);assert.match(sw,/js\/features\/content-media\.js/);assert.match(sw,/js\/data\/map-registry\.js/);assert.match(sw,/guide-loader\.js\?v=1\.1\.0/);assert.match(sw,/css\/enhancements\.css\?v=1\.3\.0/);assert.match(sw,/css\/guide-ui\.css\?v=1\.2\.0/);
++assert.match(sw,/enka\.network\/api\//);assert.match(sw,/NEVER_CACHE/);assert.match(sw,/hotaru-shell-v19/);assert.match(sw,/genshin-impact-map\.appsample\.com/);assert.match(sw,/MadeBaruna\/paimon-moe/);assert.match(sw,/js\/content-enhancements\.js\?v=1\.2\.0/);assert.match(sw,/js\/features\/content-media\.js/);assert.match(sw,/js\/data\/map-registry\.js/);assert.match(sw,/guide-loader\.js\?v=1\.1\.0/);assert.match(sw,/css\/enhancements\.css\?v=1\.3\.0/);assert.match(sw,/css\/guide-ui\.css\?v=1\.2\.0/);
+ const index=fs.readFileSync(path.join(root,'index.html'),'utf8');assert.match(index,/type="module"/);assert.match(index,/Hotaru/);assert.match(index,/js\/enhancements\.js\?v=1\.6\.0/);assert.match(index,/css\/enhancements\.css\?v=1\.3\.0/);assert.match(index,/js\/content-enhancements\.js\?v=1\.2\.0/);assert.match(index,/css\/content-enhancements\.css\?v=1\.0\.0/);assert.match(index,/guide-loader\.js\?v=1\.1\.0/);assert.match(index,/css\/guide-ui\.css\?v=1\.2\.0/);
+ const app=fs.readFileSync(path.join(root,'app.js'),'utf8');assert.match(app,/Build Check/);assert.match(app,/Import public showcase/);assert.doesNotMatch(app,new RegExp('Gen'+'seki'));
+ for(const file of ['index.html','style.css','app.js','manifest.json','service-worker.js'])assert.ok(fs.existsSync(path.join(root,file)),`missing root runtime file ${file}`);
+diff --git a/tests/smart-farming-tests.mjs b/tests/smart-farming-tests.mjs
+new file mode 100644
+index 0000000000000000000000000000000000000000..fb0ae7dec0f3c30aa8faf4cef1311a1bc97e7a64
+--- /dev/null
++++ b/tests/smart-farming-tests.mjs
+@@ -0,0 +1,25 @@
++import assert from 'node:assert/strict';
++import fs from 'node:fs';
++import { RESIN_CAP, normalizeResin, weeklyBossResinCost, remainingWeeklyDiscountedClaims, verifiedMapMarker, isExplicitWeeklyBossMaterial, buildSmartFarmPlan } from '../js/features/farm-planner.js';
++
++assert.equal(RESIN_CAP,200);assert.equal(normalizeResin(999),200);assert.equal(normalizeResin(-5),0);
++assert.equal(weeklyBossResinCost(0),30);assert.equal(weeklyBossResinCost(2),30);assert.equal(weeklyBossResinCost(3),60);assert.equal(remainingWeeklyDiscountedClaims(1),2);
++assert.equal(verifiedMapMarker('Sakura Bloom',['Sakura Bloom','Qingxin']),'Sakura Bloom');assert.equal(verifiedMapMarker('Imaginary Marker',['Sakura Bloom']),'');
++assert.equal(isExplicitWeeklyBossMaterial({name:'Boss Drop',type:'weekly boss'}),true);assert.equal(isExplicitWeeklyBossMaterial({name:'Slime Concentrate',type:'enemy drop'}),false);
++
++const detail={materials:{ascensions:[
++  {materials:[{name:'Sakura Bloom',count:3},{name:'Old Handguard',count:3}],cost:20000},
++  {materials:[{name:'Sakura Bloom',count:10},{name:'Kageuchi Handguard',count:15}],cost:40000}
++],talents:[
++  [{materials:[{name:'Teachings of Light',count:3},{name:'Old Handguard',count:6}],cost:12500},{materials:[{name:'Guide to Light',count:2},{name:'Kageuchi Handguard',count:3}],cost:17500}],
++  [{materials:[{name:'Teachings of Light',count:3},{name:'Old Handguard',count:6}],cost:12500}],
++  [{materials:[{name:'Teachings of Light',count:3},{name:'Old Handguard',count:6}],cost:12500}]
++]}};
++const entry={id:'c1',name:'Example',level:40,targetLevel:50,ascension:0,targetAscension:2,status:'Building',priority:'High',talents:{attack:1,skill:1,burst:1},targetTalents:{attack:3,skill:2,burst:2},weaponId:'',targetWeaponLevel:90};
++const plan=buildSmartFarmPlan({entries:[{entry,detail,profile:{talentPriority:['attack','skill','burst']}}],inventory:{'Sakura Bloom':5},resin:200,weeklyDiscountedClaimsUsed:2,knownMapNames:['Sakura Bloom']});
++assert.equal(plan.activeCharacters,1);assert.equal(plan.resin.cap,200);assert.equal(plan.resin.nextWeeklyBossCost,30);assert.equal(plan.items.find(x=>x.name==='Sakura Bloom')?.required,13);assert.equal(plan.items.find(x=>x.name==='Sakura Bloom')?.remaining,8);assert.equal(plan.items.find(x=>x.name==='Sakura Bloom')?.mapVerified,true);assert.equal(plan.items.find(x=>x.name==='Old Handguard')?.categories.includes('Enemy Drop'),true);assert.equal(plan.items.find(x=>x.name==='Kageuchi Handguard')?.weekly,false,'high-tier enemy drops must not be misclassified as weekly boss materials');
++assert.equal(buildSmartFarmPlan({entries:[{entry:{...entry,status:'Not Building'},detail,profile:{}}]}).activeCharacters,0);assert.equal(buildSmartFarmPlan({entries:[{entry:{...entry,status:'Finished'},detail,profile:{}}]}).activeCharacters,0);
++
++const app=fs.readFileSync(new URL('../app.js',import.meta.url),'utf8'),sw=fs.readFileSync(new URL('../service-worker.js',import.meta.url),'utf8'),index=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
++assert.ok(app.includes('Generate Smart Farm Plan'));assert.ok(app.includes('generate-smart-farm'));assert.ok(app.includes('getMapFilterOptions'));assert.ok(sw.includes('hotaru-shell-v19'));assert.ok(sw.includes('js/features/farm-planner.js'));assert.ok(sw.includes('app.js?v=1.6.0'));assert.ok(index.includes('app.js?v=1.6.0'));assert.ok(index.includes('style.css?v=1.3.0'));
++console.log('Smart Farming core QA passed.');
