@@ -27,7 +27,7 @@ for(const area of ['Sea of Bygone Eras','Ancient Sacred Mountain','Temple of Spa
 for(const area of ['Sea of Bygone Eras','Ancient Sacred Mountain','Temple of Space','Frost Moon'])assert.match(mapAreaBrowseUrl(area),/^https:\/\/genshin-impact-map\.appsample\.com\//);
 
 const sw=read('service-worker.js');
-assert.match(sw,/hotaru-shell-v14/);
+assert.match(sw,/hotaru-shell-v15/);
 assert.match(sw,/js\/data\/map-registry\.js/);
 const architecture=read('docs/ARCHITECTURE.md');
 assert.match(architecture,/Region metadata is cached locally for 7 days\./);
