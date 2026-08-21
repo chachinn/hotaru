@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { associationToRegion, affiliationsFor, enrichCharacterTaxonomy, getRegionOptions } from '../js/features/taxonomy.js';
 import { buildMapUrl, normalizeMarkerNames, normalizeTarget, remainingTarget, getMapFilterGroups, getMapFilterOptions, MAP_BROWSE_URL } from '../js/features/interactive-map.js';
-import { parseReleasedCharacterSlugs, mergeReleasedCharacters } from '../js/data/game-data.js';
+import { parseReleasedCharacterSlugs, parseReleasedCharacterRecords, mergeReleasedCharacters } from '../js/data/game-data.js';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 
 assert.equal(associationToRegion('ASSOC_TYPE_NATLAN'),'Natlan');
@@ -39,12 +39,18 @@ const releaseFixture=`
     featuredRare: ['future_rare'],
     version: '7.1',
   },`;
-const releaseSet=parseReleasedCharacterSlugs(releaseFixture,Date.parse('2026-08-21T10:00:00+08:00'));
+const now=Date.parse('2026-08-21T10:00:00+08:00');
+const releaseSet=parseReleasedCharacterSlugs(releaseFixture,now);
+const releaseRecords=parseReleasedCharacterRecords(releaseFixture,now);
 assert.ok(releaseSet.has('odette'));assert.ok(releaseSet.has('alyosha'));assert.ok(!releaseSet.has('futurecharacter'));
+assert.ok(releaseRecords.some(x=>x.slug==='odette'));assert.ok(releaseRecords.some(x=>x.slug==='alyosha'));
 const merged=mergeReleasedCharacters([{id:'1',name:'Arlecchino',slug:'arlecchino'}],[{id:'2',name:'Odette',slug:'odette'},{id:'3',name:'Alyosha',slug:'alyosha'},{id:'4',name:'Future Character',slug:'future-character'}],releaseSet);
 assert.deepEqual(merged.map(x=>x.name),['Arlecchino','Odette','Alyosha']);
 
 for(const file of ['enhancements.js','enhancements.css','js/features/taxonomy.js','js/features/interactive-map.js','js/data/game-data.js'])assert.ok(fs.existsSync(path.join(root,file)),`missing ${file}`);
-const enhancement=fs.readFileSync(path.join(root,'enhancements.js'),'utf8');assert.match(enhancement,/filter-region/);assert.match(enhancement,/filter-affiliation/);assert.match(enhancement,/hotaru-map-filter-category/);assert.match(enhancement,/data-hotaru-browse-map/);assert.match(enhancement,/loading="lazy"/);assert.match(enhancement,/data-hotaru-material/);
-const gameData=fs.readFileSync(path.join(root,'js/data/game-data.js'),'utf8');assert.match(gameData,/paimon-moe\/main\/src\/data\/banners\.js/);assert.match(gameData,/latestVersion/);assert.match(gameData,/current-release supplement/);
-console.log('Hotaru release completeness + map filter QA: all deterministic/static tests passed.');
+const enhancement=fs.readFileSync(path.join(root,'enhancements.js'),'utf8');
+assert.match(enhancement,/filter-region/);assert.match(enhancement,/filter-affiliation/);assert.match(enhancement,/sanitizeTaxonomyFilters/);assert.match(enhancement,/if\(!enriched\.length\)return false/);assert.match(enhancement,/data-hotaru-menu/);assert.match(enhancement,/hotaru-filter-toggle/);assert.match(enhancement,/hotaru-map-filter-category/);assert.match(enhancement,/data-hotaru-browse-map/);assert.match(enhancement,/loading="lazy"/);assert.match(enhancement,/data-hotaru-material/);
+const gameData=fs.readFileSync(path.join(root,'js/data/game-data.js'),'utf8');
+assert.match(gameData,/catalog-v3/);assert.match(gameData,/LEGACY_CACHE_KEYS/);assert.match(gameData,/MIN_CATALOG_CHARACTERS=80/);assert.match(gameData,/Primary catalog was incomplete/);assert.match(gameData,/last known-good cached catalog/);assert.match(gameData,/characterData/);assert.match(gameData,/current-release supplement/);
+const css=fs.readFileSync(path.join(root,'enhancements.css'),'utf8');assert.match(css,/hotaru-nav-compact/);assert.match(css,/hotaru-menu-sheet/);assert.match(css,/filters\.hotaru-filter-grid:not\(\.is-open\)/);
+console.log('Hotaru catalog safety + filter/menu + map QA: all deterministic/static tests passed.');
