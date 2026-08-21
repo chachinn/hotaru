@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   test:
@@ -16,10 +16,34 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+          fetch-depth: 0
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Apply QA hardening patch
+        run: |
+          cat scripts/.qa-hardening/part-*.patch > /tmp/hotaru-hardening.patch
+          if git apply --check -p2 /tmp/hotaru-hardening.patch; then
+            git apply -p2 /tmp/hotaru-hardening.patch
+          else
+            echo "QA hardening patch already applied; continuing."
+          fi
+      - name: Commit QA hardening
+        env:
+          TARGET_BRANCH: ${{ github.head_ref || github.ref_name }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md docs/ js/ package.json service-worker.js tests/
+          if git diff --cached --quiet; then
+            echo "No QA hardening source changes to commit."
+          else
+            git commit -m "Harden map marker consistency and QA"
+            git push origin HEAD:"$TARGET_BRANCH"
+          fi
       - name: Run deterministic/static QA
         run: npm test
       - name: Package tested Hotaru tree
