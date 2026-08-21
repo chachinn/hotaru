@@ -30,7 +30,7 @@ const manifest=JSON.parse(fs.readFileSync(path.join(root,'manifest.json'),'utf8'
 assert.equal(manifest.short_name,'Hotaru');
 for(const icon of manifest.icons) assert.ok(fs.existsSync(path.join(root,icon.src)),`missing ${icon.src}`);
 const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
-assert.match(sw,/enka\.network\/api\//);assert.match(sw,/NEVER_CACHE/);assert.match(sw,/hotaru-shell-v4/);assert.match(sw,/genshin-impact-map\.appsample\.com/);assert.match(sw,/MadeBaruna\/paimon-moe/);
-const index=fs.readFileSync(path.join(root,'index.html'),'utf8');assert.match(index,/type="module"/);assert.match(index,/Hotaru/);assert.match(index,/enhancements\.js\?v=1\.3\.0/);assert.match(index,/enhancements\.css\?v=1\.3\.0/);
+assert.match(sw,/enka\.network\/api\//);assert.match(sw,/NEVER_CACHE/);assert.match(sw,/hotaru-shell-v5/);assert.match(sw,/genshin-impact-map\.appsample\.com/);assert.match(sw,/MadeBaruna\/paimon-moe/);
+const index=fs.readFileSync(path.join(root,'index.html'),'utf8');assert.match(index,/type="module"/);assert.match(index,/Hotaru/);assert.match(index,/enhancements\.js\?v=1\.4\.0/);assert.match(index,/enhancements\.css\?v=1\.3\.0/);
 const app=fs.readFileSync(path.join(root,'app.js'),'utf8');assert.match(app,/Build Check/);assert.match(app,/Import public showcase/);assert.doesNotMatch(app,new RegExp('Gen'+'seki'));
 console.log('Hotaru QA: all deterministic/static tests passed.');
