@@ -1,0 +1,101 @@
+diff --git a/hotaru_baseline/README.md b/hotaru_work/README.md
+index bad0a6f..8d15e3a 100644
+--- a/hotaru_baseline/README.md
++++ b/hotaru_work/README.md
+@@ -11,7 +11,7 @@ Hotaru is an unofficial Genshin Impact character build companion focused on help
+ - Build Check, saved builds, artifact evaluator, My Roster, and owned weapons.
+ - Enka.Network public-showcase import with manual JSON fallback.
+ - Farming material calculations and character-material map shortcuts.
+-- Interactive Teyvat map powered through AppSample's embeddable map, with category/material dropdown filters, quick marker categories, and access to the provider's complete filter panel.
++- Interactive Teyvat map powered through AppSample's embeddable map, with category/material dropdown filters, quick marker categories, a shared verified marker registry, special-area shortcuts, and access to the provider's complete filter panel.
+ - Local material planner with Needed / Owned / Remaining tracking.
+ - Local backup/restore and migration-safe storage.
+ - Installable mobile-first PWA with offline app shell.
+diff --git a/hotaru_baseline/docs/ARCHITECTURE.md b/hotaru_work/docs/ARCHITECTURE.md
+index 6ead241..744c399 100644
+--- a/hotaru_baseline/docs/ARCHITECTURE.md
++++ b/hotaru_work/docs/ARCHITECTURE.md
+@@ -11,6 +11,7 @@ The Region / Affiliation / Interactive Map update remains additive rather than a
+ - `enhancements.js` augments the existing rendered interface.
+ - `enhancements.css` contains only the added filter/map/mobile styles.
+ - `js/features/taxonomy.js` owns region association and conservative multi-affiliation tagging.
++- `js/data/map-registry.js` is the canonical provider-marker/area registry shared by the map and deep character guide.
+ - `js/features/interactive-map.js` owns map URL/state/material-filter/material-target helpers.
+ - `tests/enhancements-tests.mjs` provides separate regression coverage.
+ 
+@@ -45,7 +46,7 @@ Hotaru stores its own material planner locally. Because the map runs cross-origi
+ ## Performance
+ 
+ - Map iframe is lazy-loaded and absent from normal build/character rendering.
+-- Region metadata is cached locally for 24 hours.
++- Region metadata is cached locally for 7 days.
+ - Release-gate data uses a short cache while the heavier game catalog keeps its longer cache.
+ - Existing character pagination remains 24 cards per page.
+ - Material planner stores at most 100 targets.
+@@ -55,4 +56,4 @@ Hotaru stores its own material planner locally. Because the map runs cross-origi
+ 
+ ## Storage compatibility
+ 
+-Existing `hotaru.app.v2` state and the preserved `hotaru.app.v1` legacy key remain untouched. New features continue to use additive local keys (`hotaru.enhancements.v1`, `hotaru.region-map.v1`, `hotaru.map.v1`) and cache entries, so this update does not require a destructive user-data schema migration.
++Existing `hotaru.app.v2` state and the preserved `hotaru.app.v1` legacy key remain untouched. New features continue to use additive local keys (`hotaru.enhancements.v1`, `hotaru.region-map.v2`, `hotaru.map.v1`) and cache entries, so this update does not require a destructive user-data schema migration.
+diff --git a/hotaru_baseline/docs/CHARACTER_GUIDE.md b/hotaru_work/docs/CHARACTER_GUIDE.md
+index 349a1fc..abb7c5e 100644
+--- a/hotaru_baseline/docs/CHARACTER_GUIDE.md
++++ b/hotaru_work/docs/CHARACTER_GUIDE.md
+@@ -34,7 +34,7 @@ Hotaru remains a user-facing **Version 1** fan companion. This guide expansion i
+ 
+ ## Exploration guide
+ 
+-The Map screen adds region shortcuts for Shrines of Depths, Oculi, waypoints, Statues, domains, and world quests. For newly released regions such as Nod-Krai or Snezhnaya, Hotaru deliberately opens the provider-maintained full filter browser for Shrine/Oculus categories when exact marker-name support is not documented. It does not invent marker names.
++The Map screen adds region shortcuts for Shrines of Depths, Oculi, waypoints, Statues, domains, and world quests. The character guide and Map screen share one canonical marker registry. `Shrine of Depth` is provider-wide; nation-specific Oculus shortcuts are shown only when the nation mapping is verified. Hotaru does not infer an Oculus from a character's element. Provider-only area maps such as Temple of Space and Frost Moon are exposed through the Region / area selector instead of guessed labels.
+ 
+ Exact route screenshots and third-party guide images are **not copied** from reference sites. Those screenshots were used as functional inspiration only. Hotaru uses live map markers instead; a future route-guide module should use a legally reusable location/route dataset or Hotaru-owned annotations.
+ 
+diff --git a/hotaru_baseline/docs/MAP.md b/hotaru_work/docs/MAP.md
+index 056bb53..187ae42 100644
+--- a/hotaru_baseline/docs/MAP.md
++++ b/hotaru_work/docs/MAP.md
+@@ -21,10 +21,12 @@ Hotaru's map module is a lazy-loaded wrapper around the embeddable AppSample Gen
+ - Local completion state for material targets.
+ - Character Materials -> Map shortcuts for individual or combined material lists.
+ - Region and multi-affiliation character filters share the same enhancement layer.
++- Region/area exploration shortcuts use the shared `js/data/map-registry.js` registry, including Dragonspine, The Chasm, Enkanomiya, Chenyu Vale, Sea of Bygone Eras, Ancient Sacred Mountain, Temple of Space, and Frost Moon.
++- Current provider markers include `Shrine of Depth` and `Lunoculus`; older region-prefixed shrine labels and guessed `Cryoculus` strings are not generated by Hotaru.
+ 
+ ## Freshness strategy
+ 
+-Hotaru keeps a curated convenience list for fast mobile selection, including current Snezhnaya specialties. Because map providers can add marker types faster than Hotaru code changes, **Browse all filters** is the freshness escape hatch: it exposes AppSample's own current filter list without requiring the user to manually type a marker name.
++Hotaru keeps a curated convenience list for fast mobile selection, including current Snezhnaya specialties and provider-verified exploration markers. Because map providers can add marker types faster than Hotaru code changes, **Browse all filters** is the freshness escape hatch: it exposes AppSample's own current filter list without requiring the user to manually type a marker name.
+ 
+ ## Data boundaries
+ 
+diff --git a/hotaru_baseline/docs/QA.md b/hotaru_work/docs/QA.md
+index 848df31..dfcfef1 100644
+--- a/hotaru_baseline/docs/QA.md
++++ b/hotaru_work/docs/QA.md
+@@ -18,6 +18,8 @@ Validated in this update:
+ - Missing released characters can be merged from the latest candidate dataset without duplicating existing roster entries.
+ - The safe live Hakush/Nanoka catalog remains the base, so latest candidate data is not exposed unless release-gated.
+ - AppSample interactive-map URLs are encoded safely and use its documented embed query format.
++- A shared map registry prevents the character guide from overwriting map markers with stale aliases; runtime code contains no guessed `Cryoculus` marker.
++- Current provider area coverage includes Ancient Sacred Mountain, Temple of Space, and Frost Moon, with dedicated provider browse URLs where verified.
+ - Map category and material/marker dropdown helpers expose browseable choices instead of requiring typed names.
+ - The provider-maintained full-map filter mode has a deterministic URL path.
+ - Material target Needed / Owned / Remaining math is deterministic.
+@@ -31,7 +33,7 @@ Validated in this update:
+ ## Performance safeguards
+ 
+ - Interactive map is not loaded during normal Home / Characters / Build / Roster use.
+-- Region metadata is locally cached for 24 hours.
++- Region metadata is locally cached for 7 days.
+ - Release-feed checks use a short cache and only fetch the latest character candidate dataset if a currently released slug is missing.
+ - Base catalog keeps its longer cache instead of being fully re-downloaded every release check.
+ - Character list remains paginated at 24 results per page.
+diff --git a/hotaru_baseline/js/content-enhancements.js b/hotaru_work/js/content-enhancements.js
+index fc94139..e21a6a3 100644
+--- a/hotaru_baseline/js/content-enhancements.js
++++ b/hotaru_work/js/content-enhancements.js
+@@ -97,7 +97,7 @@ function injectMapContext(){
+   const mapSelect=view.querySelector('#hotaru-map-filter-value');if(mapSelect&&!mapSelect.querySelector('optgroup[data-hotaru-character-sources]')){const group=document.createElement('optgroup');group.label=`${context.character||'Character'} farm sources`;group.dataset.hotaruCharacterSources='1';for(const source of normalizeMarkerNames(context.sources||[])){const o=document.createElement('option');o.value=source;o.textContent=source;group.appendChild(o)}mapSelect.prepend(group)}
+   const planner=view.querySelector('#hotaru-target-name');if(planner&&!planner.querySelector('optgroup[data-hotaru-character-materials]')){const group=document.createElement('optgroup');group.label=`${context.character||'Character'} materials`;group.dataset.hotaruCharacterMaterials='1';for(const material of context.materials||[]){const o=document.createElement('option');o.value=material.name;o.textContent=material.name;group.appendChild(o)}planner.prepend(group)}
+ }
