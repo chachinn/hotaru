@@ -1,0 +1,79 @@
+name: Promote Smart Farming v2
+
+on:
+  push:
+    branches: [feature/smart-farming-core-v2]
+
+permissions:
+  contents: write
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/smart-farming-core-v2
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify and apply clean text patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .hotaru-promotion/part-00.patch .hotaru-promotion/part-01.patch .hotaru-promotion/part-02.patch .hotaru-promotion/part-03.patch > /tmp/hotaru-smart-farming.patch
+          echo '3849d7889fdd78f54f28e087834c837ec0831a443dc1a43b9d44ffa6d096fbf4  /tmp/hotaru-smart-farming.patch' | sha256sum -c -
+          git apply --check /tmp/hotaru-smart-farming.patch
+          git apply /tmp/hotaru-smart-farming.patch
+          rm -rf .hotaru-promotion
+          rm -f .github/workflows/promote-smart-farming-v2.yml
+      - name: Full Smart Farming QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm test
+          while IFS= read -r -d '' file; do node --check "$file" >/dev/null; done < <(find . -type f \( -name '*.js' -o -name '*.mjs' \) -not -path './node_modules/*' -print0)
+          grep -q 'hotaru-shell-v19' service-worker.js
+          grep -q 'app.js?v=1.6.0' index.html
+          grep -q 'style.css?v=1.3.0' index.html
+          grep -q 'js/features/farm-planner.js' service-worker.js
+          grep -q 'Generate Smart Farm Plan' app.js
+          ! test -e .hotaru-promotion
+          ! test -e .github/workflows/promote-smart-farming-v2.yml
+          git diff --check
+      - name: Verify exact source scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git add -- \
+            app.js docs/SMART_BUILD_PLAN.md index.html js/features/farm-planner.js package.json service-worker.js style.css \
+            tests/build-intelligence2-tests.mjs tests/build-map-fixes-tests.mjs tests/character-search-focus-tests.mjs \
+            tests/consistency-tests.mjs tests/game8-structure-tests.mjs tests/guide-tests.mjs tests/mobile-ui-regression-tests.mjs \
+            tests/roster2-tests.mjs tests/run-tests.mjs tests/smart-farming-tests.mjs
+          git add -u -- .hotaru-promotion .github/workflows/promote-smart-farming-v2.yml
+          python - <<'PY'
+          import subprocess
+          expected={
+            'app.js','docs/SMART_BUILD_PLAN.md','index.html','js/features/farm-planner.js','package.json','service-worker.js','style.css',
+            'tests/build-intelligence2-tests.mjs','tests/build-map-fixes-tests.mjs','tests/character-search-focus-tests.mjs',
+            'tests/consistency-tests.mjs','tests/game8-structure-tests.mjs','tests/guide-tests.mjs','tests/mobile-ui-regression-tests.mjs',
+            'tests/roster2-tests.mjs','tests/run-tests.mjs','tests/smart-farming-tests.mjs'
+          }
+          actual=set(subprocess.check_output(['git','diff','--cached','--name-only','origin/main'],text=True).splitlines())
+          if actual != expected:
+              print('Expected:',sorted(expected))
+              print('Actual:',sorted(actual))
+              raise SystemExit(1)
+          print(f'Clean Smart Farming scope verified: {len(actual)} intended files.')
+          PY
+          git diff --cached --check
+      - name: Commit clean real source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Add Smart Farming core and inventory-aware farm plan'
+          git push origin HEAD:feature/smart-farming-core-v2
