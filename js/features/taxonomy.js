@@ -10,6 +10,7 @@ const ASSOC_REGION={
   ASSOC_TYPE_FONTAINE:'Fontaine',
   ASSOC_TYPE_NATLAN:'Natlan',
   ASSOC_TYPE_NODKRAI:'Nod-Krai',
+  ASSOC_TYPE_SNEZHNAYA:'Snezhnaya',
   ASSOC_TYPE_FATUI:'Snezhnaya / Fatui',
   ASSOC_TYPE_MAINACTOR:'Traveler',
   ASSOC_TYPE_RANGER:'Other',
@@ -58,6 +59,7 @@ const TAGS={
   'Sara':['Tenryou Commission'],
   'Kujou Sara':['Tenryou Commission'],
   'Sayu':['Shuumatsuban','Little Hexenzirkel'],
+  'Sandrone':['Fatui','Fatui Harbinger'],
   'Tartaglia':['Fatui','Fatui Harbinger'],
   'Thoma':['Yashiro Commission'],
   'Tighnari':['Akademiya-related','Forest Rangers'],
@@ -115,7 +117,7 @@ export function getAffiliationOptions(characters=[]){
   return [...new Set(characters.flatMap(c=>c.affiliations||affiliationsFor(c)))].sort((a,b)=>a.localeCompare(b));
 }
 export function getRegionOptions(characters=[]){
-  const preferred=['Mondstadt','Liyue','Inazuma','Sumeru','Fontaine','Natlan','Nod-Krai','Snezhnaya / Fatui','Traveler','Other'];
+  const preferred=['Mondstadt','Liyue','Inazuma','Sumeru','Fontaine','Natlan','Nod-Krai','Snezhnaya','Snezhnaya / Fatui','Traveler','Other'];
   const set=new Set(characters.map(c=>c.region).filter(Boolean));
   return preferred.filter(x=>set.has(x)).concat([...set].filter(x=>!preferred.includes(x)).sort((a,b)=>a.localeCompare(b)));
 }
