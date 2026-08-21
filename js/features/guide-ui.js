@@ -7,15 +7,16 @@ import { referenceStats, roleRatings, talentPriority, constellationList, constel
 
 const HAKUSH_UI='https://static.nanoka.cc/gi/UI';
 let activeCharacter='',reference=null,weaponPromise=null;
-const esc=value=>String(value??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+const esc=value=>String(value??'').replace(/[&<>'\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 
 function insertBeforeActions(app,node){const actions=[...app.querySelectorAll('main > .section.grid.two')].at(-1);if(actions)actions.before(node);else app.querySelector('main')?.appendChild(node)}
-function img(src,alt,cls=''){if(!src)return`<div class="hotaru-guide-placeholder ${cls}">✦</div>`;return`<img class="${cls}" src="${esc(src)}" alt="${esc(alt)}" loading="lazy" decoding="async" onerror="this.hidden=true;this.nextElementSibling?.removeAttribute('hidden')"><span class="hotaru-guide-placeholder ${cls}" hidden>✦</span>`}
-function itemIcon(name,src=''){return img(src||fallbackItemIcon(name),name,'hotaru-guide-item-icon')}
-function characterIcon(character){return img(character?.icon||fallbackCharacterIcon(character?.slug||character?.name),character?.name||'Character','hotaru-guide-avatar')}
-function artifactIcon(set){return img(set?.icon||fallbackArtifactIcon(set?.name),set?.name||'Artifact','hotaru-guide-item-icon')}
-function weaponIcon(weapon){return img(weapon?.icon||fallbackWeaponIcon(weapon?.slug||weapon?.name),weapon?.name||'Weapon','hotaru-guide-item-icon')}
-function materialIcon(name,icon=''){const normalized=String(icon||'').trim(),src=/^https?:/i.test(normalized)?normalized:normalized?`${HAKUSH_UI}/${normalized.replace(/\.webp$/i,'')}.webp`:fallbackItemIcon(name);return itemIcon(name,src)}
+function sourceAttr(values=[]){return esc(JSON.stringify([...new Set(values.map(value=>String(value||'').trim()).filter(Boolean))]))}
+function img(src,alt,cls='',fallbacks=[]){const sources=[...new Set([src,...fallbacks].map(value=>String(value||'').trim()).filter(Boolean))];if(!sources.length)return`<div class="hotaru-guide-placeholder ${cls}">✦</div>`;return`<img class="${cls}" src="${esc(sources[0])}" data-hotaru-sources="${sourceAttr(sources)}" data-hotaru-source-index="0" alt="${esc(alt)}" loading="lazy" decoding="async" onerror="const s=JSON.parse(this.dataset.hotaruSources||'[]'),i=Number(this.dataset.hotaruSourceIndex||0)+1;if(i<s.length){this.dataset.hotaruSourceIndex=String(i);this.src=s[i]}else{this.hidden=true;this.nextElementSibling?.removeAttribute('hidden')}"><span class="hotaru-guide-placeholder ${cls}" hidden>✦</span>`}
+function itemIcon(name,src=''){const stable=fallbackItemIcon(name);return img(stable||src,name,'hotaru-guide-item-icon',stable&&src?[src]:[])}
+function characterIcon(character){const stable=fallbackCharacterIcon(character?.slug||character?.name);return img(stable||character?.icon,character?.name||'Character','hotaru-guide-avatar',stable&&character?.icon?[character.icon]:[])}
+function artifactIcon(set){const stable=fallbackArtifactIcon(set?.name);return img(stable||set?.icon,set?.name||'Artifact','hotaru-guide-item-icon',stable&&set?.icon?[set.icon]:[])}
+function weaponIcon(weapon){const stable=fallbackWeaponIcon(weapon?.slug||weapon?.name);return img(stable||weapon?.icon,weapon?.name||'Weapon','hotaru-guide-item-icon',stable&&weapon?.icon?[weapon.icon]:[])}
+function materialIcon(name,icon=''){const normalized=String(icon||'').trim(),upstream=/^https?:/i.test(normalized)?normalized:normalized?`${HAKUSH_UI}/${normalized.replace(/\.webp$/i,'')}.webp`:'';return itemIcon(name,upstream)}
 function sectionName(app){return app.querySelector('.segmented button.active')?.textContent?.trim().toLowerCase()||'build'}
 function targetSummary(profile){const targets=statTargets(profile,{});return[['CRIT Rate',targets.cr],['CRIT DMG',targets.cd],['Energy Recharge',targets.er],['Elemental Mastery',targets.em]].filter(([,t])=>t.great>0)}
 
