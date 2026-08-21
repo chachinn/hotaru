@@ -31,7 +31,6 @@ UI modules should remain separate from calculation/data modules rather than addi
 
 Each gate must pass deterministic regression QA and a tested packaged-artifact retest before promotion to `main`.
 
-
 ## Gate 2 implementation notes — Build Intelligence 2
 
 - Build Check resolves reviewed profiles before generic inference when a reviewed character profile exists.
@@ -40,3 +39,4 @@ Each gate must pass deterministic regression QA and a tested packaged-artifact r
 - Reviewed weapon/artifact priority influences Hotaru fit scoring, but the result remains deterministic guidance rather than a damage simulation.
 - `js/features/upgrade-priority.js` now separates guaranteed actions (for example, swapping to a better reviewed weapon the user already owns) from RNG artifact/stat improvements and tags the future farm category. This stays out of `app.js`/the scoring core and is the handoff boundary for Smart Farming.
 - Columbina is the first multi-playstyle reviewed profile used to exercise the variant architecture (off-field support/DPS vs on-field Lunar-Bloom DPS).
+- Release promotion is gated on the clean source head itself: the ordinary Hotaru QA workflow must package that final tree, and the exact artifact must be independently retested before merge.
