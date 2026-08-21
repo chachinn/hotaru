@@ -71,4 +71,5 @@ assert.match(gameData,/catalog-v3/);assert.match(gameData,/LEGACY_CACHE_KEYS/);a
 const taxonomy=fs.readFileSync(path.join(root,'js/features/taxonomy.js'),'utf8');assert.match(taxonomy,/REGION_CACHE_TTL=7\*24\*60\*60\*1000/);assert.match(taxonomy,/REGION_FETCH_TIMEOUT=8000/);assert.match(taxonomy,/AbortController/);
 const css=fs.readFileSync(path.join(root,'enhancements.css'),'utf8');assert.match(css,/hotaru-nav-compact/);assert.match(css,/hotaru-menu-sheet/);assert.match(css,/filters\.hotaru-filter-grid:not\(\.is-open\)/);
 const contentCss=fs.readFileSync(path.join(root,'content-enhancements.css'),'utf8');assert.match(contentCss,/hotaru-content-thumb/);assert.match(contentCss,/hotaru-role-card/);assert.match(contentCss,/hotaru-character-map-sources/);
-console.log('Hotaru catalog safety + rarity + role + artwork + map + performance QA: all deterministic/static tests passed.');
+const workflow=fs.readFileSync(path.join(root,'.github/workflows/qa.yml'),'utf8');assert.match(workflow,/content-enhancements\.js/);assert.match(workflow,/content-enhancements\.css/);
+console.log('Hotaru catalog safety + rarity + role + artwork + map + performance + package QA: all deterministic/static tests passed.');
