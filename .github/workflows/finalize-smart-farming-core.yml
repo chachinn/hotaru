@@ -30,7 +30,21 @@ jobs:
           test -f .tmp/smartfarm/chunk-05
           test -f .tmp/smartfarm/chunk-07
 
+          dd if=.tmp/smartfarm/part-04-06 of=.tmp/smartfarm/stale-05 bs=6000 skip=1 count=1 status=none
           dd if=.tmp/smartfarm/part-04-06 of=.tmp/smartfarm/chunk-06 bs=6000 skip=2 count=1 status=none
+          echo 'chunk-05 differences versus stale slice:'
+          cmp -l .tmp/smartfarm/stale-05 .tmp/smartfarm/chunk-05 | head -40 || true
+          python - <<'PY'
+          from pathlib import Path
+          allowed=set(b'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=')
+          for name in ['chunk-00','part-01-03','part-04-06','chunk-04','chunk-05','chunk-06','chunk-07']:
+              p=Path('.tmp/smartfarm')/name
+              data=p.read_bytes()
+              bad=[(i+1,b) for i,b in enumerate(data) if b not in allowed and b not in b'\r\n\t ']
+              eq=[i+1 for i,b in enumerate(data) if b==61]
+              print(name, 'size=',len(data),'bad=',bad[:20],'eq=',eq[:20])
+          PY
+
           cat \
             .tmp/smartfarm/chunk-00 \
             .tmp/smartfarm/part-01-03 \
@@ -44,8 +58,6 @@ jobs:
           base64 --decode .tmp/smartfarm/payload.b64 > .tmp/smartfarm/payload.tar.gz
           echo "Repaired tar SHA-256: $(sha256sum .tmp/smartfarm/payload.tar.gz | awk '{print $1}')"
           gzip -t .tmp/smartfarm/payload.tar.gz
-          echo "Archive entries: $(tar -tzf .tmp/smartfarm/payload.tar.gz | wc -l)"
-          tar -tzf .tmp/smartfarm/payload.tar.gz | sed -n '1,40p'
           echo '57b957266a188d0631c69183fa20059c9c357f02166c66f786a505d79669fbf1  .tmp/smartfarm/payload.b64' | sha256sum -c -
           echo 'a8945c02ddf7368e57ae76e237c49a18e06f4627ddf0e51a295f50e96ed57575  .tmp/smartfarm/payload.tar.gz' | sha256sum -c -
           tar -xzf .tmp/smartfarm/payload.tar.gz -C .
