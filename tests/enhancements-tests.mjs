@@ -19,10 +19,10 @@ assert.equal(associationToRegion('ASSOC_TYPE_FATUI'),'');
 assert.ok(affiliationsFor('Arlecchino').includes('Fatui Harbinger'));
 assert.ok(affiliationsFor('Arlecchino').includes('House of the Hearth'));
 assert.ok(affiliationsFor('Mona').includes('Hexenzirkel-related'));
-assert.deepEqual(affiliationsFor('Odette'),[]);
+assert.deepEqual(affiliationsFor('Odette'),['Fatui']);
 assert.deepEqual(affiliationsFor('Alyosha'),[]);
 const enriched=enrichCharacterTaxonomy({id:'100',name:'Example',region:''},{100:'Snezhnaya'});assert.equal(enriched.region,'Snezhnaya');
-const odette=enrichCharacterTaxonomy({id:'paimon-odette',sourceId:'odette',name:'Odette',region:''},{});assert.equal(odette.region,'Snezhnaya');assert.ok(!odette.affiliations.includes('Fatui'));
+const odette=enrichCharacterTaxonomy({id:'paimon-odette',sourceId:'odette',name:'Odette',region:''},{});assert.equal(odette.region,'Snezhnaya');assert.ok(odette.affiliations.includes('Fatui'));
 const alyosha=enrichCharacterTaxonomy({id:'paimon-alyosha',sourceId:'alyosha',name:'Alyosha',region:'Other'},{});assert.equal(alyosha.region,'Snezhnaya');assert.ok(!alyosha.affiliations.includes('Fatui'));
 assert.deepEqual(getRegionOptions([{region:'Snezhnaya'},{region:'Nod-Krai'},{region:'Mondstadt'},{region:'Snezhnaya / Fatui'}]),['Mondstadt','Nod-Krai','Snezhnaya']);
 
