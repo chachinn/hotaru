@@ -12,7 +12,7 @@ const jsFiles=walk(path.join(root,'js')).filter(file=>file.endsWith('.js'));
 // Every relative ES-module import must resolve to a real file.
 for(const file of jsFiles){
   const source=fs.readFileSync(file,'utf8');
-  for(const match of source.matchAll(/from\s+['\"](\.[^'\"]+)['\"]/g)){
+  for(const match of source.matchAll(/from\s+['"](\.[^'"]+)['"]/g)){
     const resolved=path.resolve(path.dirname(file),match[1]);
     assert.ok(fs.existsSync(resolved),`broken relative import: ${path.relative(root,file)} -> ${match[1]}`);
   }
@@ -27,7 +27,7 @@ for(const area of ['Sea of Bygone Eras','Ancient Sacred Mountain','Temple of Spa
 for(const area of ['Sea of Bygone Eras','Ancient Sacred Mountain','Temple of Space','Frost Moon'])assert.match(mapAreaBrowseUrl(area),/^https:\/\/genshin-impact-map\.appsample\.com\//);
 
 const sw=read('service-worker.js');
-assert.match(sw,/hotaru-shell-v12/);
+assert.match(sw,/hotaru-shell-v13/);
 assert.match(sw,/js\/data\/map-registry\.js/);
 const architecture=read('docs/ARCHITECTURE.md');
 assert.match(architecture,/Region metadata is cached locally for 7 days\./);
