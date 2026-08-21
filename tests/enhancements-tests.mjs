@@ -15,11 +15,16 @@ for(const file of ['js/enhancements.js','js/content-enhancements.js','service-wo
 assert.equal(associationToRegion('ASSOC_TYPE_NATLAN'),'Natlan');
 assert.equal(associationToRegion('ASSOC_TYPE_NODKRAI'),'Nod-Krai');
 assert.equal(associationToRegion('ASSOC_TYPE_SNEZHNAYA'),'Snezhnaya');
+assert.equal(associationToRegion('ASSOC_TYPE_FATUI'),'');
 assert.ok(affiliationsFor('Arlecchino').includes('Fatui Harbinger'));
 assert.ok(affiliationsFor('Arlecchino').includes('House of the Hearth'));
 assert.ok(affiliationsFor('Mona').includes('Hexenzirkel-related'));
+assert.deepEqual(affiliationsFor('Odette'),[]);
+assert.deepEqual(affiliationsFor('Alyosha'),[]);
 const enriched=enrichCharacterTaxonomy({id:'100',name:'Example',region:''},{100:'Snezhnaya'});assert.equal(enriched.region,'Snezhnaya');
-assert.deepEqual(getRegionOptions([{region:'Snezhnaya'},{region:'Nod-Krai'},{region:'Mondstadt'}]),['Mondstadt','Nod-Krai','Snezhnaya']);
+const odette=enrichCharacterTaxonomy({id:'paimon-odette',sourceId:'odette',name:'Odette',region:''},{});assert.equal(odette.region,'Snezhnaya');assert.ok(!odette.affiliations.includes('Fatui'));
+const alyosha=enrichCharacterTaxonomy({id:'paimon-alyosha',sourceId:'alyosha',name:'Alyosha',region:'Other'},{});assert.equal(alyosha.region,'Snezhnaya');assert.ok(!alyosha.affiliations.includes('Fatui'));
+assert.deepEqual(getRegionOptions([{region:'Snezhnaya'},{region:'Nod-Krai'},{region:'Mondstadt'},{region:'Snezhnaya / Fatui'}]),['Mondstadt','Nod-Krai','Snezhnaya']);
 
 assert.deepEqual(normalizeMarkerNames(['Sakura Bloom','Sakura Bloom',' Qingxin ']),['Sakura Bloom','Qingxin']);
 const url=buildMapUrl(['Sakura Bloom','Qingxin']);assert.match(url,/genshin-impact-map\.appsample\.com/);assert.equal(new URL(url).searchParams.get('names'),'Sakura Bloom,Qingxin');
@@ -67,7 +72,7 @@ assert.match(fallbackCharacterIcon('Albedo'),/characters\/albedo\.png$/);assert.
 const content=fs.readFileSync(path.join(root,'js/content-enhancements.js'),'utf8');assert.match(content,/observer\.observe\(app,\{childList:true\}\)/);assert.doesNotMatch(content,/observer\.observe\(app,\{[^}]*subtree:true/);assert.match(content,/safeCharacterRarity/);assert.match(content,/extractMaterialMedia/);assert.match(content,/data-hotaru-content-map-sources/);assert.match(content,/loading='lazy'/);assert.match(content,/hotaru-role-card/);assert.match(content,/catalog-v3/);assert.match(content,/armImageSources/);assert.match(content,/fallbackItemIcon\(name\)/);
 const gameData=fs.readFileSync(path.join(root,'js/data/game-data.js'),'utf8');
 assert.match(gameData,/catalog-v3/);assert.match(gameData,/LEGACY_CACHE_KEYS/);assert.match(gameData,/MIN_CATALOG_CHARACTERS=80/);assert.match(gameData,/Primary catalog was incomplete/);assert.match(gameData,/last known-good cached catalog/);assert.match(gameData,/characterData/);assert.match(gameData,/current-release supplement/);
-const taxonomy=fs.readFileSync(path.join(root,'js/features/taxonomy.js'),'utf8');assert.match(taxonomy,/REGION_CACHE_TTL=7\*24\*60\*60\*1000/);assert.match(taxonomy,/REGION_FETCH_TIMEOUT=8000/);assert.match(taxonomy,/AbortController/);
+const taxonomy=fs.readFileSync(path.join(root,'js/features/taxonomy.js'),'utf8');assert.match(taxonomy,/hotaru\.region-map\.v2/);assert.match(taxonomy,/REGION_CACHE_TTL=7\*24\*60\*60\*1000/);assert.match(taxonomy,/REGION_FETCH_TIMEOUT=8000/);assert.match(taxonomy,/AbortController/);assert.doesNotMatch(taxonomy,/Snezhnaya \/ Fatui'\s*,\s*'Traveler/);
 const css=fs.readFileSync(path.join(root,'css/enhancements.css'),'utf8');assert.match(css,/hotaru-nav-compact/);assert.match(css,/hotaru-menu-sheet/);assert.match(css,/filters\.hotaru-filter-grid:not\(\.is-open\)/);
 const contentCss=fs.readFileSync(path.join(root,'css/content-enhancements.css'),'utf8');assert.match(contentCss,/hotaru-content-thumb/);assert.match(contentCss,/hotaru-role-card/);assert.match(contentCss,/hotaru-character-map-sources/);
 const workflow=fs.readFileSync(path.join(root,'.github/workflows/qa.yml'),'utf8');assert.match(workflow,/css\//);assert.match(workflow,/js\//);
