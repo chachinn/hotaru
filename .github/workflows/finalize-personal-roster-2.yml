@@ -19,13 +19,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Verify and apply exact tested payload
+      - name: Reconstruct and apply exact tested payload
         shell: bash
         run: |
           set -euo pipefail
-          test -f .tmp/roster2/payload.tar.gz
-          echo 'f7917abfff7ee741abfa1cb7873f662885f6255fbfa2247fc3b8a3406ea38630  .tmp/roster2/payload.tar.gz' | sha256sum -c -
-          tar -xzf .tmp/roster2/payload.tar.gz -C .
+          for n in 00 01 02 03 04 05 06 07; do test -f ".tmp/roster2/chunk-$n"; done
+          cat .tmp/roster2/chunk-00 .tmp/roster2/chunk-01 .tmp/roster2/chunk-02 .tmp/roster2/chunk-03 .tmp/roster2/chunk-04 .tmp/roster2/chunk-05 .tmp/roster2/chunk-06 .tmp/roster2/chunk-07 | base64 -d > .tmp/roster2/payload.final.tar.gz
+          echo '20780c75fb0dbbe471e954e27258ec14f36d4fb029941ae37d0ba3eb172ad53f  .tmp/roster2/payload.final.tar.gz' | sha256sum -c -
+          tar -xzf .tmp/roster2/payload.final.tar.gz -C .
           rm -rf .tmp/roster2
           rm -f .github/workflows/finalize-personal-roster-2.yml
       - name: Full Personal Roster 2.0 QA
@@ -42,6 +43,8 @@ jobs:
           grep -q "hotaru.app.v2" js/core/state.js
           grep -q "js/features/roster-intelligence.js" service-worker.js
           grep -q "js/features/build-goals.js" service-worker.js
+          grep -q 'max="90" value="90"' app.js
+          grep -q 'goalProfile' app.js
           ! test -e .tmp/roster2
           ! test -e .github/workflows/finalize-personal-roster-2.yml
           git diff --check
