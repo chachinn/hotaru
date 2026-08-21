@@ -62,6 +62,7 @@ const TAGS={
   'Navia':['Spina di Rosula'],
   'Neuvillette':['Court of Fontaine'],
   'Ningguang':['Liyue Qixing'],
+  'Odette':['Fatui'],
   'Qiqi':['Little Hexenzirkel'],
   'Raiden Shogun':['Archon','Inazuma Shogunate'],
   'Raiden':['Archon','Inazuma Shogunate'],
