@@ -1,11 +1,14 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { associationToRegion, affiliationsFor, enrichCharacterTaxonomy, getRegionOptions } from '../js/features/taxonomy.js';
 import { buildMapUrl, normalizeMarkerNames, normalizeTarget, remainingTarget, getMapFilterGroups, getMapFilterOptions, MAP_BROWSE_URL } from '../js/features/interactive-map.js';
 import { parseReleasedCharacterSlugs, parseReleasedCharacterRecords, mergeReleasedCharacters } from '../js/data/game-data.js';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+
+for(const file of ['enhancements.js','service-worker.js','js/features/taxonomy.js'])execFileSync(process.execPath,['--check',path.join(root,file)],{stdio:'pipe'});
 
 assert.equal(associationToRegion('ASSOC_TYPE_NATLAN'),'Natlan');
 assert.equal(associationToRegion('ASSOC_TYPE_NODKRAI'),'Nod-Krai');
