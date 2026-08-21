@@ -32,6 +32,7 @@ jobs:
           echo "9a466cc1f33a2975457a7e7bbddd9b2aa373d974113dacb5cb7f66c2c52efaae  /tmp/bi2.tar.gz" | sha256sum -c -
           tar -xzf /tmp/bi2.tar.gz -C .
           rm -f .bi2-final-payload.b64
+          rm -f .bi2-trigger
           rm -f .github/workflows/bi2-final-apply.yml
       - name: Full deterministic QA
         run: npm test
