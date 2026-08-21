@@ -13,12 +13,18 @@ Hotaru's map module is a lazy-loaded wrapper around the embeddable AppSample Gen
 
 - Dedicated Map tab added at runtime without changing the original app shell.
 - Pan/zoom interactive map.
-- Marker/material name search.
+- Category dropdown for exploration, oculi/collectibles, local specialties, general materials, ore/artifacts, enemies/bosses, fishing, and wood.
+- Material/marker dropdown inside the selected category, so users do not need to type exact material names.
+- **Browse all filters** opens AppSample's complete provider-maintained filter interface inside the embedded map.
 - Quick marker presets for waypoints, statues, oculi, ore, artifacts, ingredients, fishing and common specialties.
-- Material planner with Needed / Owned / Remaining counts.
+- Material planner with Needed / Owned / Remaining counts and a material dropdown.
 - Local completion state for material targets.
 - Character Materials -> Map shortcuts for individual or combined material lists.
 - Region and multi-affiliation character filters share the same enhancement layer.
+
+## Freshness strategy
+
+Hotaru keeps a curated convenience list for fast mobile selection, including current Snezhnaya specialties. Because map providers can add marker types faster than Hotaru code changes, **Browse all filters** is the freshness escape hatch: it exposes AppSample's own current filter list without requiring the user to manually type a marker name.
 
 ## Data boundaries
 
@@ -26,6 +32,7 @@ Hotaru does not authenticate against HoYoLAB, read private account data, or sync
 
 ## Sources
 
-- Map embed: https://genshin-impact-map.appsample.com/help/embed
+- Map embed/filter parameter: https://genshin-impact-map.appsample.com/help/embed
+- Full provider filter interface: https://genshin-impact-map.appsample.com/?lang=EN
 - Region association metadata: https://github.com/DimbreathBot/AnimeGameData
-- Base Hotaru character/game data remains Hakush/Nanoka-first, with existing fallbacks.
+- Base Hotaru character/game data remains Hakush/Nanoka-first, with existing fallbacks and the release-aware supplementation layer documented in `ARCHITECTURE.md`.
