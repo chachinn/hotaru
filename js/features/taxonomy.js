@@ -20,14 +20,19 @@ const ASSOC_REGION={
   ASSOC_TYPE_UNKNOWN:'Other'
 };
 
-// Conservative nation fallbacks for newly released characters whose supplement data
-// can arrive before the numeric association metadata used by FetterInfo catches up.
+// Reviewed primary-region/location fallbacks for characters whose upstream association
+// metadata is missing, stale, or too generic for Hotaru's Region filter.
 const REGION_OVERRIDES={
   Odette:'Snezhnaya',
   Alyosha:'Snezhnaya',
   Tartaglia:'Snezhnaya',
   Childe:'Snezhnaya',
-  Arlecchino:'Snezhnaya'
+  Arlecchino:'Snezhnaya',
+  Sandrone:'Snezhnaya',
+  Nicole:'Nod-Krai',
+  'Nicole Reeyn':'Nod-Krai',
+  Zibai:'Liyue',
+  Skirk:'Abyss / Beyond Teyvat'
 };
 
 // Curated playable-character affiliations. Multi-tagged by design.
@@ -142,7 +147,7 @@ export function getAffiliationOptions(characters=[]){
   return [...new Set(characters.flatMap(c=>c.affiliations||affiliationsFor(c)))].sort((a,b)=>a.localeCompare(b));
 }
 export function getRegionOptions(characters=[]){
-  const preferred=['Mondstadt','Liyue','Inazuma','Sumeru','Fontaine','Natlan','Nod-Krai','Snezhnaya','Traveler','Other'];
+  const preferred=['Mondstadt','Liyue','Inazuma','Sumeru','Fontaine','Natlan','Nod-Krai','Snezhnaya','Abyss / Beyond Teyvat','Traveler','Other'];
   const set=new Set(characters.map(c=>normalizeRegion(c.region)).filter(Boolean));
   return preferred.filter(x=>set.has(x)).concat([...set].filter(x=>!preferred.includes(x)).sort((a,b)=>a.localeCompare(b)));
 }
