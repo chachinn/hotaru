@@ -24,7 +24,10 @@ const ASSOC_REGION={
 // can arrive before the numeric association metadata used by FetterInfo catches up.
 const REGION_OVERRIDES={
   Odette:'Snezhnaya',
-  Alyosha:'Snezhnaya'
+  Alyosha:'Snezhnaya',
+  Tartaglia:'Snezhnaya',
+  Childe:'Snezhnaya',
+  Arlecchino:'Snezhnaya'
 };
 
 // Curated playable-character affiliations. Multi-tagged by design.
@@ -131,7 +134,7 @@ export function enrichCharacterTaxonomy(character,regionMap={}){
   const direct=normalizeRegion(character?.region);
   const override=REGION_OVERRIDES[name]||'';
   const mapped=normalizeRegion(regionMap[String(character?.id)]||regionMap[String(character?.sourceId)]||'');
-  const region=direct&&direct!=='Other'?direct:override||mapped||direct||'Other';
+  const region=override||(direct&&direct!=='Other'?direct:mapped||direct||'Other');
   return {...character,region,affiliations:affiliationsFor(character)};
 }
 
