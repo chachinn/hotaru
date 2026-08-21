@@ -20,6 +20,11 @@ for(const name of ['Arlecchino','Tartaglia','Childe']){
 }
 assert.ok(enrichCharacterTaxonomy({name:'Arlecchino',id:'a',region:'Other'},{}).affiliations.includes('Fatui'),'Arlecchino should keep Fatui as affiliation, separate from Region');
 assert.ok(enrichCharacterTaxonomy({name:'Tartaglia',id:'t',region:'Other'},{}).affiliations.includes('Fatui'),'Tartaglia should keep Fatui as affiliation, separate from Region');
+assert.equal(enrichCharacterTaxonomy({name:'Sandrone',id:'sand',region:'Other'},{}).region,'Snezhnaya','Sandrone should not fall into Other');
+assert.equal(enrichCharacterTaxonomy({name:'Nicole',id:'nic',region:'Other'},{}).region,'Nod-Krai','Nicole should use Hotaru\'s reviewed Nod-Krai grouping');
+assert.equal(enrichCharacterTaxonomy({name:'Nicole Reeyn',id:'nic2',region:'Other'},{}).region,'Nod-Krai','Nicole Reeyn alias should use the same Nod-Krai grouping');
+assert.equal(enrichCharacterTaxonomy({name:'Zibai',id:'zi',region:'Other'},{}).region,'Liyue','Zibai should be grouped under Liyue');
+assert.equal(enrichCharacterTaxonomy({name:'Skirk',id:'sk',region:'Other'},{}).region,'Abyss / Beyond Teyvat','Skirk should have a dedicated beyond-Teyvat location grouping instead of Other');
 
 const arle=reviewedBuildProfile('Arlecchino');
 const childe=reviewedBuildProfile('Childe');
@@ -42,6 +47,6 @@ const loader=fs.readFileSync(path.join(root,'js/features/guide-loader.js'),'utf8
 assert.match(loader,/resolveBuildProfile/);
 assert.match(loader,/enhanceGame8Guide/);
 const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
-assert.match(sw,/hotaru-shell-v13/);
+assert.match(sw,/hotaru-shell-v14/);
 for(const asset of ['js/data/build-profiles/index.js','js/data/build-profiles/arlecchino.js','js/data/build-profiles/tartaglia.js','js/features/build-profiles.js','js/features/game8-guide-ui.js'])assert.match(sw,new RegExp(asset.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
 console.log('Hotaru Game8-style guide structure + reviewed-profile regression QA passed.');
