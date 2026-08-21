@@ -1,0 +1,86 @@
+name: Promote Smart Team Creator UI
+
+on:
+  push:
+    branches: [feature/smart-team-creator-foundation]
+
+permissions:
+  contents: write
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/smart-team-creator-foundation
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify and apply Team Creator UI patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .hotaru-promotion/team-ui-part-00.patch .hotaru-promotion/team-ui-part-01.patch .hotaru-promotion/team-ui-part-02.patch .hotaru-promotion/team-ui-part-03.patch > /tmp/hotaru-team-ui.patch
+          echo '6e15f1dd6d6e8984910134e1bb662619be86658ced617d313bf743351a100b9f  /tmp/hotaru-team-ui.patch' | sha256sum -c -
+          git apply --check /tmp/hotaru-team-ui.patch
+          git apply /tmp/hotaru-team-ui.patch
+          rm -rf .hotaru-promotion
+          rm -f .github/workflows/promote-smart-team-ui.yml
+      - name: Full Smart Team Creator QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm test
+          while IFS= read -r -d '' file; do node --check "$file" >/dev/null; done < <(find . -type f \( -name '*.js' -o -name '*.mjs' \) -not -path './node_modules/*' -print0)
+          grep -q 'hotaru-shell-v20' service-worker.js
+          grep -q 'app.js?v=1.7.0' index.html
+          grep -q 'style.css?v=1.4.0' index.html
+          grep -q 'Smart Team Creator' app.js
+          grep -q 'Team review pending' app.js
+          grep -q 'js/data/team-profiles/index.js' service-worker.js
+          grep -q 'js/features/team-scoring.js' service-worker.js
+          grep -q 'js/features/roster-team-matcher.js' service-worker.js
+          ! test -e .hotaru-promotion
+          ! test -e .github/workflows/promote-smart-team-ui.yml
+          git diff --check
+      - name: Verify exact clean source scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git add -- \
+            app.js docs/SMART_BUILD_PLAN.md docs/SMART_BUILD_SOURCE_POLICY.md index.html \
+            js/data/team-profiles/index.js js/features/roster-team-matcher.js js/features/team-scoring.js \
+            package.json service-worker.js style.css \
+            tests/build-intelligence2-tests.mjs tests/build-map-fixes-tests.mjs tests/character-search-focus-tests.mjs \
+            tests/consistency-tests.mjs tests/game8-structure-tests.mjs tests/guide-tests.mjs tests/mobile-ui-regression-tests.mjs \
+            tests/roster2-tests.mjs tests/run-tests.mjs tests/smart-farming-tests.mjs tests/smart-team-creator-tests.mjs
+          git add -u -- .hotaru-promotion .github/workflows/promote-smart-team-ui.yml
+          python - <<'PY'
+          import subprocess
+          expected={
+            'app.js','docs/SMART_BUILD_PLAN.md','docs/SMART_BUILD_SOURCE_POLICY.md','index.html',
+            'js/data/team-profiles/index.js','js/features/roster-team-matcher.js','js/features/team-scoring.js',
+            'package.json','service-worker.js','style.css',
+            'tests/build-intelligence2-tests.mjs','tests/build-map-fixes-tests.mjs','tests/character-search-focus-tests.mjs',
+            'tests/consistency-tests.mjs','tests/game8-structure-tests.mjs','tests/guide-tests.mjs','tests/mobile-ui-regression-tests.mjs',
+            'tests/roster2-tests.mjs','tests/run-tests.mjs','tests/smart-farming-tests.mjs','tests/smart-team-creator-tests.mjs'
+          }
+          actual=set(subprocess.check_output(['git','diff','--cached','--name-only','origin/main'],text=True).splitlines())
+          if actual != expected:
+              print('Expected:',sorted(expected))
+              print('Actual:',sorted(actual))
+              raise SystemExit(1)
+          print(f'Clean Smart Team Creator scope verified: {len(actual)} intended files.')
+          PY
+          git diff --cached --check
+      - name: Commit clean real source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Integrate reviewed Smart Team Creator UI'
+          git push origin HEAD:feature/smart-team-creator-foundation
