@@ -1,4 +1,4 @@
-const CACHE = 'hotaru-shell-v9';
+const CACHE = 'hotaru-shell-v10';
 const APP_SHELL = [
   './','./index.html','./style.css?v=1.0.0','./css/enhancements.css?v=1.3.0','./css/content-enhancements.css?v=1.0.0','./css/guide-ui.css?v=1.0.0','./css/exploration-ui.css?v=1.0.0','./app.js?v=1.0.0','./js/enhancements.js?v=1.4.0','./js/content-enhancements.js?v=1.1.0','./js/features/guide-loader.js?v=1.0.0','./manifest.json',
   './js/core/state.js','./js/core/cache.js','./js/data/game-data.js','./js/data/enka.js','./js/data/character-reference.js',
