@@ -1,6 +1,7 @@
 const FETTER_URL='https://raw.githubusercontent.com/DimbreathBot/AnimeGameData/main/ExcelBinOutput/FetterInfoExcelConfigData.json';
 const REGION_CACHE_KEY='hotaru.region-map.v1';
-const REGION_CACHE_TTL=24*60*60*1000;
+const REGION_CACHE_TTL=7*24*60*60*1000;
+const REGION_FETCH_TIMEOUT=8000;
 
 const ASSOC_REGION={
   ASSOC_TYPE_MONDSTADT:'Mondstadt',
@@ -89,8 +90,9 @@ export function associationToRegion(value=''){
 
 export async function loadRegionMap({force=false}={}){
   if(!force){const cached=safeReadCache();if(cached)return cached}
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),REGION_FETCH_TIMEOUT);
   try{
-    const response=await fetch(FETTER_URL,{cache:'no-store'});
+    const response=await fetch(FETTER_URL,{cache:'no-store',signal:controller.signal});
     if(!response.ok)throw new Error(`Region metadata request failed (${response.status})`);
     const rows=await response.json(),map={};
     for(const row of Array.isArray(rows)?rows:[]){
@@ -100,6 +102,7 @@ export async function loadRegionMap({force=false}={}){
     if(Object.keys(map).length)safeWriteCache(map);
     return map;
   }catch{return safeReadCache()||{}}
+  finally{clearTimeout(timer)}
 }
 
 export function affiliationsFor(characterOrName){
