@@ -47,9 +47,9 @@ async function ensureDetail(){
 }
 async function repairRarity(character,nextDetail){
   const previous=Number(nextDetail?.rarity),raw=nextDetail?.raw?.rarity??nextDetail?.raw?.rank??nextDetail?.rarity,rarity=safeCharacterRarity(raw,character?.rarity);
-  const invalid=!Number.isFinite(previous)||![4,5].includes(previous)||!Number.isFinite(Number(character?.rarity))||![4,5].includes(Number(character?.rarity));
+  const characterRarity=Number(character?.rarity),invalid=!Number.isFinite(previous)||![4,5].includes(previous)||!Number.isFinite(characterRarity)||![4,5].includes(characterRarity)||previous!==rarity||characterRarity!==rarity;
   nextDetail.rarity=rarity;if(character)character.rarity=rarity;
-  app.querySelectorAll('.detail-head .pill').forEach(pill=>{if(/★/.test(pill.textContent||'')&&(!/^[45]★$/.test((pill.textContent||'').trim())||/nan/i.test(pill.textContent||'')))pill.textContent=`${rarity}★`});
+  app.querySelectorAll('.detail-head .pill').forEach(pill=>{if(/★/.test(pill.textContent||'')&&(pill.textContent||'').trim()!==`${rarity}★`)pill.textContent=`${rarity}★`});
   if(invalid&&catalog)await cacheSet('catalog-v3',{savedAt:Date.now(),catalog});
 }
 

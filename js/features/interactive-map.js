@@ -3,11 +3,12 @@ export const MAP_BROWSE_URL='https://genshin-impact-map.appsample.com/?lang=EN';
 export const MAP_STORAGE_KEY='hotaru.map.v1';
 
 export const MAP_FILTER_GROUPS={
-  'Exploration':['Teleport Waypoint','Statue of The Seven','Domain','Common Chest','Exquisite Chest','Precious Chest','Luxurious Chest','Seelie','Viewpoint','World Quests'],
+  'Exploration':['Shrine of Depth','Teleport Waypoint','Statue of The Seven','Domain','Common Chest','Exquisite Chest','Precious Chest','Luxurious Chest','Seelie','Viewpoint','World Quests'],
   'Oculi & Collectibles':['Anemoculus','Geoculus','Electroculus','Dendroculus','Hydroculus','Pyroculus','Crimson Agate','Sacred Seal','Radiant Spincrystal'],
   'Local Specialties':['Dandelion Seed','Cecilia','Calla Lily','Small Lamp Grass','Philanemo Mushroom','Valberry','Windwheel Aster','Wolfhook','Cor Lapis','Glaze Lily','Jueyun Chili','Noctilucous Jade','Qingxin','Silk Flower','Starconch','Violetgrass','Amakumo Fruit','Crystal Marrow','Dendrobium','Naku Weed','Onikabuto','Sakura Bloom','Sango Pearl','Sea Ganoderma','Scarab','Redcrest','Tidalga','Lakelight Lily','Rainbow Rose','Romaritime Flower','Spring of the First Dewdrop','Beryl Conch','Subdetection Unit','Lumidouce Bell','Marcotte','Cacahuatl','Grainfruit','Candlecap Mushroom','Embercore Flower','Spinel Fruit','Lakkaberry','Midsommar Berry','Icy Pebble','Windrest Flower'],
   'General Materials':['Mist Flower Corolla','Flaming Flower Stamen','Electro Crystal','Crystal Core','Butterfly Wings','Snapdragon','Horsetail','Frog','Lizard Tail','Crab','Raw Meat','Fowl','Matsutake','Pinecone','Bird Egg','Sweet Flower','Mint','Mushroom','Berry','Sunsettia','Apple','Lotus Head','Carrot','Radish','Cooking Ingredient','Harvestable Plant'],
-  'Ore & Artifacts':['Ores','White Iron Chunk','Crystal Chunk','Magical Crystal Chunk','Starsilver','Amethyst Lump','Artifact'],
+  'Artifacts':['Artifact'],
+  'Ore & Mining':['Ores','White Iron Chunk','Crystal Chunk','Magical Crystal Chunk','Starsilver','Amethyst Lump'],
   'Enemies & Bosses':['Hilichurl','Mitachurl','Fatui Skirmisher','Fatui Mirror Maiden','Whopperflower','Specter','Ruin Sentinel','Ruin Grader','Anemo Hypostasis','Geo Hypostasis','Electro Hypostasis','Cryo Hypostasis','Pyro Hypostasis','Oceanid','Cryo Regisvine','Pyro Regisvine','Primo Geovishap','Maguu Kenki','Perpetual Mechanical Array'],
   'Fishing':['Fish','Medaka','Glaze Medaka','Sweet-Flower Medaka','Aizen Medaka','Dawncatcher','Crystalfish','Lunged Stickleback','Betta','Venomspine Fish','Akai Maou','Snowstrider','Golden Koi','Rusty Koi','Raimei Angelfish'],
   'Wood':['Fir Wood','Pine Wood','Bamboo Segment','Sandbearer Wood','Birch Wood','Cuihua Wood','Fragrant Cedar Wood','Otogi Wood','Maple Wood','Aralia Wood','Yumemiru Wood']
