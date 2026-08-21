@@ -1,13 +1,13 @@
 import { loadCatalog } from './js/data/game-data.js';
 import { loadRegionMap, enrichCharacterTaxonomy, getAffiliationOptions, getRegionOptions } from './js/features/taxonomy.js';
-import { MAP_QUICK_MARKERS, buildMapUrl, loadMapState, saveMapState, normalizeMarkerNames, normalizeTarget, remainingTarget } from './js/features/interactive-map.js';
+import { MAP_QUICK_MARKERS, buildMapUrl, loadMapState, saveMapState, normalizeMarkerNames, normalizeTarget, remainingTarget, getMapFilterGroups, getMapFilterOptions } from './js/features/interactive-map.js';
 
 const EXTRA_KEY='hotaru.enhancements.v1';
 const app=document.getElementById('app');
 let catalog=null,enriched=[],regionMap=null,mapState=loadMapState(),mapOpen=false,renderQueued=false;
 let extra=loadExtra();
 
-function loadExtra(){try{return{region:'All',affiliation:'All',page:1,...JSON.parse(localStorage.getItem(EXTRA_KEY)||'{}')}}catch{return{region:'All',affiliation:'All',page:1}}}
+function loadExtra(){try{return{region:'All',affiliation:'All',page:1,mapCategory:'Local Specialties',...JSON.parse(localStorage.getItem(EXTRA_KEY)||'{}')}}catch{return{region:'All',affiliation:'All',page:1,mapCategory:'Local Specialties'}}}
 function saveExtra(){try{localStorage.setItem(EXTRA_KEY,JSON.stringify(extra))}catch{}}
 function esc(value=''){return String(value).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 function currentScreenTitle(){return app.querySelector('main h1')?.textContent?.trim()||''}
@@ -89,27 +89,35 @@ function augmentMaterialRows(){
   }
 }
 
-function openMap(names=[]){mapOpen=true;mapState.names=normalizeMarkerNames(names);mapState.lastOpenedAt=new Date().toISOString();saveMapState(mapState);renderMapView()}
+function openMap(names=[]){mapOpen=true;mapState.browseAll=false;mapState.names=normalizeMarkerNames(names);mapState.lastOpenedAt=new Date().toISOString();saveMapState(mapState);renderMapView()}
 function closeMap(){mapOpen=false;document.getElementById('hotaru-map-view')?.remove();app.querySelector('main:not(#hotaru-map-view)')?.classList.remove('hotaru-under-map');setMapNavActive(false)}
 function renderTargets(){
   if(!mapState.targets.length)return '<div class="hotaru-map-empty">No material targets yet. Add one below or send a character material here.</div>';
   return mapState.targets.map(t=>`<div class="hotaru-target-row ${t.complete?'complete':''}"><div><strong>${esc(t.name)}</strong><span>${remainingTarget(t)} remaining · ${Number(t.owned)||0}/${Number(t.needed)||0}</span></div><div class="hotaru-target-actions"><button class="ghost" data-hotaru-show-target="${esc(t.id)}">Map</button><button class="ghost" data-hotaru-complete-target="${esc(t.id)}">${t.complete?'Undo':'Done'}</button><button class="danger" data-hotaru-remove-target="${esc(t.id)}">×</button></div></div>`).join('');
 }
+function mapOptionHtml(options=[],selected=''){return options.map(value=>`<option value="${esc(value)}" ${selected===value?'selected':''}>${esc(value)}</option>`).join('')}
+function mapFilterHtml(){
+  const groups=getMapFilterGroups(),category=groups.includes(extra.mapCategory)?extra.mapCategory:'Local Specialties';extra.mapCategory=category;
+  const options=getMapFilterOptions(category),selected=mapState.names.length===1&&options.includes(mapState.names[0])?mapState.names[0]:'';
+  return `<div class="hotaru-map-filter-grid"><label class="field"><span>Category</span><select id="hotaru-map-filter-category">${groups.map(g=>`<option ${g===category?'selected':''}>${esc(g)}</option>`).join('')}</select></label><label class="field"><span>Material / marker</span><select id="hotaru-map-filter-value"><option value="">Choose one</option>${mapOptionHtml(options,selected)}</select></label><button class="primary" data-hotaru-apply-filter>Show</button><button class="secondary" data-hotaru-browse-map>Browse all filters</button></div>`;
+}
+function plannerMaterialOptions(){const current=mapState.targets.map(x=>x.name).filter(Boolean),all=[...new Set([...getMapFilterOptions('All'),...current])].sort((a,b)=>a.localeCompare(b));return mapOptionHtml(all)}
 function renderMapView(){
   const old=document.getElementById('hotaru-map-view');if(old)old.remove();
   const original=app.querySelector('main');if(original)original.classList.add('hotaru-under-map');
   const topbar=app.querySelector('.topbar'),nav=app.querySelector('.bottom-nav');if(!topbar||!nav)return;
   const main=document.createElement('main');main.id='hotaru-map-view';main.className='hotaru-map-view';
-  const url=buildMapUrl(mapState.names),label=mapState.names.length?mapState.names.join(', '):'All map markers';
-  main.innerHTML=`<div class="hotaru-map-head"><div><div class="eyebrow">Interactive Map</div><h1>Teyvat Map</h1><p class="muted">Pan, zoom and find materials. Hotaru keeps your farming targets locally on this device.</p></div><button class="secondary" data-hotaru-close-map>Back</button></div>
-    <section class="hotaru-map-toolbar"><div class="hotaru-map-current"><strong>Showing</strong><span>${esc(label)}</span></div><div class="hotaru-map-chips">${MAP_QUICK_MARKERS.map(([title,names])=>`<button class="${normalizeMarkerNames(names).join(',')===mapState.names.join(',')?'active':''}" data-hotaru-quick-map="${esc(names)}">${esc(title)}</button>`).join('')}</div><div class="hotaru-map-search"><input id="hotaru-map-marker-input" type="search" placeholder="Material or marker name, e.g. Sakura Bloom" /><button class="primary" data-hotaru-search-map>Show</button></div></section>
+  const url=buildMapUrl(mapState.names,{browseAll:mapState.browseAll}),label=mapState.browseAll?'All built-in map filters':mapState.names.length?mapState.names.join(', '):'All map markers';
+  main.innerHTML=`<div class="hotaru-map-head"><div><div class="eyebrow">Interactive Map</div><h1>Teyvat Map</h1><p class="muted">Use filters instead of typing material names. You can also open the map provider's complete filter panel.</p></div><button class="secondary" data-hotaru-close-map>Back</button></div>
+    <section class="hotaru-map-toolbar"><div class="hotaru-map-current"><strong>Showing</strong><span>${esc(label)}</span></div><div class="hotaru-map-chips">${MAP_QUICK_MARKERS.map(([title,names])=>`<button class="${!mapState.browseAll&&normalizeMarkerNames(names).join(',')===mapState.names.join(',')?'active':''}" data-hotaru-quick-map="${esc(names)}">${esc(title)}</button>`).join('')}</div>${mapFilterHtml()}</section>
     <section class="hotaru-map-frame-wrap"><div class="hotaru-map-loading">Loading interactive map…</div><iframe class="hotaru-map-frame" title="Genshin Impact interactive map" src="${esc(url)}" loading="lazy" referrerpolicy="no-referrer" allow="fullscreen" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe></section>
-    <section class="section card hotaru-planner"><div class="section-head"><div><div class="eyebrow">Material planner</div><h2>What are you farming?</h2></div><span class="pill gray">Saved locally</span></div><div id="hotaru-target-list">${renderTargets()}</div><div class="hotaru-target-form"><input id="hotaru-target-name" placeholder="Material name" /><input id="hotaru-target-needed" type="number" min="0" inputmode="numeric" placeholder="Need" /><input id="hotaru-target-owned" type="number" min="0" inputmode="numeric" placeholder="Own" /><button class="primary" data-hotaru-add-target>Add target</button></div></section>
-    <section class="section notice info">The interactive map is embedded with permission from AppSample. Hotaru does not sync HoYoLAB or in-game pins. Material target completion here is Hotaru-local and does not alter individual pins inside the embedded map.</section>`;
+    <section class="section card hotaru-planner"><div class="section-head"><div><div class="eyebrow">Material planner</div><h2>What are you farming?</h2></div><span class="pill gray">Saved locally</span></div><div id="hotaru-target-list">${renderTargets()}</div><div class="hotaru-target-form"><select id="hotaru-target-name"><option value="">Choose material</option>${plannerMaterialOptions()}</select><input id="hotaru-target-needed" type="number" min="0" inputmode="numeric" placeholder="Need" /><input id="hotaru-target-owned" type="number" min="0" inputmode="numeric" placeholder="Own" /><button class="primary" data-hotaru-add-target>Add target</button></div></section>
+    <section class="section notice info">The interactive map is embedded with permission from AppSample. Hotaru does not sync HoYoLAB or in-game pins. Use “Browse all filters” for AppSample's complete, provider-maintained marker filter list.</section>`;
   nav.before(main);setMapNavActive(true);
   main.querySelector('.hotaru-map-frame')?.addEventListener('load',()=>main.querySelector('.hotaru-map-loading')?.classList.add('hidden'),{once:true});
 }
 function rerenderTargetList(){const box=document.getElementById('hotaru-target-list');if(box)box.innerHTML=renderTargets()}
+function refreshMapFilterOptions(){const select=document.getElementById('hotaru-map-filter-value');if(!select)return;const options=getMapFilterOptions(extra.mapCategory);select.innerHTML=`<option value="">Choose one</option>${mapOptionHtml(options)}`}
 
 async function enhance(){
   addMapNav();
@@ -126,17 +134,19 @@ const observer=new MutationObserver(queueEnhance);observer.observe(app,{childLis
 document.addEventListener('change',event=>{
   if(event.target?.id==='filter-region'){extra.region=event.target.value;extra.page=1;saveExtra();renderTaxonomyResults()}
   if(event.target?.id==='filter-affiliation'){extra.affiliation=event.target.value;extra.page=1;saveExtra();renderTaxonomyResults()}
+  if(event.target?.id==='hotaru-map-filter-category'){extra.mapCategory=event.target.value;saveExtra();refreshMapFilterOptions()}
 });
 document.addEventListener('click',event=>{
-  const mapNav=event.target.closest('[data-hotaru-map]');if(mapNav){event.preventDefault();event.stopPropagation();return openMap(mapState.names)}
+  const mapNav=event.target.closest('[data-hotaru-map]');if(mapNav){event.preventDefault();event.stopPropagation();mapOpen=true;return renderMapView()}
   const page=event.target.closest('[data-hotaru-page]');if(page){extra.page=Number(page.dataset.hotaruPage)||1;saveExtra();renderTaxonomyResults();scrollTo({top:0,behavior:'instant'});return}
   const one=event.target.closest('[data-hotaru-material]');if(one)return openMap([one.dataset.hotaruMaterial]);
   const all=event.target.closest('[data-hotaru-map-all]');if(all)return openMap(String(all.dataset.hotaruMapAll||'').split('|'));
   if(event.target.closest('[data-hotaru-close-map]'))return closeMap();
-  const quick=event.target.closest('[data-hotaru-quick-map]');if(quick){mapState.names=normalizeMarkerNames(quick.dataset.hotaruQuickMap);saveMapState(mapState);return renderMapView()}
-  if(event.target.closest('[data-hotaru-search-map]')){const value=document.getElementById('hotaru-map-marker-input')?.value||'';if(value.trim()){mapState.names=normalizeMarkerNames([value]);saveMapState(mapState);renderMapView()}return}
+  const quick=event.target.closest('[data-hotaru-quick-map]');if(quick){mapState.browseAll=false;mapState.names=normalizeMarkerNames(quick.dataset.hotaruQuickMap);saveMapState(mapState);return renderMapView()}
+  if(event.target.closest('[data-hotaru-apply-filter]')){const value=document.getElementById('hotaru-map-filter-value')?.value||'';if(!value)return;mapState.browseAll=false;mapState.names=normalizeMarkerNames([value]);saveMapState(mapState);return renderMapView()}
+  if(event.target.closest('[data-hotaru-browse-map]')){mapState.browseAll=true;mapState.names=[];saveMapState(mapState);return renderMapView()}
   if(event.target.closest('[data-hotaru-add-target]')){const name=document.getElementById('hotaru-target-name')?.value||'',needed=document.getElementById('hotaru-target-needed')?.value||0,owned=document.getElementById('hotaru-target-owned')?.value||0;if(!name.trim())return;mapState.targets.push(normalizeTarget({name,needed,owned}));mapState.targets=mapState.targets.slice(-100);saveMapState(mapState);rerenderTargetList();return}
-  const show=event.target.closest('[data-hotaru-show-target]');if(show){const t=mapState.targets.find(x=>x.id===show.dataset.hotaruShowTarget);if(t){mapState.names=[t.name];saveMapState(mapState);renderMapView()}return}
+  const show=event.target.closest('[data-hotaru-show-target]');if(show){const t=mapState.targets.find(x=>x.id===show.dataset.hotaruShowTarget);if(t){mapState.browseAll=false;mapState.names=[t.name];saveMapState(mapState);renderMapView()}return}
   const complete=event.target.closest('[data-hotaru-complete-target]');if(complete){const t=mapState.targets.find(x=>x.id===complete.dataset.hotaruCompleteTarget);if(t){t.complete=!t.complete;saveMapState(mapState);rerenderTargetList()}return}
   const remove=event.target.closest('[data-hotaru-remove-target]');if(remove){mapState.targets=mapState.targets.filter(x=>x.id!==remove.dataset.hotaruRemoveTarget);saveMapState(mapState);rerenderTargetList();return}
   const normalNav=event.target.closest('.nav-btn:not([data-hotaru-map])');if(normalNav&&mapOpen)closeMap();
