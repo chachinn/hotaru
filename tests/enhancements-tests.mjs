@@ -6,9 +6,11 @@ import { fileURLToPath } from 'node:url';
 import { associationToRegion, affiliationsFor, enrichCharacterTaxonomy, getRegionOptions } from '../js/features/taxonomy.js';
 import { buildMapUrl, normalizeMarkerNames, normalizeTarget, remainingTarget, getMapFilterGroups, getMapFilterOptions, MAP_BROWSE_URL } from '../js/features/interactive-map.js';
 import { parseReleasedCharacterSlugs, parseReleasedCharacterRecords, mergeReleasedCharacters } from '../js/data/game-data.js';
+import { inferBuildProfile } from '../js/features/build-engine.js';
+import { safeCharacterRarity, fallbackItemIcon, fallbackWeaponIcon, fallbackArtifactIcon, materialSourceNames, resolveMaterialSources, rolePresentation } from '../js/features/content-media.js';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 
-for(const file of ['enhancements.js','service-worker.js','js/features/taxonomy.js'])execFileSync(process.execPath,['--check',path.join(root,file)],{stdio:'pipe'});
+for(const file of ['enhancements.js','content-enhancements.js','service-worker.js','js/features/taxonomy.js','js/features/content-media.js','js/features/build-engine.js'])execFileSync(process.execPath,['--check',path.join(root,file)],{stdio:'pipe'});
 
 assert.equal(associationToRegion('ASSOC_TYPE_NATLAN'),'Natlan');
 assert.equal(associationToRegion('ASSOC_TYPE_NODKRAI'),'Nod-Krai');
@@ -26,6 +28,14 @@ assert.ok(getMapFilterGroups().includes('Local Specialties'));
 assert.ok(getMapFilterOptions('Local Specialties').includes('Windrest Flower'));
 assert.ok(getMapFilterOptions('Local Specialties').includes('Sakura Bloom'));
 const target=normalizeTarget({name:'Lakelight Lily',needed:168,owned:74});assert.equal(remainingTarget(target),94);assert.equal(target.complete,false);
+
+// Rarity normalization must never leak NaN into the UI.
+assert.equal(safeCharacterRarity('QUALITY_PURPLE'),4);assert.equal(safeCharacterRarity('rare'),4);assert.equal(safeCharacterRarity('QUALITY_ORANGE'),5);assert.equal(safeCharacterRarity('legendary'),5);assert.equal(safeCharacterRarity(Number.NaN,4),4);
+assert.match(fallbackItemIcon('Portable Bearing'),/portable_bearing\.png$/);assert.match(fallbackWeaponIcon('Favonius Sword'),/favonius_sword\.png$/);assert.match(fallbackArtifactIcon('Golden Troupe'),/golden_troupe_flower\.png$/);
+assert.deepEqual(materialSourceNames('Reinforced Drive Shaft'),['Landcruiser']);assert.deepEqual(materialSourceNames('Precision Kuuvahki Stamping Die'),['Knuckle Duckle']);assert.deepEqual(materialSourceNames('Guide to Elysium'),['Lightless Capital']);assert.deepEqual(materialSourceNames('Mora'),[]);
+assert.deepEqual(resolveMaterialSources([{name:'Mora',count:3277500},{name:'Portable Bearing',count:168},{name:'Precision Drive Shaft',count:93},{name:'Silken Feather',count:12}]),['Portable Bearing','Landcruiser','The Knave']);
+const ainoLike={element:'Hydro',description:'A mechanic from Nod-Krai.',skills:[{name:'Burst',description:'While active, a device periodically fires Hydro attacks at nearby opponents. Nearby active party members gain a reaction buff.'}],passives:[{name:'Moonsign',description:'When Aino is in the party, the party Moonsign increases. This buff supports party members and improves reactions.'},{name:'Booster',description:'Increases reaction damage for nearby active party members.'}],constellations:[]};
+const ainoProfile=inferBuildProfile(ainoLike);assert.equal(ainoProfile.roleGroup,'Support');assert.match(ainoProfile.role,/Support/);assert.match(rolePresentation(ainoProfile).reason,/kit|utility|team|swapped|support/i);
 
 const releaseFixture=`
   {
@@ -50,13 +60,15 @@ assert.ok(releaseRecords.some(x=>x.slug==='odette'));assert.ok(releaseRecords.so
 const merged=mergeReleasedCharacters([{id:'1',name:'Arlecchino',slug:'arlecchino'}],[{id:'2',name:'Odette',slug:'odette'},{id:'3',name:'Alyosha',slug:'alyosha'},{id:'4',name:'Future Character',slug:'future-character'}],releaseSet);
 assert.deepEqual(merged.map(x=>x.name),['Arlecchino','Odette','Alyosha']);
 
-for(const file of ['enhancements.js','enhancements.css','js/features/taxonomy.js','js/features/interactive-map.js','js/data/game-data.js'])assert.ok(fs.existsSync(path.join(root,file)),`missing ${file}`);
+for(const file of ['enhancements.js','enhancements.css','content-enhancements.js','content-enhancements.css','js/features/taxonomy.js','js/features/interactive-map.js','js/features/content-media.js','js/data/game-data.js'])assert.ok(fs.existsSync(path.join(root,file)),`missing ${file}`);
 const enhancement=fs.readFileSync(path.join(root,'enhancements.js'),'utf8');
 assert.match(enhancement,/filter-region/);assert.match(enhancement,/filter-affiliation/);assert.match(enhancement,/sanitizeTaxonomyFilters/);assert.match(enhancement,/if\(!enriched\.length\)return false/);assert.match(enhancement,/data-hotaru-menu/);assert.match(enhancement,/hotaru-filter-toggle/);assert.match(enhancement,/hotaru-map-filter-category/);assert.match(enhancement,/data-hotaru-browse-map/);assert.match(enhancement,/loading="lazy"/);assert.match(enhancement,/data-hotaru-material/);
-// Performance regression guards: enhancement-owned DOM mutations must not recursively retrigger the observer.
+// Performance regression guards: enhancement-owned DOM mutations must not recursively retrigger observers.
 assert.match(enhancement,/observer\.observe\(app,\{childList:true\}\)/);assert.doesNotMatch(enhancement,/observer\.observe\(app,\{[^}]*subtree:true/);assert.doesNotMatch(enhancement,/toolbar\.outerHTML/);assert.match(enhancement,/requestIdleCallback/);assert.match(enhancement,/hotaruRenderKey/);assert.match(enhancement,/optionsSignature/);
+const content=fs.readFileSync(path.join(root,'content-enhancements.js'),'utf8');assert.match(content,/observer\.observe\(app,\{childList:true\}\)/);assert.doesNotMatch(content,/observer\.observe\(app,\{[^}]*subtree:true/);assert.match(content,/safeCharacterRarity/);assert.match(content,/extractMaterialMedia/);assert.match(content,/data-hotaru-content-map-sources/);assert.match(content,/loading='lazy'/);assert.match(content,/hotaru-role-card/);assert.match(content,/catalog-v3/);
 const gameData=fs.readFileSync(path.join(root,'js/data/game-data.js'),'utf8');
 assert.match(gameData,/catalog-v3/);assert.match(gameData,/LEGACY_CACHE_KEYS/);assert.match(gameData,/MIN_CATALOG_CHARACTERS=80/);assert.match(gameData,/Primary catalog was incomplete/);assert.match(gameData,/last known-good cached catalog/);assert.match(gameData,/characterData/);assert.match(gameData,/current-release supplement/);
 const taxonomy=fs.readFileSync(path.join(root,'js/features/taxonomy.js'),'utf8');assert.match(taxonomy,/REGION_CACHE_TTL=7\*24\*60\*60\*1000/);assert.match(taxonomy,/REGION_FETCH_TIMEOUT=8000/);assert.match(taxonomy,/AbortController/);
 const css=fs.readFileSync(path.join(root,'enhancements.css'),'utf8');assert.match(css,/hotaru-nav-compact/);assert.match(css,/hotaru-menu-sheet/);assert.match(css,/filters\.hotaru-filter-grid:not\(\.is-open\)/);
-console.log('Hotaru catalog safety + filter/menu + map + performance QA: all deterministic/static tests passed.');
+const contentCss=fs.readFileSync(path.join(root,'content-enhancements.css'),'utf8');assert.match(contentCss,/hotaru-content-thumb/);assert.match(contentCss,/hotaru-role-card/);assert.match(contentCss,/hotaru-character-map-sources/);
+console.log('Hotaru catalog safety + rarity + role + artwork + map + performance QA: all deterministic/static tests passed.');
