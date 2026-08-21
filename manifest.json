@@ -1,7 +1,7 @@
 {
   "name": "Hotaru — Character Build Companion",
   "short_name": "Hotaru",
-  "description": "An unofficial Genshin Impact character build companion for weapons, artifacts, stats, roster planning and farming guidance.",
+  "description": "An unofficial Genshin Impact character build companion for weapons, artifacts, stats, roster planning, farming guidance and an interactive map.",
   "id": "./",
   "start_url": "./",
   "scope": "./",
