@@ -1,0 +1,86 @@
+name: Promote mobile guide cleanup v2
+
+on:
+  push:
+    branches:
+      - fix/mobile-guide-map-cleanup-v2
+    paths:
+      - '.hotaru-promotion/mobile-cleanup.patch.gz.b64'
+      - '.github/workflows/promote-mobile-guide-cleanup-v2.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/mobile-guide-map-cleanup-v2
+          fetch-depth: 0
+
+      - name: Verify exact patch and run full QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          PAYLOAD='.hotaru-promotion/mobile-cleanup.patch.gz.b64'
+          EXPECTED_BASE64='8b840c99c5054fa037bd0d9b2b412fedd0f89aee115918eb5f496a91def96b9b'
+          EXPECTED_PATCH='eccd1fbe5dc50ea05dd74395bcb0238ecd41a609ff39ef3ec6dfcbcca832256d'
+          ACTUAL_BASE64="$(sha256sum "$PAYLOAD" | awk '{print $1}')"
+          echo "payload sha256=$ACTUAL_BASE64"
+          test "$ACTUAL_BASE64" = "$EXPECTED_BASE64"
+          base64 -d "$PAYLOAD" > /tmp/mobile-cleanup.patch.gz
+          gzip -dc /tmp/mobile-cleanup.patch.gz > /tmp/mobile-cleanup.patch
+          ACTUAL_PATCH="$(sha256sum /tmp/mobile-cleanup.patch | awk '{print $1}')"
+          echo "patch sha256=$ACTUAL_PATCH"
+          test "$ACTUAL_PATCH" = "$EXPECTED_PATCH"
+          git apply --check /tmp/mobile-cleanup.patch
+          git apply /tmp/mobile-cleanup.patch
+          npm test
+          find . -type f \( -name '*.js' -o -name '*.mjs' \) -not -path './node_modules/*' -print0 | xargs -0 -n1 node --check
+          git diff --name-only HEAD -- | sort > /tmp/actual-files
+          cat > /tmp/expected-files <<'EOF'
+          css/enhancements.css
+          css/guide-ui.css
+          index.html
+          js/data/team-profiles/index.js
+          js/enhancements.js
+          js/features/guide-engine.js
+          js/features/guide-ui.js
+          js/features/interactive-map.js
+          package.json
+          service-worker.js
+          tests/build-intelligence2-tests.mjs
+          tests/build-map-fixes-tests.mjs
+          tests/character-search-focus-tests.mjs
+          tests/consistency-tests.mjs
+          tests/game8-structure-tests.mjs
+          tests/guide-tests.mjs
+          tests/mobile-content-cleanup-tests.mjs
+          tests/mobile-ui-regression-tests.mjs
+          tests/roster2-tests.mjs
+          tests/run-tests.mjs
+          tests/smart-farming-tests.mjs
+          tests/smart-team-creator-tests.mjs
+          EOF
+          sort -o /tmp/expected-files /tmp/expected-files
+          diff -u /tmp/expected-files /tmp/actual-files
+          test "$(wc -l < /tmp/actual-files)" -eq 22
+          test "$(git diff --diff-filter=D --name-only HEAD -- | wc -l)" -eq 0
+          grep -q 'hotaru-shell-v21' service-worker.js
+          grep -q './js/enhancements.js?v=1.7.0' service-worker.js
+          grep -q './css/enhancements.css?v=1.4.0' service-worker.js
+          grep -q './css/guide-ui.css?v=1.3.0' service-worker.js
+
+      - name: Replace helpers with real source commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .hotaru-promotion
+          rm -f .github/workflows/promote-mobile-guide-cleanup-v2.yml
+          git add -A
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Fix mobile guide teams and map planner UX'
+          git push origin HEAD:fix/mobile-guide-map-cleanup-v2
