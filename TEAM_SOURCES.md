@@ -28,6 +28,14 @@ The downloaded community catalog is cached locally for six hours. If it is unava
 
 TikTok, Reddit, HoYoLAB, YouTube, and other community posts can reveal useful off-meta or emerging variations, but a social post alone is not enough for Hotaru to promote a team to reviewed status. Social-media ideas should be cross-checked against game mechanics and a reviewed or simulation-backed source before they enter the recommendation layer.
 
+## 4. Flexible Pair Builder — adapted/off-meta
+
+When two locked characters have no exact sourced composition, Hotaru may offer an **Adapted** result only through an audited pair rule. Adapted results are not promoted to Reviewed or Simulation-backed. They must preserve the source character's non-negotiable mechanics instead of substituting by element alone.
+
+The first audited flexible pair is **Odette + Flins**. Hotaru starts from KQM's Flins Lunar-Charged structure (Flins + Electro + Hydro + Anemo/Flex), requires another Nod-Krai teammate for Ascendant Gleam, keeps off-field Hydro for Lunar-Charged, and uses Odette only in the Flex slot. The result is explicitly marked off-meta because Odette's Cryo application can compete with Hydro/Electro aura and is not part of KQM's standard Flins examples. Icy Veins is used to verify Odette's off-field support role.
+
+Hotaru does **not** treat Cyno, Razor, Flins, or other same-element carries as interchangeable. A new pair must receive its own mechanics review before the Flexible Pair Builder can generate it.
+
 ## Abyss boundary
 
-The dated Spiral Abyss planner continues to use only Hotaru's curated reviewed team pool. The larger simulation-backed community catalog is deliberately excluded from the Abyss pair-search engine so current-cycle scoring remains controlled, explainable, and performant.
+The dated Spiral Abyss planner continues to use only Hotaru's curated reviewed team pool. The larger simulation-backed community catalog and Adapted pair suggestions are deliberately excluded from the Abyss pair-search engine so current-cycle scoring remains controlled, explainable, and performant.

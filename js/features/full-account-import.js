@@ -11,6 +11,8 @@ const MATERIAL_ALIASES={
 };
 
 const compact=value=>String(value||'').normalize('NFKD').replace(/[’']/g,'').replace(/[^a-z0-9]/gi,'').toLowerCase();
+const TRAVELER_ELEMENTS=new Map([['anemo','Anemo'],['geo','Geo'],['electro','Electro'],['dendro','Dendro'],['hydro','Hydro'],['pyro','Pyro'],['cryo','Cryo']]);
+function travelerTeamName(value=''){const normalized=compact(value),match=normalized.match(/^traveler(anemo|geo|electro|dendro|hydro|pyro|cryo)$/);return match?`${TRAVELER_ELEMENTS.get(match[1])} Traveler`:''}
 const humanize=value=>String(value||'').replace(/([a-z0-9])([A-Z])/g,'$1 $2').replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();
 const clamp=(value,min,max,fallback=min)=>{const n=Number(value);return Number.isFinite(n)?Math.max(min,Math.min(max,Math.round(n))):fallback};
 
@@ -56,7 +58,7 @@ export function mergeGOODAccount({state={},good={},characters=[],weapons=[]}={})
     for(const field of LOCAL_GOAL_FIELDS)if(previous[field]!==undefined)preserved[field]=previous[field];
     const level=clamp(raw?.level,1,90,previous.level||1),hasAscension=Number.isFinite(Number(raw?.ascension)),ascension=hasAscension?clamp(raw.ascension,0,6,0):(previous.ascension!==undefined?previous.ascension:undefined);
     if(!hasAscension&&[20,40,50,60,70,80].includes(level))ascensionReview+=1;
-    const fresh={id,name:catalogCharacter.name,level,constellation:clamp(raw?.constellation,0,6,previous.constellation||0),talents:goodTalent(raw?.talent||raw?.talents||{}),source:sourceLabel(previous),fullAccountImportedAt:new Date().toISOString()};
+    const teamName=travelerTeamName(raw?.key||raw?.name),fresh={id,name:catalogCharacter.name,level,constellation:clamp(raw?.constellation,0,6,previous.constellation||0),talents:goodTalent(raw?.talent||raw?.talents||{}),source:sourceLabel(previous),fullAccountImportedAt:new Date().toISOString(),...(teamName?{teamName}:{})};
     if(ascension!==undefined)fresh.ascension=ascension;
     const merged=normalizeRosterEntry({...previous,...fresh,...preserved},catalogCharacter);
     if(idx===undefined){rosterIndex.set(id,roster.length);roster.push(merged);charactersAdded+=1}else{roster[idx]=merged;charactersRefreshed+=1}
