@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { sampleTeams } from '../js/features/guide-engine.js';
-import { reviewedTeamProfile } from '../js/data/team-profiles/index.js';
+import { reviewedTeamProfile, reviewedTeamsForCharacter } from '../js/data/team-profiles/index.js';
 import { normalizeTarget } from '../js/features/interactive-map.js';
 
 const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
@@ -13,10 +13,11 @@ const enhancementCss=read('css/enhancements.css');
 const sw=read('service-worker.js');
 const index=read('index.html');
 
-// Team guide: no arbitrary four-team ceiling and reviewed anchors have >4 sourced variations.
+// Team guide: no arbitrary four-team ceiling; reviewed anchors and teammates inherit sourced variations.
 assert.doesNotMatch(guideEngine,/return output\.slice\(0,4\)/);
 for(const name of ['Arlecchino','Tartaglia','Columbina'])assert.ok((reviewedTeamProfile(name)?.archetypes||[]).length>4,`${name} should expose more than four reviewed variations`);
-assert.match(guideEngine,/reviewedTeamProfile/);
+assert.ok(reviewedTeamsForCharacter('Bennett').length>3,'Reviewed teammates should inherit the complete reviewed teams they appear in');
+assert.match(guideEngine,/reviewedTeamsForCharacter/);
 assert.match(guideEngine,/members\.length!==4\|\|members\.some/,'Reviewed guide teams must be complete four-character teams');
 assert.match(guideEngine,/Kaedehara Kazuha/,'Kazuha alias should resolve against canonical catalogue naming');
 
@@ -56,12 +57,14 @@ assert.match(enhancements,/MAP_BROWSE_URL/);
 assert.match(enhancementCss,/\.hotaru-map-completion/);
 
 // PWA refresh covers changed enhancement + guide CSS/JS.
-assert.match(sw,/hotaru-shell-v26/);
+assert.match(sw,/hotaru-shell-v27/);
 assert.match(sw,/css\/enhancements\.css\?v=1\.4\.0/);
 assert.match(sw,/css\/guide-ui\.css\?v=1\.3\.0/);
 assert.match(sw,/js\/enhancements\.js\?v=1\.7\.0/);
+assert.match(sw,/css\/roster-ui\.css\?v=1\.0\.0/);
 assert.match(index,/css\/enhancements\.css\?v=1\.4\.0/);
 assert.match(index,/css\/guide-ui\.css\?v=1\.3\.0/);
 assert.match(index,/js\/enhancements\.js\?v=1\.7\.0/);
+assert.match(index,/css\/roster-ui\.css\?v=1\.0\.0/);
 
 console.log('Mobile content cleanup + team variation QA passed.');
