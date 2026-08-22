@@ -4,6 +4,6 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "test": "node tests/run-tests.mjs && node tests/enhancements-tests.mjs && node tests/guide-tests.mjs && node tests/build-map-fixes-tests.mjs && node tests/consistency-tests.mjs && node tests/smart-expansion-boundary-tests.mjs && node tests/qa-hardening-changelog-tests.mjs && node tests/source-policy-tests.mjs && node tests/game8-structure-tests.mjs && node tests/mobile-ui-regression-tests.mjs && node tests/build-intelligence2-tests.mjs && node tests/character-search-focus-tests.mjs && node tests/roster2-tests.mjs && node tests/smart-farming-tests.mjs && node tests/smart-team-creator-tests.mjs"
+    "test": "node tests/run-tests.mjs && node tests/enhancements-tests.mjs && node tests/guide-tests.mjs && node tests/build-map-fixes-tests.mjs && node tests/consistency-tests.mjs && node tests/smart-expansion-boundary-tests.mjs && node tests/qa-hardening-changelog-tests.mjs && node tests/source-policy-tests.mjs && node tests/game8-structure-tests.mjs && node tests/mobile-ui-regression-tests.mjs && node tests/build-intelligence2-tests.mjs && node tests/character-search-focus-tests.mjs && node tests/roster2-tests.mjs && node tests/smart-farming-tests.mjs && node tests/smart-team-creator-tests.mjs && node tests/mobile-content-cleanup-tests.mjs"
   }
 }

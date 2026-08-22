@@ -1,3 +1,4 @@
+import { reviewedTeamProfile } from '../data/team-profiles/index.js';
 const DAY_GROUPS={
   'Monday / Thursday / Sunday':['Freedom','Prosperity','Transience','Admonition','Equity','Contention','Moonlight'],
   'Tuesday / Friday / Sunday':['Resistance','Diligence','Elegance','Ingenuity','Justice','Kindling','Elysium'],
@@ -61,15 +62,29 @@ export function ascensionStages(detail={}){const list=Array.isArray(detail?.mate
 
 export function weaponAcquisition(weapon={}){const text=`${weapon.location||''} ${weapon.description||''}`.toLowerCase();if(/craft|forg/.test(text))return'Crafted';if(/battle pass|gnostic/.test(text))return'Battle Pass';if(/fish/.test(text))return'Fishing';if(/event/.test(text))return'Event';if(/quest/.test(text))return'Quest';if(/wish|gacha/.test(text))return'Gacha';return weapon.rarity>=4?'Gacha / limited source':'In-game source'}
 
-function available(catalog,name,self){return catalog?.characters?.find(c=>c.name===name&&c.name!==self)}
-function synergyExplanation(character,teammate,archetype){const element=teammate?.element||'';return `${teammate?.name||'This teammate'} fills a ${element||'complementary'} slot in Hotaru's ${archetype} template and should be adjusted for your actual rotation, sustain, and energy needs.`}
-export function sampleTeams(detail={},catalog={}){
-  const self=detail.name,element=detail.element||'Unknown',text=kitText(detail,{}),output=[];
-  if(/lunar|moonsign/.test(text)){const mates=LUNAR_TEAMMATES.map(name=>available(catalog,name,self)).filter(Boolean).slice(0,6);if(mates.length>=3)output.push({name:'Lunar Reaction Core',members:[{...detail,role:'Core'},...mates.slice(0,3).map((x,i)=>({...x,role:i===0?'Main DPS / Driver':i===1?'Sub-DPS / Support':'Support'}))]})}
-  for(const [name,candidates] of TEAM_LIBRARY[element]||[]){const mates=candidates.map(x=>available(catalog,x,self)).filter(Boolean);if(mates.length>=2)output.push({name,members:[{...detail,role:'Core'},...mates.slice(0,3).map((x,i)=>({...x,role:i===0?'Main DPS / Driver':i===1?'Sub-DPS / Support':'Support'}))]})}
-  return output.slice(0,4);
+const TEAM_NAME_ALIASES={kazuha:'Kaedehara Kazuha',childe:'Tartaglia',sara:'Kujou Sara'};
+function sameName(a='',b=''){return String(a||'').trim().toLowerCase()===String(b||'').trim().toLowerCase()}
+function available(catalog,name,self){
+  const wanted=TEAM_NAME_ALIASES[String(name||'').trim().toLowerCase()]||name;
+  return catalog?.characters?.find(c=>(sameName(c.name,wanted)||sameName(c.name,name))&&!sameName(c.name,self))||null;
 }
-export function notableTeammates(detail={},catalog={}){const seen=new Set(),rows=[];for(const team of sampleTeams(detail,catalog))for(const member of team.members.slice(1)){if(seen.has(member.name))continue;seen.add(member.name);rows.push({...member,archetype:team.name,explanation:synergyExplanation(detail,member,team.name)})}return rows.slice(0,8)}
+function completeReviewedTeams(detail={},catalog={}){
+  const profile=reviewedTeamProfile(detail.name);if(!profile)return[];
+  return (profile.archetypes||[]).map(team=>{
+    const members=(team.members||[]).map(name=>sameName(name,detail.name)?{...detail,role:'Core'}:(()=>{const found=available(catalog,name,detail.name);return found?{...found,role:'Reviewed teammate'}:null})());
+    if(members.length!==4||members.some(x=>!x))return null;
+    return{name:team.name,members,reviewed:true,source:team.source,why:team.why,notes:team.notes||''};
+  }).filter(Boolean);
+}
+function synergyExplanation(character,teammate,archetype,team){if(team?.why)return team.why;const element=teammate?.element||'';return `${teammate?.name||'This teammate'} fills a ${element||'complementary'} slot in Hotaru's ${archetype} template and should be adjusted for your actual rotation, sustain, and energy needs.`}
+export function sampleTeams(detail={},catalog={}){
+  const self=detail.name,reviewed=completeReviewedTeams(detail,catalog);if(reviewed.length)return reviewed;
+  const element=detail.element||'Unknown',text=kitText(detail,{}),output=[];
+  if(/lunar|moonsign/.test(text)){const mates=LUNAR_TEAMMATES.map(name=>available(catalog,name,self)).filter(Boolean);if(mates.length>=3)output.push({name:'Lunar Reaction Core',members:[{...detail,role:'Core'},...mates.slice(0,3).map((x,i)=>({...x,role:i===0?'Main DPS / Driver':i===1?'Sub-DPS / Support':'Support'}))],reviewed:false})}
+  for(const [name,candidates] of TEAM_LIBRARY[element]||[]){const mates=candidates.map(x=>available(catalog,x,self));if(mates.length===3&&mates.every(Boolean))output.push({name,members:[{...detail,role:'Core'},...mates.map((x,i)=>({...x,role:i===0?'Main DPS / Driver':i===1?'Sub-DPS / Support':'Support'}))],reviewed:false})}
+  return output;
+}
+export function notableTeammates(detail={},catalog={}){const seen=new Set(),rows=[];for(const team of sampleTeams(detail,catalog))for(const member of team.members.slice(1)){if(seen.has(member.name))continue;seen.add(member.name);rows.push({...member,archetype:team.name,reviewed:Boolean(team.reviewed),explanation:synergyExplanation(detail,member,team.name,team)})}return rows.slice(0,12)}
 
 export function extractVoiceActors(detail={}){
   const result=[];const raw=detail.raw||{};const seen=new Set();
