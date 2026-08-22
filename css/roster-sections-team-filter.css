@@ -1,16 +1,10 @@
 /* Clean Roster workspace + conservative team utility filter. */
-main:has(.hotaru-roster-tabs)>.hotaru-section-jump{display:none!important}
-.hotaru-roster-tabs{position:sticky;top:calc(66px + var(--safe-top));z-index:18;display:flex;gap:7px;overflow-x:auto;margin:-5px -4px 14px;padding:7px 4px;background:rgba(255,248,251,.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);scrollbar-width:none}
-.hotaru-roster-tabs::-webkit-scrollbar{display:none}
-.hotaru-roster-tabs button{flex:0 0 auto;min-height:40px;padding:0 13px;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--ink);font-size:11px;font-weight:820;box-shadow:0 5px 16px rgba(130,77,97,.04);cursor:pointer}
-.hotaru-roster-tabs button.active{border-color:rgba(230,86,140,.32);background:var(--pink-100);color:var(--pink-700);box-shadow:0 7px 20px rgba(219,85,136,.09)}
-.hotaru-roster-tabs button:active{transform:scale(.98)}
-main:has(.hotaru-roster-tabs)>section[hidden]{display:none!important}
+main[data-hotaru-roster-active]>.hotaru-section-jump{display:none!important}
+main[data-hotaru-roster-active]>section[hidden]{display:none!important}
 .hotaru-team-utility-field{min-width:170px}
 .hotaru-team-utility-field small{display:block;margin-top:5px;color:var(--muted);font-size:10px;line-height:1.35}
 .hotaru-team-utility-field.disabled{opacity:.65}
 .hotaru-team-utility-hint{margin:9px 0 0;padding:7px 9px;border-radius:10px;background:#fff5f8;color:var(--pink-700)!important;font-weight:700}
 .hotaru-team-utility-empty{margin-top:10px}
 .team-card[hidden]{display:none!important}
-@media(max-width:600px){.hotaru-roster-tabs{top:calc(61px + var(--safe-top));margin-left:-1px;margin-right:-1px}.hotaru-roster-tabs button{min-height:39px;padding:0 12px}.hotaru-team-utility-field{grid-column:1/-1}.hotaru-team-utility-field select{width:100%}}
-@media(prefers-reduced-motion:reduce){.hotaru-roster-tabs button:active{transform:none}}
+@media(max-width:600px){.hotaru-team-utility-field{grid-column:1/-1}.hotaru-team-utility-field select{width:100%}}
