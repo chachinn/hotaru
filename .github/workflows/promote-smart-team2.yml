@@ -29,14 +29,19 @@ jobs:
           test "$(sha256sum .hotaru-team2.chunk-2 | awk '{print $1}')" = "4489f145e25630a3a812324589ee6478e1b93b7f8e09e6d075196e4b945da5a5"
           test "$(sha256sum .hotaru-team2.chunk-3 | awk '{print $1}')" = "2c0037101e4d56cb176922ad40de14e882a79e7de0c8675aa2c8291bac61194b"
           test "$(sha256sum .hotaru-team2.chunk-4 | awk '{print $1}')" = "740c565c8d1cbc63fd7177c5ef3586289578baf9a4ac039aa813e6527521cb4f"
-          cat .hotaru-team2.chunk-1 .hotaru-team2.chunk-2 .hotaru-team2.chunk-3 .hotaru-team2.chunk-4 > /tmp/hotaru-team2.payload.b64
-          test "$(sha256sum /tmp/hotaru-team2.payload.b64 | awk '{print $1}')" = "240067f18eac837241b2352addcdd7c95362cf5922d3829d0a945d9128731eb6"
-          base64 -d /tmp/hotaru-team2.payload.b64 > /tmp/hotaru-team2.patch.gz
-          test "$(sha256sum /tmp/hotaru-team2.patch.gz | awk '{print $1}')" = "f294c8e9a2f0a379b6e655ef8c8d1532fb3024f69921876ad29b1deb2d917da1"
-          gzip -dc /tmp/hotaru-team2.patch.gz > /tmp/hotaru-team2.patch
-          test "$(sha256sum /tmp/hotaru-team2.patch | awk '{print $1}')" = "56b0e8903d96c027bc3682fe14862be6af8f143a3ad34b30d4c56972f7e35c41"
-          git apply --check /tmp/hotaru-team2.patch
-          git apply /tmp/hotaru-team2.patch
+          cat .hotaru-team2.chunk-1 .hotaru-team2.chunk-2 .hotaru-team2.chunk-3 .hotaru-team2.chunk-4 > /tmp/hotaru-team2-base.b64
+          test "$(sha256sum /tmp/hotaru-team2-base.b64 | awk '{print $1}')" = "240067f18eac837241b2352addcdd7c95362cf5922d3829d0a945d9128731eb6"
+          base64 -d /tmp/hotaru-team2-base.b64 > /tmp/hotaru-team2-base.patch.gz
+          test "$(sha256sum /tmp/hotaru-team2-base.patch.gz | awk '{print $1}')" = "f294c8e9a2f0a379b6e655ef8c8d1532fb3024f69921876ad29b1deb2d917da1"
+          test "$(sha256sum .hotaru-team2.additions.b64 | awk '{print $1}')" = "98a78b0de545708b0d89ecfa6cf06baa81f07d6410520c1ea5eaef3a0ae9ea1a"
+          base64 -d .hotaru-team2.additions.b64 > /tmp/hotaru-team2-additions.patch.gz
+          test "$(sha256sum /tmp/hotaru-team2-additions.patch.gz | awk '{print $1}')" = "e7d8ebd6a498e7687406a127b8a61900a988846a49b178aae77c11e480eca19e"
+          cat /tmp/hotaru-team2-base.patch.gz /tmp/hotaru-team2-additions.patch.gz > /tmp/hotaru-team2-complete.patch.gz
+          test "$(sha256sum /tmp/hotaru-team2-complete.patch.gz | awk '{print $1}')" = "1f6508d135008f9379b47d5abff2d6e542572d8e7663d69d4f865cdb3e428856"
+          gzip -dc /tmp/hotaru-team2-complete.patch.gz > /tmp/hotaru-team2-complete.patch
+          test "$(sha256sum /tmp/hotaru-team2-complete.patch | awk '{print $1}')" = "000989d1cd7d5ccf8cecacd542fd4216067c3737707f2340a18e1ab99533fb28"
+          git apply --check /tmp/hotaru-team2-complete.patch
+          git apply /tmp/hotaru-team2-complete.patch
       - name: Run full local-equivalent gate
         shell: bash
         run: |
@@ -47,7 +52,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          rm -f .hotaru-team2.payload.b64 .hotaru-team2.chunk-1 .hotaru-team2.chunk-2 .hotaru-team2.chunk-3 .hotaru-team2.chunk-4 .github/workflows/promote-smart-team2.yml
+          rm -f .hotaru-team2.payload.b64 .hotaru-team2.chunk-1 .hotaru-team2.chunk-2 .hotaru-team2.chunk-3 .hotaru-team2.chunk-4 .hotaru-team2.additions.b64 .github/workflows/promote-smart-team2.yml
           cat > /tmp/expected.txt <<'EOF'
           README.md
           app.js
