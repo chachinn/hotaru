@@ -24,6 +24,8 @@ export function matchReviewedTeams({roster=[],lockedNames=[],allowUnowned=false,
     const baseScore=scoreReviewedTeam({...team,members},{roster:scoringRoster,ownedNames,lockedNames:locks});
     return{...team,members,missing,ownedCount,ownedComplete:missing.length===0,score:baseScore+sourceBonus(team)+referenceBonus(team)};
   }).filter(team=>allowUnowned||team.ownedComplete).sort((a,b)=>b.score-a.score||a.name.localeCompare(b.name));
-  const requested=Math.max(1,Math.min(30,Number(limit)||12)),resultLimit=requested===1?1:Math.max(12,requested);
-  return{results:results.slice(0,resultLimit),pendingLocks,coverage:teamCoverage(roster),ownedNames};
+  const allRequested=limit==='all'||limit===Infinity,numericLimit=Number(limit);
+  const requested=allRequested?results.length:Math.max(1,Math.min(200,Number.isFinite(numericLimit)&&numericLimit>0?Math.floor(numericLimit):12));
+  const resultLimit=allRequested?results.length:requested===1?1:Math.max(12,requested);
+  return{results:results.slice(0,resultLimit),totalResults:results.length,pendingLocks,coverage:teamCoverage(roster),ownedNames};
 }
