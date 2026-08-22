@@ -6,7 +6,9 @@ function isAppleMobile(){return /iPhone|iPad|iPod/i.test(navigator.userAgent)||(
 function exporterLink(label='Download exporter file'){return`<a class="secondary hotaru-sync-download" href="./tools/hotaru-hoyolab-export.user.js" download="hotaru-hoyolab-export.user.js">${label}</a>`}
 function enhanceExistingExporterLink(modal){
   const link=[...modal.querySelectorAll('a')].find(a=>String(a.getAttribute('href')||'').includes('hotaru-hoyolab-export.user.js'));if(!link)return;
-  link.textContent='Download exporter file';link.setAttribute('download','hotaru-hoyolab-export.user.js');link.removeAttribute('target');
+  if(link.textContent!=='Download exporter file')link.textContent='Download exporter file';
+  if(link.getAttribute('download')!=='hotaru-hoyolab-export.user.js')link.setAttribute('download','hotaru-hoyolab-export.user.js');
+  if(link.hasAttribute('target'))link.removeAttribute('target');
 }
 function mobileSyncMarkup(){
   const apple=isAppleMobile();
