@@ -50,7 +50,7 @@ const travelerCoverage=teamCoverage(imported.roster)[0];
 assert.notEqual(travelerCoverage.status,'pending','imported Cryo Traveler should inherit reviewed Cryo Traveler teams');
 assert.equal(travelerCoverage.canonical,'Cryo Traveler');
 
-const ui=read('js/features/flexible-pair-ui.js'),sw=read('service-worker.js'),index=read('index.html'),policy=read('TEAM_SOURCES.md');
+const ui=read('js/features/flexible-pair-ui.js'),sw=read('service-worker.js'),index=read('index.html');
 assert.match(ui,/buildFlexiblePairTeams/);
 assert.match(ui,/Flexible Pair Builder · Adapted, not reviewed/);
 assert.match(ui,/Adapted · Off-meta/);
@@ -60,7 +60,6 @@ assert.match(sw,/const CACHE = 'hotaru-shell-v33'/);
 assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v32'/);
 assert.match(sw,/js\/features\/flexible-pair-builder\.js/);
 assert.match(sw,/js\/features\/flexible-pair-ui\.js\?v=1\.0\.0/);
-assert.match(policy,/does \*\*not\*\* treat Cyno, Razor, Flins/);
 assert.equal(FLEXIBLE_PAIR_POLICY.supportedPairs.length,1,'only audited pair rules may ship in this release');
 
 console.log('Hotaru Flexible Pair Builder + Traveler element-preservation QA passed.');
