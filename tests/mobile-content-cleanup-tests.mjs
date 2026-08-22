@@ -56,7 +56,7 @@ assert.match(enhancements,/MAP_BROWSE_URL/);
 assert.match(enhancementCss,/\.hotaru-map-completion/);
 
 // PWA refresh covers changed enhancement + guide CSS/JS.
-assert.match(sw,/hotaru-shell-v22/);
+assert.match(sw,/hotaru-shell-v23/);
 assert.match(sw,/css\/enhancements\.css\?v=1\.4\.0/);
 assert.match(sw,/css\/guide-ui\.css\?v=1\.3\.0/);
 assert.match(sw,/js\/enhancements\.js\?v=1\.7\.0/);

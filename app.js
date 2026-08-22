@@ -10,7 +10,8 @@ import { ascensionTotals, talentTotals, mergeNeeds } from './js/features/farming
 import { buildSmartFarmPlan, RESIN_CAP } from './js/features/farm-planner.js';
 import { buildResinPlan, CONDENSED_RESIN_COST } from './js/features/resin-planner.js';
 import { buildDailyPlan } from './js/features/daily-plan.js';
-import { SERVER_OPTIONS } from './js/data/farming-schedule.js';
+import { SERVER_OPTIONS, serverGameDay } from './js/data/farming-schedule.js';
+import { buildDailyDashboard } from './js/features/daily-dashboard.js';
 import { getMapFilterOptions, buildMapUrl } from './js/features/interactive-map.js';
 import { teamCoverage, matchReviewedTeams } from './js/features/roster-team-matcher.js';
 import { safeCharacterRarity } from './js/features/content-media.js';
@@ -19,7 +20,7 @@ const $app=document.getElementById('app'),$toast=document.getElementById('toast'
 const tabs=[['home','⌂','Home'],['characters','✦','Characters'],['build','◇','Build'],['roster','♙','Roster'],['more','•••','More']];
 let state=loadState(),catalog=null,sourceStatus='loading',toastTimer=null,characterDetail=null,latestBuildResult=null;
 let buildRuntime={weaponCandidates:[],weaponRanks:[],artifactRanks:[],loadingWeapons:false,formDraft:null};
-let farmRuntime={loading:false,plan:null,error:''};
+let farmRuntime={loading:false,plan:null,error:'',key:'',requestedKey:'',errorKey:''};
 let teamRuntime={result:null,error:''};
 const initialTab=new URLSearchParams(location.search).get('tab');if(tabs.some(([id])=>id===initialTab))state.ui.tab=initialTab;
 
@@ -36,20 +37,35 @@ function nav(){return`<nav class="bottom-nav" aria-label="Primary navigation">${
 function image(url,alt,cls=''){if(!url)return`<div class="fallback ${cls}">✦</div>`;return`<img class="${cls}" src="${esc(url)}" alt="${esc(alt)}" loading="lazy" decoding="async" onerror="this.style.display='none';this.parentElement?.classList.add('image-error')" />`}
 function catalogNotice(){if(!catalog)return'';if(catalog.warning)return`<div class="notice">${esc(catalog.warning)}</div>`;return`<div class="notice good">Game catalog: ${esc(catalog.source)} · ${esc(catalog.version||'current')} · ${catalog.characters.length} characters</div>`}
 
+function dailyFarmKey(){
+  if(!catalog)return'';const server=state.ui.farmServer||'Asia',day=serverGameDay(new Date(),server),active=sortRoster(normalizeRoster(state.roster,catalog.characters)).filter(entry=>entry.status!=='Not Building'&&entry.status!=='Finished');
+  if(!active.length)return'';
+  return JSON.stringify({date:day.dateKey,server,resin:Math.min(RESIN_CAP,Math.max(0,n(state.ui.farmResin,RESIN_CAP))),weekly:Math.max(0,n(state.ui.weeklyDiscountedClaimsUsed,0)),roster:active.map(entry=>[entry.id,entry.level,entry.ascension,entry.status,entry.priority,entry.weaponId,entry.targetLevel,entry.targetAscension,entry.targetWeaponLevel,entry.talents,entry.targetTalents,entry.buildVariant]),inventory:state.inventory});
+}
+function scheduleHomeFarmRefresh(){
+  if(state.ui.tab!=='home'||!catalog||farmRuntime.loading)return;const key=dailyFarmKey();if(!key||farmRuntime.key===key||farmRuntime.requestedKey===key||farmRuntime.errorKey===key)return;farmRuntime.requestedKey=key;queueMicrotask(()=>generateSmartFarmPlan({readControls:false,key}));
+}
+function homeFarmTodayView(summary,daily,resin){
+  if(farmRuntime.loading)return`<section class="section card daily-today-card"><div class="section-head"><div><div class="eyebrow">Preparing your day</div><h2>Farm Today</h2></div><span class="pill gray">Updating</span></div><div class="skeleton" style="height:132px"></div></section>`;
+  if(farmRuntime.error)return`<section class="section card daily-today-card"><div class="section-head"><div><div class="eyebrow">Daily plan</div><h2>Farm Today</h2></div><span class="pill bad">Needs refresh</span></div><div class="notice">${esc(farmRuntime.error)}</div><button class="secondary daily-inline-action" data-action="refresh-daily-dashboard">Try again</button></section>`;
+  if(!daily)return`<section class="section card daily-today-card"><div class="section-head"><div><div class="eyebrow">Daily plan</div><h2>Farm Today</h2></div></div><div class="empty compact-empty"><div class="empty-symbol">✦</div><h3>No active build goals yet</h3><p>Mark a roster character Building or Usable and Hotaru will make your daily plan here.</p></div><button class="secondary daily-inline-action" data-go="roster">Open roster</button></section>`;
+  const tasks=(daily.top||[]).slice(0,3);
+  return`<section class="section card daily-today-card"><div class="section-head"><div><div class="eyebrow">${esc(daily.weekday)} · ${esc(daily.serverLabel)} server</div><h2>Farm Today</h2><p class="muted small">Highest-value actions from your current build goals.</p></div><button class="ghost" data-action="open-farm-planner">Full plan</button></div>${summary.highestImpact?`<div class="daily-priority"><span>Top upgrade</span><strong>${esc(summary.highestImpact.character)} · ${esc(summary.highestImpact.kind)} ${summary.highestImpact.current} → ${summary.highestImpact.target}</strong></div>`:''}<div class="daily-task-list">${tasks.length?tasks.map((task,index)=>`<div class="daily-task-row"><span class="daily-task-number">${index+1}</span><div class="row-main"><div class="row-title">${esc(task.title)}</div><div class="row-sub">${esc(task.characters?.join(' · ')||task.subtitle||'')}</div><div class="row-sub">${esc(task.type==='resin'?`${task.resin} Resin · ${task.claimHint}`:`0 Resin · ${task.subtitle}`)}</div></div>${task.mapVerified?`<a class="secondary daily-map" href="${esc(buildMapUrl([task.mapMarker]))}" target="_blank" rel="noopener">Map</a>`:''}</div>`).join(''):`<div class="notice info">Nothing needs farming from the exact progression data Hotaru has today.</div>`}</div><div class="daily-resin-strip"><div><strong>${resin.budget}</strong><span>Resin</span></div><div><strong>${resin.spent}</strong><span>Planned</span></div><div><strong>${resin.remaining}</strong><span>Left</span></div></div>${summary.blockedToday.length?`<p class="muted small daily-footnote">${summary.blockedToday.length} needed domain target${summary.blockedToday.length===1?' is':'s are'} closed on today's normal rotation.</p>`:''}${summary.unverifiedToday.length?`<p class="muted small daily-footnote">${summary.unverifiedToday.length} schedule${summary.unverifiedToday.length===1?' needs':'s need'} review; Hotaru is not guessing availability.</p>`:''}</section>`;
+}
 function homeView(){
-  const currentId=state.ui.buildCharacterId||state.builds.at(-1)?.characterId||state.roster[0]?.id,current=catalog?.characters?.find(c=>String(c.id)===String(currentId));
+  const server=state.ui.farmServer||'Asia',day=serverGameDay(new Date(),server),normalized=catalog?sortRoster(normalizeRoster(state.roster,catalog.characters)):[],active=normalized.filter(entry=>entry.status!=='Not Building'&&entry.status!=='Finished'),currentId=state.ui.buildCharacterId||state.builds.at(-1)?.characterId||state.roster[0]?.id,current=catalog?.characters?.find(c=>String(c.id)===String(currentId));
+  if(catalog&&active.length)scheduleHomeFarmRefresh();
+  let resinPlan=null,daily=null;if(farmRuntime.plan){resinPlan=buildResinPlan({farmPlan:farmRuntime.plan,resin:state.ui.farmResin,weeklyDiscountedClaimsUsed:state.ui.weeklyDiscountedClaimsUsed,server,now:new Date()});daily=buildDailyPlan({farmPlan:farmRuntime.plan,resinPlan,server,now:new Date(),limit:3});}
+  const summary=buildDailyDashboard({roster:state.roster,characters:catalog?.characters||[],weapons:state.weapons,dailyPlan:daily,resinPlan});
+  const team=summary.bestTeam;
   return`<main>
-  <section class="hero"><img class="hero-logo" src="icons/icon-192.png" alt="" /><div class="eyebrow" style="color:rgba(255,255,255,.8)">Your Teyvat build companion</div><h1>Build smarter.</h1><p>Weapons, artifacts, stat targets, roster and farming guidance—organized around the characters you actually use.</p></section>
-  <section class="section"><div class="section-head"><div><div class="eyebrow">Start here</div><h2>What do you want to do?</h2></div></div><div class="grid two">
-    <button class="card card-button" data-go="characters"><div class="card-icon">✦</div><strong>Find a character</strong><span>Open live character data and build guidance.</span></button>
-    <button class="card card-button" data-go="build"><div class="card-icon">◇</div><strong>Check my build</strong><span>Review weapon, artifacts and stats together.</span></button>
-    <button class="card card-button" data-go="roster"><div class="card-icon">♙</div><strong>My roster</strong><span>Track characters and weapons you own.</span></button>
-    <button class="card card-button" data-action="uid-modal"><div class="card-icon">⌁</div><strong>Import showcase</strong><span>Use your public Enka/Genshin showcase by UID.</span></button>
-  </div></section>
-  ${current?`<section class="section"><div class="section-head"><h2>Continue building</h2><span class="pill">Saved locally</span></div><button class="card card-button" data-character="${esc(current.id)}" data-open-build="1"><div class="row-title">${esc(current.name)}</div><div class="row-sub">${esc(current.element)} · ${esc(current.weapon)} · ${safeCharacterRarity(current.rarity,4)}★</div></button></section>`:''}
-  <section class="section"><div class="section-head"><h2>Your progress</h2><span class="pill gray">On device</span></div><div class="card status-grid">
-    <div class="status-box"><strong>${state.roster.length}</strong><span>Characters saved</span></div><div class="status-box"><strong>${state.weapons.length}</strong><span>Weapons saved</span></div><div class="status-box"><strong>${state.builds.length}</strong><span>Builds saved</span></div><div class="status-box"><strong>${state.artifacts.length}</strong><span>Artifacts checked</span></div>
-  </div></section><section class="section">${catalogNotice()}</section></main>`}
+  <section class="hero daily-hero"><div class="eyebrow" style="color:rgba(255,255,255,.8)">${esc(day.weekday)} · ${esc(day.label)} server</div><h1>Your day, sorted.</h1><p>Hotaru pulls your roster goals, farming priorities, Resin and reviewed teams into one calm daily view.</p><div class="daily-hero-stats"><div><strong>${summary.counts.active}</strong><span>Active builds</span></div><div><strong>${summary.counts.finished}</strong><span>Finished</span></div><div><strong>${Math.min(RESIN_CAP,Math.max(0,n(state.ui.farmResin,RESIN_CAP)))}</strong><span>Resin set</span></div></div></section>
+  ${homeFarmTodayView(summary,daily,resinPlan||summary.resin)}
+  <section class="section card daily-focus-card"><div class="section-head"><div><div class="eyebrow">Roster focus</div><h2>What to finish next</h2></div><button class="ghost" data-go="roster">Roster</button></div>${summary.focus.length?`<div class="daily-focus-list">${summary.focus.map(item=>`<button class="daily-focus-row" data-action="use-build" data-id="${esc(item.id)}"><div class="row-main"><div class="daily-focus-title"><strong>${esc(item.name)}</strong><span class="pill ${item.priority==='High'?'warn':'gray'}">${esc(item.priority)}</span></div><div class="row-sub">${esc(item.nextGoal)}</div><div class="progress daily-progress"><i style="width:${item.progress}%"></i></div></div><span class="daily-progress-label">${item.progress}%</span></button>`).join('')}</div>`:`<div class="empty compact-empty"><h3>No active build targets</h3><p>Set a character to Building or Usable to create a daily focus list.</p></div>`}</section>
+  <section class="section daily-split"><div class="card daily-team-card"><div class="section-head"><div><div class="eyebrow">Team snapshot</div><h2>Best ready team</h2></div><button class="ghost" data-action="open-team-creator">Teams</button></div>${team?`<strong class="daily-team-name">${esc(team.name)}</strong><div class="daily-team-members">${team.members.map(name=>`<span>${esc(name)}</span>`).join('')}</div><p class="muted small">Reviewed template · owned ${team.ownedCount}/4</p>`:`<div class="empty compact-empty"><h3>No complete reviewed team yet</h3><p>${summary.pendingTeamReviews?`${summary.pendingTeamReviews} roster character${summary.pendingTeamReviews===1?' is':'s are'} awaiting team review.`:'Add/build more reviewed teammates to complete one.'}</p></div>`}</div><div class="card daily-progress-card"><div class="eyebrow">Local progress</div><h2>${summary.counts.saved} saved characters</h2><div class="daily-mini-stats"><div><strong>${summary.counts.building}</strong><span>Building</span></div><div><strong>${summary.counts.active}</strong><span>Active</span></div><div><strong>${state.builds.length}</strong><span>Build checks</span></div></div></div></section>
+  ${current?`<section class="section card daily-continue-card"><div class="section-head"><div><div class="eyebrow">Continue building</div><h2>${esc(current.name)}</h2><p class="muted small">${esc(current.element)} · ${esc(current.weapon)} · ${safeCharacterRarity(current.rarity,4)}★</p></div><button class="secondary" data-character="${esc(current.id)}" data-open-build="1">Open guide</button></div></section>`:''}
+  <section class="section"><div class="section-head"><div><div class="eyebrow">Quick actions</div><h2>Jump back in</h2></div></div><div class="daily-quick-grid"><button class="card card-button" data-go="build"><div class="card-icon">◇</div><strong>Check a build</strong><span>Review the character you're working on.</span></button><button class="card card-button" data-go="characters"><div class="card-icon">✦</div><strong>Character guide</strong><span>Open build and material guidance.</span></button><button class="card card-button" data-action="uid-modal"><div class="card-icon">⌁</div><strong>Import showcase</strong><span>Refresh your public showcase roster.</span></button></div></section>
+  <section class="section">${catalogNotice()}</section></main>`}
 
 function filteredCharacters(){
   if(!catalog)return[];const q=String(state.ui.search||'').toLowerCase().trim();
@@ -186,21 +202,19 @@ function generateSmartTeam(){
   teamRuntime={error:'',result:matchReviewedTeams({roster:normalized,lockedNames:cleanLocks,allowUnowned:Boolean(state.ui.teamAllowUnowned),limit:5})};render();
 }
 
-async function generateSmartFarmPlan(){
+async function generateSmartFarmPlan({readControls=true,key=''}={}){
   if(!catalog||farmRuntime.loading)return;
-  state.ui.farmServer=document.getElementById('farm-server')?.value||state.ui.farmServer||'Asia';
-  state.ui.farmResin=Math.min(RESIN_CAP,Math.max(0,n(document.getElementById('farm-resin')?.value,RESIN_CAP)));
-  state.ui.weeklyDiscountedClaimsUsed=Math.max(0,n(document.getElementById('farm-weekly-claims')?.value,0));persist();
-  const active=sortRoster(normalizeRoster(state.roster,catalog.characters)).filter(entry=>entry.status!=='Not Building'&&entry.status!=='Finished');
-  farmRuntime={loading:true,plan:null,error:''};render();
+  if(readControls){state.ui.farmServer=document.getElementById('farm-server')?.value||state.ui.farmServer||'Asia';state.ui.farmResin=Math.min(RESIN_CAP,Math.max(0,n(document.getElementById('farm-resin')?.value,RESIN_CAP)));state.ui.weeklyDiscountedClaimsUsed=Math.max(0,n(document.getElementById('farm-weekly-claims')?.value,0));persist()}
+  const active=sortRoster(normalizeRoster(state.roster,catalog.characters)).filter(entry=>entry.status!=='Not Building'&&entry.status!=='Finished'),requestKey=key||dailyFarmKey();
+  farmRuntime={loading:true,plan:null,error:'',key:'',requestedKey:requestKey,errorKey:''};render();
   try{
     const entries=[];
     for(let i=0;i<active.length;i+=3){
       const batch=active.slice(i,i+3),results=await Promise.allSettled(batch.map(async entry=>{const character=catalog.characters.find(c=>String(c.id)===String(entry.id));if(!character)return null;const detail=await getCharacterDetail(character),profile=resolvedBuildProfile(detail,{buildVariant:entry.buildVariant}),weapon=state.weapons.find(w=>String(w.id)===String(entry.weaponId))||null;return{entry:{...entry,name:character.name},character,detail,profile,weapon}}));
       results.forEach(result=>{if(result.status==='fulfilled'&&result.value)entries.push(result.value)});
     }
-    farmRuntime={loading:false,error:'',plan:buildSmartFarmPlan({entries,inventory:state.inventory,resin:state.ui.farmResin,weeklyDiscountedClaimsUsed:state.ui.weeklyDiscountedClaimsUsed,knownMapNames:getMapFilterOptions('All')})};
-  }catch(error){farmRuntime={loading:false,plan:null,error:`Could not build the farm plan: ${error.message}`}}
+    farmRuntime={loading:false,error:'',plan:buildSmartFarmPlan({entries,inventory:state.inventory,resin:state.ui.farmResin,weeklyDiscountedClaimsUsed:state.ui.weeklyDiscountedClaimsUsed,knownMapNames:getMapFilterOptions('All')}),key:requestKey,requestedKey:'',errorKey:''};
+  }catch(error){farmRuntime={loading:false,plan:null,error:`Could not build the farm plan: ${error.message}`,key:'',requestedKey:'',errorKey:requestKey}}
   render();
 }
 
@@ -225,6 +239,9 @@ document.addEventListener('click',async event=>{
   if(action==='use-build'){const id=event.target.closest('[data-id]')?.dataset.id;state.ui.buildCharacterId=String(id);state.ui.tab='build';state.ui.characterId='';characterDetail=null;latestBuildResult=null;persist();render();return}
   if(action==='generate-smart-team')return generateSmartTeam();
   if(action==='generate-smart-farm')return generateSmartFarmPlan();
+  if(action==='refresh-daily-dashboard'){farmRuntime={...farmRuntime,key:'',requestedKey:'',errorKey:'',error:''};return generateSmartFarmPlan({readControls:false,key:dailyFarmKey()})}
+  if(action==='open-farm-planner'){state.ui.tab='roster';persist();render();requestAnimationFrame(()=>document.querySelector('.smart-farm-card')?.scrollIntoView({behavior:'smooth',block:'start'}));return}
+  if(action==='open-team-creator'){state.ui.tab='roster';persist();render();requestAnimationFrame(()=>document.querySelector('.smart-team-card')?.scrollIntoView({behavior:'smooth',block:'start'}));return}
   if(action==='evaluate-build')return evaluateCurrentBuild(false);if(action==='save-build')return evaluateCurrentBuild(true);
   if(action==='evaluate-artifact'){if(!characterDetail)return;const formContext=buildRuntime.formDraft?.context||state.builds.find(x=>String(x.characterId)===String(state.ui.buildCharacterId))?.context||{},profile=resolvedBuildProfile(characterDetail,formContext),gv=id=>n(document.getElementById(id)?.value,0),result=scoreArtifact({profile,mainStat:document.getElementById('artifact-main')?.value||'',substats:{cr:gv('artifact-cr'),cd:gv('artifact-cd'),er:gv('artifact-er'),em:gv('artifact-em'),scaling:gv('artifact-scaling')}}),box=document.getElementById('artifact-result');if(box)box.innerHTML=`<div class="section notice good"><strong>${result.grade} · ${result.score}/100</strong><br>CRIT Value: ${result.critValue}<br>${esc(result.note)}</div>`;state.artifacts.push({characterId:String(state.ui.buildCharacterId),score:result.score,checkedAt:new Date().toISOString()});state.artifacts=state.artifacts.slice(-100);persist();return}
   if(action==='add-roster-modal')return rosterModal();if(action==='edit-roster')return rosterModal(rosterEntry(event.target.closest('[data-id]')?.dataset.id));
