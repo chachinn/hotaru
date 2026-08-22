@@ -54,11 +54,12 @@ assert.ok(sampleTeams({name:'Nicole',element:'Pyro',description:''},guideCatalog
 assert.ok(sampleTeams({name:'Mavuika',element:'Pyro',description:''},guideCatalog).some(team=>team.confidence==='Simulation-backed'),'character guides should inherit simulation-backed community variants');
 
 const index=read('index.html'),sw=read('service-worker.js'),bootstrap=read('js/features/team-community-bootstrap.js'),matcher=read('js/features/roster-team-matcher.js'),daily=read('js/features/daily-dashboard.js');
-assert.match(index,/team-community-bootstrap\.js\?v=1\.0\.1/);
-assert.match(sw,/hotaru-shell-v33/);
-for(const asset of ['js/data/team-recommendations.js','js/data/community-team-catalog.js','js/features/team-community-bootstrap.js?v=1.0.1'])assert.ok(sw.includes(asset),`PWA shell must package ${asset}`);
+assert.match(index,/team-community-bootstrap\.js\?v=1\.0\.2/);
+assert.match(sw,/hotaru-shell-v41/);
+for(const asset of ['js/data/team-recommendations.js','js/data/community-team-catalog.js','js/features/team-community-bootstrap.js?v=1.0.2'])assert.ok(sw.includes(asset),`PWA shell must package ${asset}`);
 assert.match(sw,/raw\.githubusercontent\.com\/SenjeyB\/gi-rec/,'remote community data should bypass the service-worker app-shell cache');
-assert.match(bootstrap,/6\+ recommendations/);
+assert.match(bootstrap,/hotaru-team-source-status/,'coverage status may remain internal but its user-facing banner should be removed');
+assert.match(bootstrap,/team-pending/,'legacy reviewed-only pending banner should be removed from the rendered card');
 assert.match(bootstrap,/Simulation-backed/);
 assert.match(bootstrap,/refreshOpenCharacterGuide/,'an already-open character guide should refresh after the community catalog arrives');
 assert.match(matcher,/Math\.max\(12/,'team result surface should expand beyond the old five-result cap');
