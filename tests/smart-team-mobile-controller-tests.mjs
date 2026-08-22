@@ -28,15 +28,18 @@ assert.match(controller,/state\.ui\?\.\[stateKey\]/,'unowned lock selection must
 assert.match(flexible,/loadState/,'flexible pair ownership must read saved Hotaru state');
 assert.doesNotMatch(flexible,/rosterFromSelect/,'flexible pair ownership must not be inferred from picker options');
 assert.match(css,/@media\(max-width:600px\)[\s\S]*\.smart-team-card \.team-controls\{grid-template-columns:1fr\}/,'phone Smart Team controls must stack into one full-width column');
-assert.match(index,/roster-sections-team-filter\.css\?v=1\.0\.1/,'index must load the phone-layout stylesheet revision');
-assert.match(index,/smart-team-mobile-controller\.js\?v=1\.0\.2/,'index must load the cleaned Smart Team controller');
+assert.match(css,/@media\(max-width:600px\)[\s\S]*\.hotaru-team-utility-grid\{grid-template-columns:1fr\}/,'expanded Team Needs controls must also stack on phone widths');
+assert.match(index,/roster-sections-team-filter\.css\?v=1\.1\.0/,'index must load the expanded Team Needs stylesheet revision');
+assert.match(index,/roster-sections-team-filter\.js\?v=1\.1\.0/,'index must load the expanded Team Needs controller revision');
+assert.match(index,/smart-team-mobile-controller\.js\?v=1\.0\.2/,'index must preserve the cleaned Smart Team controller');
 assert.match(index,/flexible-pair-ui\.js\?v=1\.0\.2/,'index must load the ownership-safe flexible pair UI');
-assert.match(sw,/hotaru-shell-v39/,'service worker shell must advance to v39');
-assert.match(sw,/PREVIOUS_CACHE = 'hotaru-shell-v38'/,'service worker must migrate from v38');
-assert.match(sw,/roster-sections-team-filter\.css\?v=1\.0\.1/,'service worker must cache the phone-layout stylesheet revision');
-assert.match(sw,/smart-team-mobile-controller\.js\?v=1\.0\.2/,'service worker must cache the cleaned controller');
+assert.match(sw,/hotaru-shell-v40/,'service worker shell must advance to v40');
+assert.match(sw,/PREVIOUS_CACHE = 'hotaru-shell-v39'/,'service worker must migrate from v39');
+assert.match(sw,/roster-sections-team-filter\.css\?v=1\.1\.0/,'service worker must cache the expanded Team Needs stylesheet revision');
+assert.match(sw,/roster-sections-team-filter\.js\?v=1\.1\.0/,'service worker must cache the expanded Team Needs controller revision');
+assert.match(sw,/smart-team-mobile-controller\.js\?v=1\.0\.2/,'service worker must preserve the cleaned controller');
 assert.match(sw,/flexible-pair-ui\.js\?v=1\.0\.2/,'service worker must cache the updated flexible pair UI');
-assert.match(updater,/RELEASE='v39'/,'PWA updater must request v39');
+assert.match(updater,/RELEASE='v40'/,'PWA updater must request v40');
 assert.equal(pkg.version,'1.0.0','package version must remain 1.0.0');
 
-console.log('Smart Team mobile controller + ownership picker layout tests passed');
+console.log('Smart Team mobile controller + ownership picker + expanded Team Needs layout tests passed');
