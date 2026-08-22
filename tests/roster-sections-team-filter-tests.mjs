@@ -50,11 +50,11 @@ assert.match(css,/\.hotaru-team-utility-field/);
 assert.match(index,/roster-sections-team-filter\.css\?v=1\.0\.0/);
 assert.match(index,/roster-sections-team-filter\.js\?v=1\.0\.1/);
 assert.match(index,/navigation-refresh\.js\?v=1\.2\.0/);
-assert.match(sw,/const CACHE = 'hotaru-shell-v36'/);
-assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v35'/);
+assert.match(sw,/const CACHE = 'hotaru-shell-v37'/);
+assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v36'/);
 assert.match(sw,/team-utility-tags\.js/);
 assert.match(sw,/roster-sections-team-filter\.js\?v=1\.0\.1/);
 assert.match(sw,/navigation-refresh\.js\?v=1\.2\.0/);
-assert.match(updater,/RELEASE='v36'/);
+assert.match(updater,/RELEASE='v37'/);
 
 console.log('Hotaru clean Roster hamburger sections + team utility filter QA passed.');

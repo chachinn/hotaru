@@ -55,18 +55,19 @@ assert.match(ui,/buildFlexiblePairTeams/);
 assert.match(ui,/Flexible Pair Builder · Adapted, not reviewed/);
 assert.match(ui,/Adapted · Off-meta/);
 assert.match(ui,/source\.links/,'adapted cards should show both corroborating sources');
-assert.match(index,/flexible-pair-ui\.js\?v=1\.0\.1/);
-assert.match(sw,/const CACHE = 'hotaru-shell-v36'/);
-assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v35'/);
+assert.match(index,/flexible-pair-ui\.js\?v=1\.0\.2/);
+assert.match(sw,/const CACHE = 'hotaru-shell-v37'/);
+assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v36'/);
 assert.match(sw,/js\/features\/flexible-pair-builder\.js/);
-assert.match(sw,/js\/features\/flexible-pair-ui\.js\?v=1\.0\.1/);
+assert.match(sw,/js\/features\/flexible-pair-ui\.js\?v=1\.0\.2/);
 assert.equal(FLEXIBLE_PAIR_POLICY.supportedPairs.length,1,'only audited pair rules may ship in this release');
-
 
 assert.match(ui,/pendingGenerate=true/,'the iPhone hotfix must remember the generate tap before the main app rerenders');
 assert.match(ui,/\{capture:true\}/,'the generate tap must be captured before the app bubble listener replaces the DOM');
 assert.match(ui,/new MutationObserver\(\(\)=>\{if\(pendingGenerate\)schedulePatch\(\)\}\)/,'the fallback must follow the main app rerender instead of racing it');
 assert.match(ui,/requestAnimationFrame\(\(\)=>requestAnimationFrame/,'the fallback must wait through two render frames on Safari/PWA');
 assert.match(ui,/function setHtml\(node,html\)\{if\(node&&node\.innerHTML!==html\)node\.innerHTML=html\}/,'fallback DOM writes must remain idempotent');
+assert.match(ui,/loadState/,'flexible pair ownership must come from persisted roster state');
+assert.doesNotMatch(ui,/rosterFromSelect/,'full-catalog picker options must never be treated as owned roster entries');
 
 console.log('Hotaru Flexible Pair Builder + Traveler element-preservation QA passed.');
