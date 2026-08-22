@@ -54,8 +54,9 @@ function addNeed(map,{name,count=0,exact=true,character='',category='Material',g
 function ascensionStages(detail={}){return Array.isArray(detail?.materials?.ascensions)?detail.materials.ascensions:[]}
 function talentTracks(detail={}){return Array.isArray(detail?.materials?.talents)?detail.materials.talents:[]}
 function ascensionNameSet(detail={}){const names=new Set();for(const stage of ascensionStages(detail))for(const item of stageItems(stage)){const name=itemName(item);if(name)names.add(key(name))}return names}
+function talentNameSet(detail={}){const names=new Set();for(const track of talentTracks(detail))for(const stage of Array.isArray(track)?track:[])for(const item of stageItems(stage)){const name=itemName(item);if(name)names.add(key(name))}return names}
 
-function classifyMaterial(name,{origin='',inAscension=false,item={},stage={},knownMapNames=[]}={}){
+function classifyMaterial(name,{origin='',inAscension=false,inTalent=false,item={},stage={},knownMapNames=[]}={}){
   if(/^mora$/i.test(name))return'Mora';
   if(EXP_RE.test(name))return'Character EXP';
   if(/^Crown of Insight$/i.test(name))return'Talent Material';
@@ -63,6 +64,7 @@ function classifyMaterial(name,{origin='',inAscension=false,item={},stage={},kno
   if(GEM_RE.test(name))return'Character Ascension';
   const marker=verifiedMapMarker(name,knownMapNames);if(marker)return'Local Specialty';
   if(origin==='talent'&&inAscension)return'Enemy Drop';
+  if(origin==='ascension'&&inTalent)return'Enemy Drop';
   if(origin==='talent'&&isExplicitWeeklyBossMaterial(item,stage))return'Weekly Boss';
   if(origin==='talent')return'Talent Material';
   if(origin==='ascension')return'Ascension Material';
@@ -70,13 +72,13 @@ function classifyMaterial(name,{origin='',inAscension=false,item={},stage={},kno
 }
 
 function collectAscensionNeeds(map,{entry,detail,priority,knownMapNames=[]}){
-  const stages=ascensionStages(detail),from=Math.max(0,Math.min(stages.length,num(entry.ascension,0))),to=Math.max(from,Math.min(stages.length,num(entry.targetAscension,from)));
+  const talentNames=talentNameSet(detail),stages=ascensionStages(detail),from=Math.max(0,Math.min(stages.length,num(entry.ascension,0))),to=Math.max(from,Math.min(stages.length,num(entry.targetAscension,from)));
   if(to<=from)return false;
   let added=false;
   for(const stage of stages.slice(from,to)){
     for(const item of stageItems(stage)){
       const name=itemName(item),count=amount(item);if(!name||!count)continue;
-      addNeed(map,{name,count,character:entry.name,category:classifyMaterial(name,{origin:'ascension',item,stage,knownMapNames}),goal:`Ascension ${from} → ${to}`,mapMarker:verifiedMapMarker(name,knownMapNames),priority,goalRank:2});added=true;
+      addNeed(map,{name,count,character:entry.name,category:classifyMaterial(name,{origin:'ascension',inTalent:talentNames.has(key(name)),item,stage,knownMapNames}),goal:`Ascension ${from} → ${to}`,mapMarker:verifiedMapMarker(name,knownMapNames),priority,goalRank:2});added=true;
     }
     const mora=Math.max(0,num(stage.cost??stage.mora_cost,0));if(mora){addNeed(map,{name:'Mora',count:mora,character:entry.name,category:'Mora',goal:`Ascension ${from} → ${to}`,priority,goalRank:2});added=true}
   }
