@@ -1,21 +1,23 @@
-# Trigger promotion after workflow registration
 name: Promote Smart Team Creator 2.0
 
 on:
-  push:
-    branches: ['feature/smart-team-creator-2-abyss']
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: write
 
 jobs:
   promote:
+    if: github.head_ref == 'feature/smart-team-creator-2-abyss'
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
       - name: Checkout feature branch
         uses: actions/checkout@v4
         with:
+          ref: feature/smart-team-creator-2-abyss
           fetch-depth: 0
       - name: Verify and apply exact tested patch
         shell: bash
