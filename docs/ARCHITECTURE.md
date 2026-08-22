@@ -47,6 +47,12 @@ Hotaru stores its own material planner locally. Because the map runs cross-origi
 
 `js/features/abyss-team-planner.js` builds on the existing reviewed team-profile registry and roster scoring. It only pairs reviewed four-character archetypes whose canonical members do not overlap, then scores ownership/readiness across all eight slots. It can surface an owned build gap or an unowned roster gap, but it does not claim to optimize against the current Spiral Abyss enemy cycle or Ley Line effects. Character aliases are canonicalized before overlap and ownership checks.
 
+## Abyss Intelligence
+
+`js/data/abyss-cycle.js` stores a dated, source-linked review of the active Spiral Abyss rotation. `js/features/abyss-intelligence.js` is a deterministic matchup layer over the permanent reviewed-team planner: it maps canonical team elements to the reviewed Floor 12 buffs/mechanics, compares both team-to-half orientations, and ranks the source-reviewed pair by cycle fit without inventing a new team archetype. The current Version 7.0 review covers Aug 16–Sep 15, 2026 and was reviewed on Aug 22. Once that date window expires, cycle scoring is disabled and the permanent two-team planner remains available with an explicit review-needed state.
+
+Current-cycle facts are intentionally separate from `team-profiles/`; a future Abyss refresh can replace the dated cycle module without rewriting permanent roster/team knowledge. The layer is a matchup heuristic, not a damage simulation, and does not claim that a Ley Line bonus is mandatory when a sufficiently built off-meta team can clear.
+
 ## Performance
 
 - Map iframe is lazy-loaded and absent from normal build/character rendering.
