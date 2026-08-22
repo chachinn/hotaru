@@ -89,13 +89,13 @@ assert.match(index,/roster-sections-team-filter\.css\?v=1\.1\.0/);
 assert.match(index,/roster-sections-team-filter\.js\?v=1\.1\.0/);
 assert.match(index,/smart-team-mobile-controller\.js\?v=1\.0\.2/,'current ownership/mobile controller must remain loaded');
 assert.match(index,/navigation-refresh\.js\?v=1\.2\.0/);
-assert.match(sw,/const CACHE = 'hotaru-shell-v40'/);
-assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v39'/);
+assert.match(sw,/const CACHE = 'hotaru-shell-v41'/);
+assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v40'/);
 assert.match(sw,/team-utility-tags\.js/);
 assert.match(sw,/roster-sections-team-filter\.js\?v=1\.1\.0/);
 assert.match(sw,/roster-sections-team-filter\.css\?v=1\.1\.0/);
-assert.match(sw,/smart-team-mobile-controller\.js\?v=1\.0\.2/,'v39 ownership/mobile controller must remain cached');
+assert.match(sw,/smart-team-mobile-controller\.js\?v=1\.0\.2/,'current ownership/mobile controller must remain cached');
 assert.match(sw,/navigation-refresh\.js\?v=1\.2\.0/);
-assert.match(updater,/RELEASE='v40'/);
+assert.match(updater,/RELEASE='v41'/);
 
 console.log('Hotaru clean Roster hamburger + expanded verified Team Needs + iPhone layout QA passed.');

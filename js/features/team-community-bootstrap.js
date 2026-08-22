@@ -20,23 +20,17 @@ function setHTML(node,value=''){
   return true;
 }
 function publish(){window.__hotaruTeamCatalogStatus=status;document.dispatchEvent(new CustomEvent('hotaru:team-catalog-updated',{detail:status}));schedulePatch()}
-function sourceNotice(){
-  if(status.state==='loading')return`<strong>Expanding team QA…</strong><br>Loading reviewed and simulation-backed team variations.`;
-  if(status.state==='unavailable')return`<strong>Reviewed teams are available; community variations are offline.</strong><br>Hotaru will not invent missing teams. The cached/reviewed core remains usable.`;
-  const gap=status.total-status.sixPlus;
-  return`<strong>Expanded team coverage · ${status.sixPlus}/${status.total} characters have 6+ recommendations</strong><br>${status.covered}/${status.total} have at least one sourced recommendation. ${gap?`${gap} still need additional verified variants.`:'Every released catalog character meets the 6-team target.'} Simulation-backed variations are clearly labeled and are not personalized DPS claims.`;
-}
 function patchTeamCreator(){
   const card=document.querySelector('.smart-team-card');if(!card)return;
   const mode=card.querySelector('#team-mode')?.value||'roster',abyssMode=mode==='abyss';
   const eyebrow=card.querySelector('.section-head .eyebrow');if(!abyssMode)setText(eyebrow,'Sourced roster matching');
   const headPill=card.querySelector('.section-head .pill');if(!abyssMode)setText(headPill,'Reviewed + simulated');
   const generate=card.querySelector('.team-generate');if(!abyssMode)setText(generate,'Create team recommendations');
-  let note=card.querySelector('#hotaru-team-source-status');
-  if(!abyssMode){
-    if(!note){note=document.createElement('div');note.id='hotaru-team-source-status';note.className='notice info';const controls=card.querySelector('.team-controls');controls?.before(note)}
-    setHTML(note,sourceNotice());
-  }else if(note)note.remove();
+  // Coverage counters are QA diagnostics, not a user decision. Keep them out of the phone UI.
+  card.querySelector('#hotaru-team-source-status')?.remove();
+  // The legacy reviewed-only banner can mislabel characters that are covered by the sourced community feed
+  // (and context-dependent characters such as Traveler/Manekin). Show coverage only when a chosen lock needs it.
+  card.querySelector('.team-pending')?.remove();
   const emptyTitle=[...card.querySelectorAll('.empty h3')].find(node=>/Create from reviewed teams/i.test(node.textContent||''));setText(emptyTitle,'Create from sourced team data');
   const emptyCopy=[...card.querySelectorAll('.empty p')].find(node=>/reviewed team templates/i.test(node.textContent||''));setText(emptyCopy,'Hotaru matches your roster to sourced reviewed or simulation-backed compositions. It does not invent missing teams.');
   const noMatch=[...card.querySelectorAll('.notice.info strong')].find(node=>/No complete reviewed match/i.test(node.textContent||''));setText(noMatch,'No complete sourced match from this roster.');

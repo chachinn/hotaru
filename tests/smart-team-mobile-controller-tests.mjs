@@ -33,13 +33,13 @@ assert.match(index,/roster-sections-team-filter\.css\?v=1\.1\.0/,'index must loa
 assert.match(index,/roster-sections-team-filter\.js\?v=1\.1\.0/,'index must load the expanded Team Needs controller revision');
 assert.match(index,/smart-team-mobile-controller\.js\?v=1\.0\.2/,'index must preserve the cleaned Smart Team controller');
 assert.match(index,/flexible-pair-ui\.js\?v=1\.0\.2/,'index must load the ownership-safe flexible pair UI');
-assert.match(sw,/hotaru-shell-v40/,'service worker shell must advance to v40');
-assert.match(sw,/PREVIOUS_CACHE = 'hotaru-shell-v39'/,'service worker must migrate from v39');
+assert.match(sw,/hotaru-shell-v41/,'service worker shell must advance to v41');
+assert.match(sw,/PREVIOUS_CACHE = 'hotaru-shell-v40'/,'service worker must migrate from v40');
 assert.match(sw,/roster-sections-team-filter\.css\?v=1\.1\.0/,'service worker must cache the expanded Team Needs stylesheet revision');
 assert.match(sw,/roster-sections-team-filter\.js\?v=1\.1\.0/,'service worker must cache the expanded Team Needs controller revision');
 assert.match(sw,/smart-team-mobile-controller\.js\?v=1\.0\.2/,'service worker must preserve the cleaned controller');
 assert.match(sw,/flexible-pair-ui\.js\?v=1\.0\.2/,'service worker must cache the updated flexible pair UI');
-assert.match(updater,/RELEASE='v40'/,'PWA updater must request v40');
+assert.match(updater,/RELEASE='v41'/,'PWA updater must request v41');
 assert.equal(pkg.version,'1.0.0','package version must remain 1.0.0');
 
 console.log('Smart Team mobile controller + ownership picker + expanded Team Needs layout tests passed');
