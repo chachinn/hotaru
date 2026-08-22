@@ -43,6 +43,10 @@ Users can choose a category and material/marker from Hotaru dropdown filters. Ma
 
 Hotaru stores its own material planner locally. Because the map runs cross-origin, Hotaru cannot read or modify the provider's internal per-pin completion state and does not synchronize HoYoLAB or in-game pins.
 
+## Reviewed two-team planning
+
+`js/features/abyss-team-planner.js` builds on the existing reviewed team-profile registry and roster scoring. It only pairs reviewed four-character archetypes whose canonical members do not overlap, then scores ownership/readiness across all eight slots. It can surface an owned build gap or an unowned roster gap, but it does not claim to optimize against the current Spiral Abyss enemy cycle or Ley Line effects. Character aliases are canonicalized before overlap and ownership checks.
+
 ## Performance
 
 - Map iframe is lazy-loaded and absent from normal build/character rendering.

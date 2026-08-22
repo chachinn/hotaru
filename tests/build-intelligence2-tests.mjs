@@ -57,7 +57,7 @@ assert.ok(app.includes('event.target?.dataset?.buildContext'),'Build-profile/con
 assert.ok(app.includes('data-build-context="sameElement"'),'Same-element team context must refresh reviewed ER targets live');
 assert.ok(app.includes('buildRuntime.weaponCandidates'),'Weapon candidates must be retained so profile changes can re-rank without another network load');
 const sw=fs.readFileSync(new URL('../service-worker.js',import.meta.url),'utf8');
-assert.ok(sw.includes('hotaru-shell-v23'));
+assert.ok(sw.includes('hotaru-shell-v24'));
 assert.ok(sw.includes('build-profiles/columbina.js'));
 assert.ok(sw.includes('features/upgrade-priority.js'),'upgrade-priority module must be part of the offline app shell');
 const upgrade=fs.readFileSync(new URL('../js/features/upgrade-priority.js',import.meta.url),'utf8');
