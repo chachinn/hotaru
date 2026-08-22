@@ -1,4 +1,4 @@
-const RELEASE='v31';
+const RELEASE='v32';
 const RELOAD_KEY=`hotaru.pwa-reload.${RELEASE}`;
 let registration=null;
 let updating=false;
