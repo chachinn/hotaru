@@ -3,6 +3,8 @@ import { loadCatalog } from '../data/game-data.js';
 import { normalizeRoster, sortRoster } from './roster-intelligence.js';
 import { matchReviewedTeams } from './roster-team-matcher.js';
 import { buildFlexiblePairTeams } from './flexible-pair-builder.js';
+import { planReviewedAbyssTeams } from './abyss-team-planner.js';
+import { applyAbyssCycleIntelligence } from './abyss-intelligence.js';
 
 const app=document.getElementById('app');
 const PICKER_FILTER_KEY='hotaru.smart-team-picker-ownership.v1';
@@ -77,20 +79,41 @@ function sourcedCard(team,index){
 function flexibleCard(team,index){
   return`<article class="team-card team-adapted"><div class="team-card-head"><div><div class="eyebrow">${index===0?'Best flexible fit':`Flexible option ${index+1}`}</div><h3>${esc(team.name)}</h3></div><div class="team-badges"><span class="pill ${team.ownedComplete?'good':'warn'}">Owned ${team.ownedCount}/4</span><span class="pill warn">Adapted · Off-meta</span></div></div><div class="team-members">${(team.members||[]).map(name=>`<div class="team-member ${(team.missing||[]).includes(name)?'missing':''}"><strong>${esc(name)}</strong><span>${(team.missing||[]).includes(name)?'Not owned':'Owned'}</span></div>`).join('')}</div><p class="muted small"><strong>Source structure:</strong> ${esc(team.adaptedFrom||'')}</p><p class="team-why">${esc(team.why||'')}</p>${team.notes?`<p class="muted small">${esc(team.notes)}</p>`:''}<div class="team-source"><span>Cross-checked adaptation</span><div>${sourceLinks(team.source||{})}</div></div></article>`;
 }
+function abyssTeamSideView(team,side){
+  const fit=team?.cycleFit,half=side===1?'First half':'Second half',links=sourceLinks(team?.source||{}),sourceType=team?.source?.type||team?.confidence||'Reviewed team';
+  return`<article class="abyss-side"><div class="abyss-side-head"><div><div class="eyebrow">${fit?`Floor 12 · ${half}`:`Team ${side}`}</div><h3>${esc(team?.name||`Team ${side}`)}</h3></div><div class="team-badges"><span class="pill ${team?.readyCount===4?'good':team?.ownedComplete?'warn':'gray'}">Ready ${Number(team?.readyCount||0)}/4</span>${fit?`<span class="pill ${fit.label==='Strong'?'good':fit.label==='Good'?'warn':'gray'}">${esc(fit.label)} fit</span>`:''}</div></div><div class="team-members">${(team?.memberStates||[]).map(member=>`<div class="team-member ${!member.owned?'missing':member.status==='Building'?'building':''}"><strong>${esc(member.name)}</strong><span>${member.owned?esc(member.status):'Not owned'}</span></div>`).join('')}</div>${fit?`<div class="abyss-fit"><div class="chip-row">${(fit.elements||[]).map(element=>`<span class="pill gray">${esc(element)}</span>`).join('')}</div>${(fit.matches||[]).slice(0,3).map(item=>`<p class="abyss-fit-line good">✓ ${esc(item)}</p>`).join('')}${(fit.gaps||[]).slice(0,2).map(item=>`<p class="abyss-fit-line gap">△ ${esc(item)}</p>`).join('')}</div>`:''}<p class="team-why">${esc(team?.why||'')}</p><div class="team-source"><span>${esc(sourceType)}</span><div>${links}</div></div></article>`;
+}
+function abyssCyclePanel(result){
+  const cycle=result?.cycle,status=result?.status;if(!cycle)return'';
+  if(!result.cycleApplied)return`<div class="notice info team-abyss-note"><strong>Cycle review needed.</strong><br>Hotaru's last reviewed Abyss cycle (${esc(cycle.label)}) is no longer current. Two-team planning still works, but cycle scoring is disabled until the enemy data is reviewed again.</div>`;
+  return`<section class="abyss-cycle-card"><div class="abyss-cycle-head"><div><div class="eyebrow">${esc(status?.label||'Current reviewed cycle')} · reviewed ${esc(cycle.reviewedAt)}</div><h3>${esc(cycle.label)}</h3></div><span class="pill good">Cycle-aware</span></div><div class="abyss-cycle-halves"><div><strong>First half</strong><span>${esc(cycle.floor12?.firstHalf?.buff||'')}</span><small>${esc(cycle.floor12?.firstHalf?.summary||'')}</small></div><div><strong>Second half</strong><span>${esc(cycle.floor12?.secondHalf?.buff||'')}</span><small>${esc(cycle.floor12?.secondHalf?.summary||'')}</small></div></div></section>`;
+}
+function abyssResultsView(result,allowUnowned){
+  const cycle=abyssCyclePanel(result);
+  if(!result?.results?.length)return`${cycle}<div class="notice info"><strong>No valid two-team plan could be built.</strong><br>${allowUnowned?'No two non-overlapping sourced teams are currently available.':'Hotaru could not form a two-team pair even for a missing-slot preview.'}</div>`;
+  const fallback=result.previewFallback?'<div class="notice warn"><strong>Closest sourced 8-slot preview</strong><br>Your roster does not currently complete two non-overlapping reviewed teams, so Hotaru is showing the closest plan and marking every missing character. This does not change your roster.</div>':'';
+  const pairs=result.results.map((pair,index)=>`<section class="abyss-pair"><div class="abyss-pair-head"><div><div class="eyebrow">${index===0?(result.cycleApplied?'Best current-cycle plan':'Best two-team plan'):`Alternative ${index+1}`}</div><h3>Abyss pair</h3><p class="muted small">Eight unique slots · no character appears on both sides.</p></div><div class="team-badges"><span class="pill ${pair.ownedComplete?'good':'warn'}">Owned ${pair.ownedCount}/8</span><span class="pill ${pair.readyComplete?'good':'gray'}">Ready ${pair.readyCount}/8</span>${result.cycleApplied?`<span class="pill gray">Cycle fit ${pair.cycleScore}</span>`:''}</div></div><div class="abyss-team-grid">${abyssTeamSideView(pair.teams?.[0],1)}${abyssTeamSideView(pair.teams?.[1],2)}</div>${pair.cycleGaps?.length?`<div class="abyss-cycle-gaps"><strong>Current-cycle gaps</strong>${pair.cycleGaps.map(gap=>`<span>△ ${esc(gap)}</span>`).join('')}</div>`:''}<div class="abyss-next ${pair.nextStep?.type==='ready'?'ready':''}"><div class="eyebrow">${pair.nextStep?.type==='ready'?'Two-team readiness':pair.nextStep?.type==='missing'?'Roster gap':'Who to build next'}</div><strong>${pair.nextStep?.type==='ready'?'Both reviewed teams are roster-ready':esc(pair.nextStep?.name||'Next roster step')}</strong><p>${esc(pair.nextStep?.reason||'')}</p></div>${pair.missing?.length?`<div class="chip-row abyss-missing">${pair.missing.map(name=>`<span class="pill warn">Missing · ${esc(name)}</span>`).join('')}</div>`:''}</section>`).join('');
+  return`<div class="abyss-results">${cycle}${fallback}${pairs}<p class="muted small team-cycle-note">Cycle fit is a deterministic matchup layer over reviewed team archetypes and dated Floor 12 facts. It is not a damage simulation and it never invents an unreviewed team.</p></div>`;
+}
 function renderError(host,message){setHtml(host,`<div class="notice">${esc(message)}</div>`)}
 function renderPending(host,names=[]){setHtml(host,`<div class="notice info"><strong>Team coverage pending</strong><br>${esc(names.join(' · '))} ${names.length===1?'does':'do'} not have sourced Hotaru team coverage yet. Hotaru will not invent a team for ${names.length===1?'this character':'these locks'}.</div>`)}
 
 async function generateVisibleTeam(){
   if(generating)return;
   const card=smartCard(),host=resultsHost(card);if(!card||!host)return;
-  const mode=card.querySelector('#team-mode')?.value||'roster';if(mode==='abyss')return;
-  const lock1=card.querySelector('#team-lock-1')?.value||'',lock2=card.querySelector('#team-lock-2')?.value||'',allowUnowned=Boolean(card.querySelector('#team-allow-unowned')?.checked),locks=[];
-  if(mode==='lock1'||mode==='lock2')locks.push(lock1);if(mode==='lock2')locks.push(lock2);
-  const cleanLocks=locks.filter(Boolean);
-  if(mode!=='roster'&&!cleanLocks.length){renderError(host,'Choose a character to build around.');return}
-  if(mode==='lock2'&&(cleanLocks.length<2||key(cleanLocks[0])===key(cleanLocks[1]))){renderError(host,'Choose two different characters for the 2-character lock.');return}
+  const mode=card.querySelector('#team-mode')?.value||'roster',allowUnowned=Boolean(card.querySelector('#team-allow-unowned')?.checked);
   generating=true;
   try{
+    if(mode==='abyss'){
+      setHtml(host,'<div class="notice info"><strong>Creating current Abyss plan…</strong><br>Building two non-overlapping sourced teams from your saved roster and the reviewed cycle data.</div>');
+      const catalog=await getCatalog(),state=loadState(),{normalized}=ownedNameSet(state,catalog),base=planReviewedAbyssTeams({roster:normalized,allowUnowned,limit:5}),result=applyAbyssCycleIntelligence(base,{characters:catalog?.characters||[],now:new Date()});
+      setHtml(host,abyssResultsView(result,allowUnowned));return;
+    }
+    const lock1=card.querySelector('#team-lock-1')?.value||'',lock2=card.querySelector('#team-lock-2')?.value||'',locks=[];
+    if(mode==='lock1'||mode==='lock2')locks.push(lock1);if(mode==='lock2')locks.push(lock2);
+    const cleanLocks=locks.filter(Boolean);
+    if(mode!=='roster'&&!cleanLocks.length){renderError(host,'Choose a character to build around.');return}
+    if(mode==='lock2'&&(cleanLocks.length<2||key(cleanLocks[0])===key(cleanLocks[1]))){renderError(host,'Choose two different characters for the 2-character lock.');return}
     setHtml(host,'<div class="notice info"><strong>Creating recommendations…</strong><br>Matching your saved roster against sourced team data.</div>');
     const catalog=await getCatalog(),state=loadState(),{normalized}=ownedNameSet(state,catalog);
     const exact=matchReviewedTeams({roster:normalized,lockedNames:cleanLocks,allowUnowned,limit:12});
@@ -113,7 +136,6 @@ if(app)new MutationObserver(schedulePickerPatch).observe(app,{childList:true,sub
 
 document.addEventListener('click',event=>{
   const button=event.target.closest?.('[data-action="generate-smart-team"]');if(!button)return;
-  const card=button.closest('.smart-team-card'),mode=card?.querySelector('#team-mode')?.value||'roster';if(mode==='abyss')return;
   event.preventDefault();event.stopPropagation();generateVisibleTeam();
 },{capture:true});
 

@@ -1,4 +1,4 @@
-import { TEAM_UTILITY_CATEGORIES, TEAM_UTILITY_OPTIONS, utilityOptionsForCategory, teamMatchesUtility, teamUtilitySummary } from '../data/team-utility-tags.js';
+import { TEAM_UTILITY_OPTIONS, teamMatchesUtility, teamUtilitySummary } from '../data/team-utility-tags.js';
 
 const app=document.getElementById('app');
 const SECTION_KEY='hotaru.roster-section.v1';
@@ -16,9 +16,7 @@ function safeGet(key,fallback=''){try{return localStorage.getItem(key)||fallback
 function safeSet(key,value){try{localStorage.setItem(key,value)}catch{}}
 function validSection(value){return SECTIONS.some(item=>item.id===value)?value:'characters'}
 function validUtility(value){return TEAM_UTILITY_OPTIONS.some(item=>item.id===value)?value:'any'}
-function validUtilityCategory(value){return TEAM_UTILITY_CATEGORIES.some(item=>item.id===value)?value:'any'}
 function utilityOption(value){return TEAM_UTILITY_OPTIONS.find(item=>item.id===validUtility(value))||TEAM_UTILITY_OPTIONS[0]}
-function categoryForUtility(value){return utilityOption(value).category||'any'}
 function rosterMain(){const main=app?.querySelector('main');return main?.querySelector('h1')?.textContent?.trim()==='My Roster'?main:null}
 function sectionByHeading(main,heading){return[...main.querySelectorAll(':scope > section')].find(section=>section.querySelector('h2')?.textContent?.trim()===heading)||null}
 function sectionMap(main){return new Map(SECTIONS.map(item=>[item.id,sectionByHeading(main,item.heading)]).filter(([,section])=>section))}
@@ -49,33 +47,28 @@ function chooseRosterSection(id){
 }
 
 function utilityLabel(value){return utilityOption(value).label}
-function categoryOptionsHtml(){return TEAM_UTILITY_CATEGORIES.map(item=>`<option value="${item.id}">${item.label}</option>`).join('')}
-function utilityOptionsHtml(category){return utilityOptionsForCategory(category).map(item=>`<option value="${item.id}">${item.label}</option>`).join('')}
-function storedUtilityState(){
-  const requirement=validUtility(safeGet(UTILITY_KEY,'any'));
-  const requirementCategory=categoryForUtility(requirement);
-  const savedCategory=validUtilityCategory(safeGet(UTILITY_CATEGORY_KEY,requirementCategory));
-  const category=requirement!=='any'?requirementCategory:savedCategory;
-  return{category,requirement:category==='any'?'any':requirement};
+function utilityOptionsHtml(){
+  const any=TEAM_UTILITY_OPTIONS.find(item=>item.id==='any');
+  const sustain=TEAM_UTILITY_OPTIONS.filter(item=>item.category==='sustain');
+  const utility=TEAM_UTILITY_OPTIONS.filter(item=>item.category==='utility');
+  const options=items=>items.map(item=>`<option value="${item.id}">${item.label}</option>`).join('');
+  return`<option value="${any?.id||'any'}">${any?.label||'No preference'}</option><optgroup label="Sustain">${options(sustain)}</optgroup><optgroup label="Utility">${options(utility)}</optgroup>`;
 }
+function storedUtility(){return validUtility(safeGet(UTILITY_KEY,'any'))}
 function ensureUtilityControl(){
   const smart=document.querySelector('.smart-team-card');if(!smart)return null;
   const controls=smart.querySelector('.team-controls');if(!controls)return null;
   let field=controls.querySelector('.hotaru-team-utility-field');
   if(!field){
     field=document.createElement('div');field.className='field hotaru-team-utility-field';
-    field.innerHTML=`<div class="hotaru-team-utility-grid"><label>Team Needs<select id="hotaru-team-utility-category">${categoryOptionsHtml()}</select></label><label>Need<select id="hotaru-team-utility"></select></label></div><small>Verified baseline utility only; Hotaru will not guess constellation-, artifact-, or weapon-only roles.</small>`;
+    field.innerHTML=`<label for="hotaru-team-utility">Team Need</label><select id="hotaru-team-utility">${utilityOptionsHtml()}</select><small>Optional: filter the shown recommendations by one verified baseline role.</small>`;
     const generate=controls.querySelector('.team-generate');if(generate)controls.insertBefore(field,generate);else controls.appendChild(field);
   }
-  const categorySelect=field.querySelector('#hotaru-team-utility-category'),select=field.querySelector('#hotaru-team-utility'),abyss=smart.querySelector('#team-mode')?.value==='abyss';
-  const stored=storedUtilityState();
-  if(categorySelect.value!==stored.category)categorySelect.value=stored.category;
-  setHtml(select,utilityOptionsHtml(stored.category));
-  const available=utilityOptionsForCategory(stored.category).some(item=>item.id===stored.requirement)?stored.requirement:'any';
-  if(select.value!==available)select.value=available;
-  categorySelect.disabled=abyss;select.disabled=abyss;field.classList.toggle('disabled',abyss);
-  setText(field.querySelector('small'),abyss?'Team Needs filtering is disabled for the two-team Abyss planner.':'Verified baseline utility only; Hotaru will not guess constellation-, artifact-, or weapon-only roles.');
-  return{categorySelect,select};
+  const select=field.querySelector('#hotaru-team-utility'),abyss=smart.querySelector('#team-mode')?.value==='abyss',stored=storedUtility();
+  if(select&&select.value!==stored)select.value=stored;
+  select.disabled=abyss;field.classList.toggle('disabled',abyss);
+  setText(field.querySelector('small'),abyss?'Team Need filtering is only for single-team recommendations; Current Abyss builds two teams together.':'Optional: filter the shown recommendations by one verified baseline role.');
+  return{select};
 }
 
 function cardMembers(card){return[...card.querySelectorAll('.team-members .team-member strong')].map(node=>node.textContent?.trim()).filter(Boolean)}
@@ -114,14 +107,7 @@ document.addEventListener('click',event=>{
 },{capture:true});
 
 document.addEventListener('change',event=>{
-  if(event.target?.id==='hotaru-team-utility-category'){
-    const category=validUtilityCategory(event.target.value);safeSet(UTILITY_CATEGORY_KEY,category);
-    const previous=validUtility(safeGet(UTILITY_KEY,'any'));
-    const requirement=categoryForUtility(previous)===category?previous:'any';safeSet(UTILITY_KEY,requirement);applyUtilityFilter();return;
-  }
   if(event.target?.id!=='hotaru-team-utility')return;
-  const requirement=validUtility(event.target.value);safeSet(UTILITY_KEY,requirement);
-  const currentCategory=validUtilityCategory(document.getElementById('hotaru-team-utility-category')?.value||safeGet(UTILITY_CATEGORY_KEY,'any'));
-  safeSet(UTILITY_CATEGORY_KEY,requirement==='any'?currentCategory:categoryForUtility(requirement));applyUtilityFilter();
+  const requirement=validUtility(event.target.value);safeSet(UTILITY_KEY,requirement);safeSet(UTILITY_CATEGORY_KEY,utilityOption(requirement).category||'any');applyUtilityFilter();
 });
 schedulePatch();
