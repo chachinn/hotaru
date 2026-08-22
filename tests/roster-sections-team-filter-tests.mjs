@@ -31,6 +31,8 @@ assert.deepEqual(TEAM_UTILITY_CATEGORIES.map(item=>item.id),['any','sustain','ut
 assert.deepEqual(utilityOptionsForCategory('sustain').map(item=>item.id),['any','healer','shielder','sustain','both']);
 assert.deepEqual(utilityOptionsForCategory('utility').map(item=>item.id),['any','buffer','debuffer','crowd-control','interruption-resistance','battery','off-field-dps']);
 for(const id of ['buffer','debuffer','crowd-control','interruption-resistance','battery','off-field-dps'])assert.ok(TEAM_UTILITY_OPTIONS.some(item=>item.id===id),`${id} must remain available`);
+const directLabels=['Healer','Shielder','Healer or Shielder','Healing + Shielding','Buffer','Debuffer / RES shred','Crowd Control / Grouping','Interruption Resistance','Energy / Battery','Off-field DPS'];
+for(const label of directLabels)assert.ok(TEAM_UTILITY_OPTIONS.some(item=>item.label===label),`${label} must be provided by the Team Need registry`);
 
 const healerPair=['Odette','Flins','Aino','Kuki Shinobu'];
 const shieldPair=['Odette','Flins','Ineffa','Yelan'];
@@ -75,7 +77,7 @@ assert.doesNotMatch(ui,/id="hotaru-team-utility-category"/,'two-step category UI
 assert.match(ui,/for="hotaru-team-utility">Team Need/,'single direct Team Need control must be labeled clearly');
 assert.match(ui,/<optgroup label="Sustain">/);
 assert.match(ui,/<optgroup label="Utility">/);
-for(const label of ['Healer','Shielder','Healer or Shielder','Healing + Shielding','Buffer','Debuffer / RES shred','Crowd Control / Grouping','Interruption Resistance','Energy / Battery','Off-field DPS'])assert.ok(ui.includes(label),`${label} must be directly visible in the Team Need menu`);
+assert.match(ui,/TEAM_UTILITY_OPTIONS\.filter/,'direct Team Need choices must be generated from the verified utility registry');
 assert.match(ui,/teamMatchesUtility/);
 assert.match(ui,/team-card/);
 assert.match(ui,/invent a team just to satisfy the filter/,'empty state must preserve the no-fabrication policy');
