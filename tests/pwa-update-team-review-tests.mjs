@@ -15,7 +15,7 @@ const screenshotPair=matchReviewedTeams({roster:[{name:'Odette'},{name:'Flins'}]
 assert.deepEqual(screenshotPair.pendingLocks,[],'A reviewed Odette + Flins lock may have no exact shared team, but neither character is pending review');
 
 const index=read('index.html'),sw=read('service-worker.js'),updater=read('js/pwa-update.js');
-assert.ok(index.indexOf('js/pwa-update.js?v=1.0.0')<index.indexOf('app.js?v=1.13.0'),'PWA updater must start before app modules so stale installed PWAs recover promptly');
+assert.ok(index.indexOf('js/pwa-update.js?v=1.0.0')<index.indexOf('app.js?v=1.12.0'),'PWA updater must start before app modules so stale installed PWAs recover promptly');
 assert.match(sw,/const CACHE = 'hotaru-shell-v30'/);
 assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v29'/);
 assert.match(sw,/js\/pwa-update\.js\?v=1\.0\.0/,'PWA updater must be available offline after the fresh shell is installed');
