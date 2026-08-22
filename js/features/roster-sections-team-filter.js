@@ -33,11 +33,21 @@ function applyRosterSection(){
   main.dataset.hotaruRosterActive=resolved;
 }
 
+function openRosterTab(){
+  if(rosterMain())return;
+  const tab=app?.querySelector('.bottom-nav [data-tab="roster"]');
+  if(tab){tab.click();return}
+  const fallback=document.createElement('button');fallback.type='button';fallback.dataset.tab='roster';fallback.hidden=true;document.body.appendChild(fallback);fallback.click();fallback.remove();
+}
 function chooseRosterSection(id){
-  const value=validSection(id);safeSet(SECTION_KEY,value);applyRosterSection();
+  const value=validSection(id);safeSet(SECTION_KEY,value);
   document.getElementById('hotaru-section-menu')?.querySelector('[data-hotaru-close-menu]')?.click();
-  document.dispatchEvent(new CustomEvent('hotaru:roster-section-changed',{detail:{section:value}}));
-  requestAnimationFrame(()=>window.scrollTo({top:0,behavior:'smooth'}));
+  openRosterTab();
+  requestAnimationFrame(()=>{
+    applyRosterSection();
+    document.dispatchEvent(new CustomEvent('hotaru:roster-section-changed',{detail:{section:value}}));
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
 }
 
 function utilityLabel(value){return TEAM_UTILITY_OPTIONS.find(item=>item.id===value)?.label||'No preference'}
