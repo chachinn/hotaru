@@ -44,19 +44,19 @@ assert.match(utilityUi,/TEAM_UTILITY_OPTIONS\.filter/,'the direct menu must popu
 assert.match(utilityUi,/Team Need filtering is only for single-team recommendations/,'Abyss-disabled state must explain why the Team Need filter is unavailable');
 assert.match(css,/@media\(max-width:600px\)[\s\S]*\.smart-team-card \.team-controls\{grid-template-columns:1fr\}/,'phone Smart Team controls must stack into one full-width column');
 assert.match(css,/@media\(max-width:600px\)[\s\S]*\.hotaru-team-utility-field select\{width:100%\}/,'Team Need must remain full-width on phone');
-assert.match(index,/roster-sections-team-filter\.css\?v=1\.2\.1/,'index must load the stability stylesheet revision');
+assert.match(index,/roster-sections-team-filter\.css\?v=1\.2\.2/,'index must load the stability stylesheet revision');
 assert.match(index,/roster-sections-team-filter\.js\?v=1\.2\.0/,'index must load the direct Team Need controller revision');
 assert.match(index,/smart-team-mobile-controller\.js\?v=1\.0\.3/,'index must preserve the Current Abyss mobile controller revision');
-assert.match(index,/smart-team-results-pagination\.js\?v=1\.0\.0/,'index must load the incremental team-results layer');
+assert.match(index,/smart-team-results-pagination\.js\?v=1\.1\.0/,'index must load the incremental team-results layer');
 assert.match(index,/flexible-pair-ui\.js\?v=1\.0\.2/,'index must load the ownership-safe flexible pair UI');
-assert.match(sw,/const CACHE = 'hotaru-shell-v43'/,'service worker shell must advance to v43');
-assert.match(sw,/PREVIOUS_CACHE = 'hotaru-shell-v42'/,'service worker must migrate from v42');
-assert.match(sw,/roster-sections-team-filter\.css\?v=1\.2\.1/,'service worker must cache the stability stylesheet revision');
+assert.match(sw,/const CACHE = 'hotaru-shell-v44'/,'service worker shell must advance to v44');
+assert.match(sw,/PREVIOUS_CACHE = 'hotaru-shell-v43'/,'service worker must migrate from v43');
+assert.match(sw,/roster-sections-team-filter\.css\?v=1\.2\.2/,'service worker must cache the stability stylesheet revision');
 assert.match(sw,/roster-sections-team-filter\.js\?v=1\.2\.0/,'service worker must cache the direct Team Need controller revision');
 assert.match(sw,/smart-team-mobile-controller\.js\?v=1\.0\.3/,'service worker must keep the Current Abyss mobile controller');
-assert.match(sw,/smart-team-results-pagination\.js\?v=1\.0\.0/,'service worker must cache the incremental team-results layer');
+assert.match(sw,/smart-team-results-pagination\.js\?v=1\.1\.0/,'service worker must cache the incremental team-results layer');
 assert.match(sw,/flexible-pair-ui\.js\?v=1\.0\.2/,'service worker must cache the ownership-safe flexible pair UI');
-assert.match(updater,/RELEASE='v43'/,'PWA updater must request v43');
+assert.match(updater,/RELEASE='v44'/,'PWA updater must request v44');
 assert.equal(pkg.version,'1.0.0','package version must remain 1.0.0');
 
 console.log('Smart Team mobile controller + Current Abyss + direct Team Need QA passed');

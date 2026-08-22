@@ -16,13 +16,34 @@ assert.deepEqual(allResult.results.slice(0,12).map(team=>team.id),defaultResult.
 
 const pager=fs.readFileSync('js/features/smart-team-results-pagination.js','utf8');
 const css=fs.readFileSync('css/roster-sections-team-filter.css','utf8');
+const index=fs.readFileSync('index.html','utf8');
+const sw=fs.readFileSync('service-worker.js','utf8');
 assert.match(pager,/const PAGE_SIZE=12/,'phone render batch must stay bounded');
 assert.match(pager,/matchReviewedTeams\(\{roster,lockedNames:cleanLocks,allowUnowned,limit:'all'\}\)/,'pagination layer must request the full valid set');
 assert.match(pager,/results\.slice\(0,session\.shown\)/,'initial render must only build the current page');
 assert.match(pager,/insertAdjacentHTML\('beforeend'/,'load-more must append instead of replacing all existing cards');
 assert.match(pager,/Math\.min\(PAGE_SIZE,remaining\)/,'load-more must stay bounded to the next small batch');
 assert.match(pager,/filteredResults/,'Team Need filtering must be applied to the complete in-memory result set before paging');
+assert.match(pager,/hotaru\.smart-team-result-filter\.v1/,'result filter choice must have a stable preference key');
+assert.match(pager,/hotaru\.smart-team-result-sort\.v1/,'result sort choice must have a stable preference key');
+assert.match(pager,/Fully owned/,'result filter must support fully-owned teams');
+assert.match(pager,/Needs unowned characters/,'result filter must support missing-slot previews');
+assert.match(pager,/Reviewed only/,'result filter must support reviewed evidence only');
+assert.match(pager,/Simulation-backed only/,'result filter must support simulation-backed evidence only');
+assert.match(pager,/Best match/,'result sort must preserve score-ranked default');
+assert.match(pager,/Most owned/,'result sort must support ownership ranking');
+assert.match(pager,/Reviewed first/,'result sort must support evidence ranking');
+assert.match(pager,/Team name A–Z/,'result sort must support alphabetical browsing');
+assert.match(pager,/results=results\.filter\(team=>matchesResultFilter/,'result filtering must happen on the full in-memory set before paging');
+assert.match(pager,/return sortResults\(results,sort\)/,'sorting must happen before paging');
+assert.match(pager,/sort==='best'\?\(index===0\?'Best match'/,'non-default sorts must not incorrectly relabel the first card as Best match');
+assert.match(css,/\.hotaru-team-results-tools/,'results toolbar must have dedicated stable layout');
 assert.match(css,/\.hotaru-team-results-pager/,'paged results must have a stable dedicated footer');
+assert.match(css,/@media\(max-width:600px\)[\s\S]*\.hotaru-team-results-tools\{grid-template-columns:1fr\}/,'sort/filter controls must stack on phones');
 assert.match(css,/@media\(max-width:600px\)[\s\S]*\.hotaru-team-results-pager\{align-items:stretch;flex-direction:column\}/,'pager controls must remain phone-friendly');
+assert.match(index,/smart-team-results-pagination\.js\?v=1\.1\.0/,'index must cache-miss the new sort/filter result layer');
+assert.match(sw,/smart-team-results-pagination\.js\?v=1\.1\.0/,'service worker must cache the new sort/filter result layer');
+assert.match(index,/roster-sections-team-filter\.css\?v=1\.2\.2/,'index must cache-miss the result toolbar CSS');
+assert.match(sw,/roster-sections-team-filter\.css\?v=1\.2\.2/,'service worker must cache the result toolbar CSS');
 
-console.log('Hotaru full team-result access + incremental rendering stability QA passed.');
+console.log('Hotaru full team-result access + incremental sort/filter rendering stability QA passed.');
