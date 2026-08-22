@@ -28,10 +28,10 @@ export function planReviewedAbyssTeams({roster=[],allowUnowned=false,limit=3}={}
   for(let i=0;i<snapshots.length;i++)for(let j=i+1;j<snapshots.length;j++){
     const first=snapshots[i],second=snapshots[j];if(overlaps(first,second))continue;
     const missing=unique([...first.missing,...second.missing]),ownedCount=first.ownedCount+second.ownedCount,readyCount=first.readyCount+second.readyCount;
-    if(!allowUnowned&&missing.length)continue;
     const teams=[first,second],nextStep=nextBuildStep(teams,normalizedRoster),score=first.score+second.score+(readyCount*30)+(ownedCount*35)-(missing.length*260);
     pairs.push({id:[first.id,second.id].sort().join('__'),teams,missing,ownedCount,readyCount,ownedComplete:missing.length===0,readyComplete:readyCount===8,score,nextStep});
   }
   pairs.sort((a,b)=>b.score-a.score||b.readyCount-a.readyCount||b.ownedCount-a.ownedCount||a.id.localeCompare(b.id));
-  return{kind:'abyss',results:pairs.slice(0,Math.max(1,limit)),ownedNames:unique(normalizedRoster.map(entry=>entry.name)),coverage:(roster||[]).map(entry=>({name:entry.name,...teamReviewStatus(entry.name)}))};
+  const ownedPairs=pairs.filter(pair=>pair.missing.length===0),previewFallback=!allowUnowned&&ownedPairs.length===0&&pairs.length>0,eligible=allowUnowned||previewFallback?pairs:ownedPairs;
+  return{kind:'abyss',results:eligible.slice(0,Math.max(1,limit)),ownedNames:unique(normalizedRoster.map(entry=>entry.name)),coverage:(roster||[]).map(entry=>({name:entry.name,...teamReviewStatus(entry.name)})),previewFallback};
 }
