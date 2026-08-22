@@ -46,19 +46,24 @@ const roster=fixtureCharacters.map(({name})=>({name,status:'Usable',priority:'Me
 const mavuika=matchReviewedTeams({roster,lockedNames:['Mavuika'],allowUnowned:true,limit:5});
 assert.ok(mavuika.results.length>=6,'the team creator must no longer stop at five suggestions when six or more sourced options exist');
 assert.ok(mavuika.results.some(team=>team.confidence==='Simulation-backed'));
+assert.equal(matchReviewedTeams({roster,allowUnowned:true,limit:1}).results.length,1,'callers that explicitly need one best team must stay bounded to one result');
+assert.equal(matchReviewedTeams({roster,lockedNames:['Mavuika'],allowUnowned:true,limit:12,curatedOnly:true}).results.length,0,'curated-only consumers must never absorb simulation-backed community teams');
 
 const guideCatalog={characters:[...new Set(allRecommendedTeams().flatMap(team=>team.members))].map(name=>({name,element:'Unknown',weapon:'Unknown',icon:'',slug:name.toLowerCase().replace(/[^a-z0-9]+/g,'-')}))};
 assert.ok(sampleTeams({name:'Nicole',element:'Pyro',description:''},guideCatalog).length>5,'character guides should expose more than five sourced Nicole teams');
 assert.ok(sampleTeams({name:'Mavuika',element:'Pyro',description:''},guideCatalog).some(team=>team.confidence==='Simulation-backed'),'character guides should inherit simulation-backed community variants');
 
-const index=read('index.html'),sw=read('service-worker.js'),bootstrap=read('js/features/team-community-bootstrap.js'),matcher=read('js/features/roster-team-matcher.js');
+const index=read('index.html'),sw=read('service-worker.js'),bootstrap=read('js/features/team-community-bootstrap.js'),matcher=read('js/features/roster-team-matcher.js'),daily=read('js/features/daily-dashboard.js');
 assert.match(index,/team-community-bootstrap\.js\?v=1\.0\.0/);
 assert.match(sw,/hotaru-shell-v31/);
 for(const asset of ['js/data/team-recommendations.js','js/data/community-team-catalog.js','js/features/team-community-bootstrap.js?v=1.0.0'])assert.ok(sw.includes(asset),`PWA shell must package ${asset}`);
 assert.match(sw,/raw\.githubusercontent\.com\/SenjeyB\/gi-rec/,'remote community data should bypass the service-worker app-shell cache');
 assert.match(bootstrap,/6\+ recommendations/);
 assert.match(bootstrap,/Simulation-backed/);
+assert.match(bootstrap,/refreshOpenCharacterGuide/,'an already-open character guide should refresh after the community catalog arrives');
 assert.match(matcher,/Math\.max\(12/,'team result surface should expand beyond the old five-result cap');
+assert.match(matcher,/requested===1\?1/,'single-result consumers must stay single-result');
+assert.match(daily,/curatedOnly:true/,'Daily Dashboard must keep its best-team card curated reviewed-only');
 assert.equal(COMMUNITY_TEAM_SOURCE.license,'MIT');
 
 console.log('Hotaru expanded team coverage + community source QA passed.');
