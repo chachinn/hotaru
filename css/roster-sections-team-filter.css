@@ -1,11 +1,13 @@
 /* Clean Roster workspace + conservative team utility filter. */
 main[data-hotaru-roster-active]>.hotaru-section-jump{display:none!important}
 main[data-hotaru-roster-active]>section[hidden]{display:none!important}
-.hotaru-team-utility-field{min-width:170px}
+.hotaru-team-utility-field{min-width:260px}
+.hotaru-team-utility-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+.hotaru-team-utility-grid label{display:grid;gap:5px}
 .hotaru-team-utility-field small{display:block;margin-top:5px;color:var(--muted);font-size:10px;line-height:1.35}
 .hotaru-team-utility-field.disabled{opacity:.65}
 .hotaru-team-utility-hint{margin:9px 0 0;padding:7px 9px;border-radius:10px;background:#fff5f8;color:var(--pink-700)!important;font-weight:700}
 .hotaru-team-utility-empty{margin-top:10px}
 .team-card[hidden]{display:none!important}
 .hotaru-team-picker-ownership-field small{display:block;margin-top:2px;color:var(--muted);font-size:10px;line-height:1.35}
-@media(max-width:600px){.hotaru-team-utility-field{grid-column:1/-1}.hotaru-team-utility-field select{width:100%}.smart-team-card .team-controls{grid-template-columns:1fr}.smart-team-card .team-generate{grid-column:auto}.hotaru-team-picker-ownership-field{grid-column:auto}}
+@media(max-width:600px){.hotaru-team-utility-field{grid-column:1/-1;width:100%}.hotaru-team-utility-grid{grid-template-columns:1fr}.hotaru-team-utility-field select{width:100%}.smart-team-card .team-controls{grid-template-columns:1fr}.smart-team-card .team-generate{grid-column:auto}.hotaru-team-picker-ownership-field{grid-column:auto}}
