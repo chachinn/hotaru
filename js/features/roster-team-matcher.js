@@ -1,4 +1,5 @@
-import { allRecommendedTeams, canonicalTeamCharacter, teamRecommendationStatus } from '../data/team-recommendations.js';
+import { canonicalTeamCharacter } from '../data/team-profiles/index.js';
+import { allRecommendedTeams, teamRecommendationStatus } from '../data/team-recommendations.js';
 import { scoreReviewedTeam } from './team-scoring.js';
 function key(value=''){return String(value||'').trim().toLowerCase()}
 function unique(values=[]){return [...new Set(values.map(value=>String(value||'').trim()).filter(Boolean))]}
