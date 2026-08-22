@@ -40,10 +40,15 @@ const preview=planReviewedAbyssTeams({roster:sparse,allowUnowned:true,limit:2});
 assert.ok(preview.results.length>=1);assert.equal(preview.previewFallback,false);assert.ok(preview.results[0].missing.length>0);assert.ok(preview.results[0].ownedCount<8);
 for(const pair of preview.results){const pairNames=pair.teams.flatMap(team=>team.members.map(name=>name.toLowerCase()));assert.equal(new Set(pairNames).size,8,'unowned preview still must enforce no duplicate characters across teams')}
 
-const app=fs.readFileSync(new URL('../app.js',import.meta.url),'utf8'),sw=fs.readFileSync(new URL('../service-worker.js',import.meta.url),'utf8'),index=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8'),style=fs.readFileSync(new URL('../style.css',import.meta.url),'utf8'),bootstrap=fs.readFileSync(new URL('../js/features/team-community-bootstrap.js',import.meta.url),'utf8');
+const app=fs.readFileSync(new URL('../app.js',import.meta.url),'utf8'),controller=fs.readFileSync(new URL('../js/features/smart-team-mobile-controller.js',import.meta.url),'utf8'),sw=fs.readFileSync(new URL('../service-worker.js',import.meta.url),'utf8'),index=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8'),style=fs.readFileSync(new URL('../style.css',import.meta.url),'utf8'),bootstrap=fs.readFileSync(new URL('../js/features/team-community-bootstrap.js',import.meta.url),'utf8');
 assert.ok(app.includes("value=\"abyss\""));assert.ok(app.includes('Current Abyss · cycle-aware'));assert.ok(app.includes('Who to build next'));assert.ok(app.includes('planReviewedAbyssTeams'));assert.ok(app.includes('Current-cycle intelligence is dated, not guessed'));assert.ok(app.includes('cycle scoring automatically when the reviewed rotation expires'));
+assert.ok(controller.includes("if(mode==='abyss')"),'mobile controller must execute Current Abyss itself');
+assert.ok(controller.includes('planReviewedAbyssTeams({roster:normalized,allowUnowned,limit:5})'),'mobile controller must invoke the real planner with saved roster state');
+assert.ok(controller.includes('applyAbyssCycleIntelligence'),'mobile controller must retain cycle-aware ranking');
+assert.ok(controller.includes('Closest sourced 8-slot preview'),'sparse-roster fallback must render a visible explanation');
+assert.ok(!controller.includes("if(mode==='abyss')return;"),'Current Abyss must not fall through to the iPhone-stale bubble generator');
 assert.ok(style.includes('.abyss-team-grid'));assert.ok(style.includes('.abyss-next'));
 assert.ok(bootstrap.includes("card.querySelector('#hotaru-team-source-status')?.remove()"),'coverage QA banner must stay out of the user-facing Team Creator');
 assert.ok(bootstrap.includes("card.querySelector('.team-pending')?.remove()"),'legacy reviewed-only pending banner must stay out of the user-facing Team Creator');
-assert.ok(sw.includes('hotaru-shell-v41'));assert.ok(sw.includes('js/features/abyss-team-planner.js'));assert.ok(index.includes('app.js?v=1.12.0'));assert.ok(index.includes('style.css?v=1.8.0'));
-console.log('Smart Team Creator Abyss fallback + UI cleanup QA passed.');
+assert.ok(sw.includes("const CACHE = 'hotaru-shell-v42'"));assert.ok(sw.includes("PREVIOUS_CACHE = 'hotaru-shell-v41'"));assert.ok(sw.includes('js/features/abyss-team-planner.js'));assert.ok(sw.includes('smart-team-mobile-controller.js?v=1.0.3'));assert.ok(index.includes('app.js?v=1.12.0'));assert.ok(index.includes('style.css?v=1.8.0'));assert.ok(index.includes('smart-team-mobile-controller.js?v=1.0.3'));
+console.log('Smart Team Creator Abyss planner + mobile execution + fallback QA passed.');
