@@ -14,8 +14,10 @@ Hotaru is an unofficial Genshin Impact character build companion focused on help
 - **Farm Today + Resin Planner:** turns active roster goals into a server-day-aware top-three farming plan, separates 0-Resin world materials from Resin activities, respects talent-domain rotations and the 04:00 server reset, budgets current Resin without inventing random drop quantities, and keeps guaranteed progression ahead of artifact RNG.
 - **Daily Dashboard:** Home turns roster focus, top-three Farm Today actions, Resin budget, reviewed team readiness, and quick build actions into one mobile-first daily view.
 - **Smart Team Creator 2.0 + Abyss Intelligence:** plans two non-overlapping reviewed teams, assigns them to the current reviewed Floor 12 halves, scores matchup fit against dated Ley Line/enemy mechanics, shows 8-slot ownership/readiness, and identifies the next useful character to build. Cycle scoring automatically disables after the reviewed rotation expires instead of reusing stale Abyss data.
+- **Account import:** quick UID/Enka refresh accumulates public-showcase rotations, while Full Account Import accepts GOOD JSON and a Hotaru HoYoLAB Battle Chronicle exporter for complete roster merging without overwriting Hotaru-specific build goals.
 - Interactive Teyvat map powered through AppSample's embeddable map, with category/material dropdown filters, quick marker categories, a shared verified marker registry, special-area shortcuts, and access to the provider's complete filter panel.
 - Local material planner with Needed / Owned / Remaining tracking.
+- **Smart UID import:** imports Enka public-showcase characters, preserves Hotaru-local build goals when refreshed, and accumulates characters across repeated imports of the same UID as you rotate your Genshin showcase. UID alone cannot expose the full account roster.
 - Local backup/restore and migration-safe storage.
 - Installable mobile-first PWA with offline app shell.
 

@@ -39,5 +39,5 @@ for(const pair of preview.results){const pairNames=pair.teams.flatMap(team=>team
 const app=fs.readFileSync(new URL('../app.js',import.meta.url),'utf8'),sw=fs.readFileSync(new URL('../service-worker.js',import.meta.url),'utf8'),index=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8'),style=fs.readFileSync(new URL('../style.css',import.meta.url),'utf8');
 assert.ok(app.includes("value=\"abyss\""));assert.ok(app.includes('Current Abyss · cycle-aware'));assert.ok(app.includes('Who to build next'));assert.ok(app.includes('planReviewedAbyssTeams'));assert.ok(app.includes('Current-cycle intelligence is dated, not guessed'));assert.ok(app.includes('cycle scoring automatically when the reviewed rotation expires'));
 assert.ok(style.includes('.abyss-team-grid'));assert.ok(style.includes('.abyss-next'));
-assert.ok(sw.includes('hotaru-shell-v25'));assert.ok(sw.includes('js/features/abyss-team-planner.js'));assert.ok(index.includes('app.js?v=1.11.0'));assert.ok(index.includes('style.css?v=1.8.0'));
+assert.ok(sw.includes('hotaru-shell-v26'));assert.ok(sw.includes('js/features/abyss-team-planner.js'));assert.ok(index.includes('app.js?v=1.12.0'));assert.ok(index.includes('style.css?v=1.8.0'));
 console.log('Smart Team Creator 2.0 Abyss planner QA passed.');

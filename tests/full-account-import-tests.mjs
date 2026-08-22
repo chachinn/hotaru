@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { parseGOOD, mergeGOODAccount } from '../js/features/full-account-import.js';
+
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const fixture={format:'GOOD',version:2,source:'Hotaru HoYoLAB Exporter',characters:[{key:'KamisatoAyaka',level:90,constellation:2,talent:{auto:9,skill:9,burst:10}},{key:'Jean',level:80,constellation:1,talent:{auto:8,skill:8,burst:8}}],weapons:[{key:'MistsplitterReforged',level:90,ascension:6,refinement:1,location:'KamisatoAyaka'}],artifacts:[{setKey:'BlizzardStrayer',slotKey:'flower',rarity:5,level:20,mainStatKey:'hp',substats:[{key:'critRate_',value:7.8}],location:'KamisatoAyaka'}],materials:{Mora:1234567,HerosWit:42,SlimeCondensate:99}};
+assert.equal(parseGOOD(fixture).characters.length,2);
+assert.throws(()=>parseGOOD({format:'NOTGOOD',version:2}),/not a GOOD/i);
+const state={roster:[{id:'10000002',name:'Kamisato Ayaka',level:70,ascension:5,constellation:0,talents:{attack:6,skill:6,burst:6},status:'Building',priority:'High',targetLevel:90,targetAscension:6,targetWeaponLevel:90,targetTalents:{attack:10,skill:10,burst:10},buildVariant:'freeze',notes:'keep me',source:'Manual'}],weapons:[{id:'manual:1',name:'Favonius Sword',type:'Sword',level:80,refinement:5,source:'Manual'}],inventory:{Mora:1},ownedArtifacts:[]};
+const characters=[{id:'10000002',name:'Kamisato Ayaka',slug:'kamisato-ayaka'},{id:'10000003',name:'Jean',slug:'jean'}];
+const weapons=[{id:'11509',name:'Mistsplitter Reforged',slug:'mistsplitter-reforged',weapon:'Sword',rarity:5}];
+const merged=mergeGOODAccount({state,good:fixture,characters,weapons});
+assert.equal(merged.summary.charactersAdded,1);assert.equal(merged.summary.charactersRefreshed,1);assert.equal(merged.roster.length,2);
+const ayaka=merged.roster.find(x=>x.id==='10000002');assert.equal(ayaka.level,90);assert.equal(ayaka.constellation,2);assert.deepEqual(ayaka.talents,{attack:9,skill:9,burst:10});assert.equal(ayaka.status,'Building');assert.equal(ayaka.priority,'High');assert.equal(ayaka.notes,'keep me');assert.deepEqual(ayaka.targetTalents,{attack:10,skill:10,burst:10});assert.match(ayaka.weaponId,/^good:11509:/);
+assert.equal(merged.weapons.length,2,'Manual weapon and GOOD weapon should coexist');assert.equal(merged.ownedArtifacts.length,1);assert.equal(merged.inventory.Mora,1234567);assert.equal(merged.inventory["Hero's Wit"],42);assert.equal(merged.inventory['Slime Condensate'],99);
+const app=fs.readFileSync(path.join(root,'app.js'),'utf8');assert.match(app,/Full Account Import/);assert.match(app,/good-file/);assert.match(app,/Hotaru HoYoLAB Exporter/);assert.match(app,/mergeGOODAccount/);
+const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');assert.match(sw,/js\/features\/full-account-import\.js/);assert.match(sw,/tools\/hotaru-hoyolab-export\.user\.js/);assert.match(sw,/hotaru-shell-v26/);
+const qaWorkflow=fs.readFileSync(path.join(root,'.github/workflows/qa.yml'),'utf8');assert.match(qaWorkflow,/\n\s*tools\/\n/,'Release artifact must package the HoYoLAB exporter helper');
+const script=fs.readFileSync(path.join(root,'tools/hotaru-hoyolab-export.user.js'),'utf8');assert.match(script,/character\/list/);assert.match(script,/character\/detail/);assert.match(script,/format:'GOOD'/);assert.doesNotMatch(script,/ltoken|cookie_token|account_id/i,'Exporter must not scrape or persist account credentials');
+console.log('Hotaru GOOD full-account + HoYoLAB full-roster import regression QA passed.');
