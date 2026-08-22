@@ -4,7 +4,7 @@ const app=document.getElementById('app');
 const SECTION_KEY='hotaru.roster-section.v1';
 const UTILITY_KEY='hotaru.team-utility.v1';
 const SECTIONS=[
-  {id:'characters',heading:'Characters',label:'Characters'},
+  {id:'characters',heading:'Characters',label:'Roster Characters'},
   {id:'teams',heading:'Smart Team Creator',label:'Teams & Abyss'},
   {id:'farming',heading:'Smart Farming',label:'Farming'},
   {id:'weapons',heading:'Owned weapons',label:'Weapons'}
@@ -18,45 +18,26 @@ function validUtility(value){return TEAM_UTILITY_OPTIONS.some(item=>item.id===va
 function rosterMain(){const main=app?.querySelector('main');return main?.querySelector('h1')?.textContent?.trim()==='My Roster'?main:null}
 function sectionByHeading(main,heading){return[...main.querySelectorAll(':scope > section')].find(section=>section.querySelector('h2')?.textContent?.trim()===heading)||null}
 function sectionMap(main){return new Map(SECTIONS.map(item=>[item.id,sectionByHeading(main,item.heading)]).filter(([,section])=>section))}
+function activeSection(){return validSection(safeGet(SECTION_KEY,'characters'))}
 
-function ensureRosterTabs(main,sections){
-  let nav=main.querySelector(':scope > .hotaru-roster-tabs');
-  if(!nav){
-    nav=document.createElement('nav');
-    nav.className='hotaru-roster-tabs';
-    nav.setAttribute('aria-label','Roster sections');
-    main.querySelector('.page-head')?.after(nav);
-  }
-  const signature=[...sections.keys()].join('|');
-  if(nav.dataset.signature!==signature){
-    nav.dataset.signature=signature;
-    nav.innerHTML=SECTIONS.filter(item=>sections.has(item.id)).map(item=>`<button type="button" data-hotaru-roster-section="${item.id}">${item.label}</button>`).join('');
-  }
-  return nav;
-}
-
-function applyRosterSection({scroll=false}={}){
+function applyRosterSection(){
   const main=rosterMain();if(!main)return;
   const sections=sectionMap(main);if(!sections.size)return;
-  const active=validSection(safeGet(SECTION_KEY,'characters'));
-  const resolved=sections.has(active)?active:[...sections.keys()][0];
-  const nav=ensureRosterTabs(main,sections);
+  const wanted=activeSection(),resolved=sections.has(wanted)?wanted:[...sections.keys()][0];
   for(const [id,section] of sections){
     section.id=`roster-${id}`;
     section.hidden=id!==resolved;
     section.dataset.hotaruRosterSection=id;
   }
-  nav.querySelectorAll('[data-hotaru-roster-section]').forEach(button=>{
-    const selected=button.dataset.hotaruRosterSection===resolved;
-    button.classList.toggle('active',selected);
-    button.setAttribute('aria-current',selected?'page':'false');
-  });
   const oldJump=main.querySelector(':scope > .hotaru-section-jump');if(oldJump)oldJump.hidden=true;
-  if(scroll)nav.scrollIntoView({behavior:'smooth',block:'start'});
+  main.dataset.hotaruRosterActive=resolved;
 }
 
-function chooseRosterSection(id,{scroll=false}={}){
-  const value=validSection(id);safeSet(SECTION_KEY,value);applyRosterSection({scroll});
+function chooseRosterSection(id){
+  const value=validSection(id);safeSet(SECTION_KEY,value);applyRosterSection();
+  document.getElementById('hotaru-section-menu')?.querySelector('[data-hotaru-close-menu]')?.click();
+  document.dispatchEvent(new CustomEvent('hotaru:roster-section-changed',{detail:{section:value}}));
+  requestAnimationFrame(()=>window.scrollTo({top:0,behavior:'smooth'}));
 }
 
 function utilityLabel(value){return TEAM_UTILITY_OPTIONS.find(item=>item.id===value)?.label||'No preference'}
@@ -117,12 +98,11 @@ function schedulePatch(){if(patchQueued)return;patchQueued=true;requestAnimation
 if(app)new MutationObserver(schedulePatch).observe(app,{childList:true,subtree:true});
 
 document.addEventListener('click',event=>{
-  const rosterTab=event.target.closest('[data-hotaru-roster-section]');
-  if(rosterTab){event.preventDefault();chooseRosterSection(rosterTab.dataset.hotaruRosterSection,{scroll:false});return}
+  const rosterSection=event.target.closest('[data-hotaru-roster-section]');
+  if(rosterSection){event.preventDefault();event.stopPropagation();chooseRosterSection(rosterSection.dataset.hotaruRosterSection);return}
   if(event.target.closest('[data-action="open-team-creator"]'))safeSet(SECTION_KEY,'teams');
   if(event.target.closest('[data-action="open-farm-planner"]'))safeSet(SECTION_KEY,'farming');
   const menuJump=event.target.closest('[data-hotaru-nav-jump]');if(menuJump)safeSet(SECTION_KEY,menuJump.dataset.hotaruNavJump==='teams'?'teams':'farming');
-  const oldJump=event.target.closest('[data-hotaru-scroll]');if(oldJump){const target=oldJump.dataset.hotaruScroll||'';if(target.includes('roster-teams'))safeSet(SECTION_KEY,'teams');else if(target.includes('roster-farming'))safeSet(SECTION_KEY,'farming');else if(target.includes('roster-weapons'))safeSet(SECTION_KEY,'weapons');else if(target.includes('roster-characters'))safeSet(SECTION_KEY,'characters')}
 },{capture:true});
 
 document.addEventListener('change',event=>{
