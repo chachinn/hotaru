@@ -1,6 +1,6 @@
-const CACHE = 'hotaru-shell-v26';
+const CACHE = 'hotaru-shell-v27';
 const APP_SHELL = [
-  './','./index.html','./style.css?v=1.8.0','./css/enhancements.css?v=1.4.0','./css/content-enhancements.css?v=1.0.0','./css/guide-ui.css?v=1.3.0','./css/exploration-ui.css?v=1.0.0','./app.js?v=1.12.0','./js/enhancements.js?v=1.7.0','./js/content-enhancements.js?v=1.2.0','./js/features/guide-loader.js?v=1.1.0','./tools/hotaru-hoyolab-export.user.js',
+  './','./index.html','./style.css?v=1.8.0','./css/enhancements.css?v=1.4.0','./css/content-enhancements.css?v=1.0.0','./css/guide-ui.css?v=1.3.0','./css/exploration-ui.css?v=1.0.0','./css/roster-ui.css?v=1.0.0','./app.js?v=1.12.0','./js/enhancements.js?v=1.7.0','./js/content-enhancements.js?v=1.2.0','./js/features/guide-loader.js?v=1.1.0','./tools/hotaru-hoyolab-export.user.js',
   './manifest.json',
   './js/core/state.js','./js/data/team-profiles/index.js','./js/data/abyss-cycle.js','./js/data/farming-schedule.js','./js/core/cache.js','./js/data/game-data.js','./js/data/enka.js','./js/data/character-reference.js','./js/data/map-registry.js','./js/data/build-profiles/index.js','./js/data/build-profiles/arlecchino.js','./js/data/build-profiles/tartaglia.js','./js/data/build-profiles/columbina.js',
   './js/features/uid-import.js',
