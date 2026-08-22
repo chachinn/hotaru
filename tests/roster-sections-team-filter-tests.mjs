@@ -47,14 +47,17 @@ assert.doesNotMatch(ui,/hotaru-roster-tabs/,'the abandoned horizontal subsection
 for(const section of ['characters','teams','farming','weapons'])assert.ok(nav.includes(`data-hotaru-roster-section="${section}"`),`hamburger should expose ${section}`);
 assert.match(css,/section\[hidden\]/);
 assert.match(css,/\.hotaru-team-utility-field/);
-assert.match(index,/roster-sections-team-filter\.css\?v=1\.0\.0/);
+assert.match(css,/\.hotaru-team-picker-ownership-field/);
+assert.match(css,/@media\(max-width:600px\)[\s\S]*\.smart-team-card \.team-controls\{grid-template-columns:1fr\}/,'Smart Team controls must stack on phone widths');
+assert.match(index,/roster-sections-team-filter\.css\?v=1\.0\.1/);
 assert.match(index,/roster-sections-team-filter\.js\?v=1\.0\.1/);
 assert.match(index,/navigation-refresh\.js\?v=1\.2\.0/);
-assert.match(sw,/const CACHE = 'hotaru-shell-v38'/);
-assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v37'/);
+assert.match(sw,/const CACHE = 'hotaru-shell-v39'/);
+assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v38'/);
 assert.match(sw,/team-utility-tags\.js/);
+assert.match(sw,/roster-sections-team-filter\.css\?v=1\.0\.1/);
 assert.match(sw,/roster-sections-team-filter\.js\?v=1\.0\.1/);
 assert.match(sw,/navigation-refresh\.js\?v=1\.2\.0/);
-assert.match(updater,/RELEASE='v38'/);
+assert.match(updater,/RELEASE='v39'/);
 
-console.log('Hotaru clean Roster hamburger sections + team utility filter QA passed.');
+console.log('Hotaru clean Roster hamburger sections + team utility + Smart Team phone layout QA passed.');
