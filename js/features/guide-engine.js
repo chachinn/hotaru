@@ -1,4 +1,5 @@
-import { reviewedTeamsForCharacter, canonicalTeamCharacter } from '../data/team-profiles/index.js';
+import { canonicalTeamCharacter } from '../data/team-profiles/index.js';
+import { recommendedTeamsForCharacter } from '../data/team-recommendations.js';
 import { talentBookSchedule } from '../data/farming-schedule.js';
 const TEAM_LIBRARY={
   Hydro:[['Vaporize',['Xiangling','Bennett','Kazuha']],['Electro-Charged',['Fischl','Ororon','Sucrose']],['Bloom / Hyperbloom',['Nahida','Kuki Shinobu','Nilou']]],
@@ -64,20 +65,21 @@ function available(catalog,name,self){
   const wanted=TEAM_NAME_ALIASES[String(name||'').trim().toLowerCase()]||canonicalTeamCharacter(name);
   return catalog?.characters?.find(c=>(sameName(c.name,wanted)||sameName(c.name,name))&&!sameName(c.name,self))||null;
 }
-function completeReviewedTeams(detail={},catalog={}){
-  const teams=reviewedTeamsForCharacter(detail.name);if(!teams.length)return[];
+function completeRecommendedTeams(detail={},catalog={}){
+  const teams=recommendedTeamsForCharacter(detail.name);if(!teams.length)return[];
   return teams.map(team=>{
-    const members=(team.members||[]).map(name=>sameName(name,detail.name)?{...detail,role:'Core'}:(()=>{const found=available(catalog,name,detail.name);return found?{...found,role:'Reviewed teammate'}:null})());
+    const reviewed=team.confidence==='Reviewed',roleLabel=reviewed?'Reviewed teammate':'Simulation-backed teammate';
+    const members=(team.members||[]).map(name=>sameName(name,detail.name)?{...detail,role:'Core'}:(()=>{const found=available(catalog,name,detail.name);return found?{...found,role:roleLabel}:null})());
     if(members.length!==4||members.some(x=>!x))return null;
-    return{name:team.name,members,reviewed:true,source:team.source,why:team.why,notes:team.notes||''};
+    return{name:team.name,members,reviewed,confidence:team.confidence||'Sourced',source:team.source,why:team.why,notes:team.notes||''};
   }).filter(Boolean);
 }
 function synergyExplanation(character,teammate,archetype,team){if(team?.why)return team.why;const element=teammate?.element||'';return `${teammate?.name||'This teammate'} fills a ${element||'complementary'} slot in Hotaru's ${archetype} template and should be adjusted for your actual rotation, sustain, and energy needs.`}
 export function sampleTeams(detail={},catalog={}){
-  const self=detail.name,reviewed=completeReviewedTeams(detail,catalog);if(reviewed.length)return reviewed;
+  const self=detail.name,sourced=completeRecommendedTeams(detail,catalog);if(sourced.length)return sourced;
   const element=detail.element||'Unknown',text=kitText(detail,{}),output=[];
-  if(/lunar|moonsign/.test(text)){const mates=LUNAR_TEAMMATES.map(name=>available(catalog,name,self)).filter(Boolean);if(mates.length>=3)output.push({name:'Lunar Reaction Core',members:[{...detail,role:'Core'},...mates.slice(0,3).map((x,i)=>({...x,role:i===0?'Main DPS / Driver':i===1?'Sub-DPS / Support':'Support'}))],reviewed:false})}
-  for(const [name,candidates] of TEAM_LIBRARY[element]||[]){const mates=candidates.map(x=>available(catalog,x,self));if(mates.length===3&&mates.every(Boolean))output.push({name,members:[{...detail,role:'Core'},...mates.map((x,i)=>({...x,role:i===0?'Main DPS / Driver':i===1?'Sub-DPS / Support':'Support'}))],reviewed:false})}
+  if(/lunar|moonsign/.test(text)){const mates=LUNAR_TEAMMATES.map(name=>available(catalog,name,self)).filter(Boolean);if(mates.length>=3)output.push({name:'Lunar Reaction Core',members:[{...detail,role:'Core'},...mates.slice(0,3).map((x,i)=>({...x,role:i===0?'Main DPS / Driver':i===1?'Sub-DPS / Support':'Support'}))],reviewed:false,confidence:'Template'})}
+  for(const [name,candidates] of TEAM_LIBRARY[element]||[]){const mates=candidates.map(x=>available(catalog,x,self));if(mates.length===3&&mates.every(Boolean))output.push({name,members:[{...detail,role:'Core'},...mates.map((x,i)=>({...x,role:i===0?'Main DPS / Driver':i===1?'Sub-DPS / Support':'Support'}))],reviewed:false,confidence:'Template'})}
   return output;
 }
 export function notableTeammates(detail={},catalog={}){const seen=new Set(),rows=[];for(const team of sampleTeams(detail,catalog))for(const member of team.members.slice(1)){if(seen.has(member.name))continue;seen.add(member.name);rows.push({...member,archetype:team.name,reviewed:Boolean(team.reviewed),explanation:synergyExplanation(detail,member,team.name,team)})}return rows.slice(0,12)}
