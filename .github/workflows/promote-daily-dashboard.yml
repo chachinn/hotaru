@@ -27,7 +27,7 @@ jobs:
           PATCH_SHA: 18e8cf32808d2e12d19cac4646e61166ac76f5b0f0119011ec6e0e81eac137c2
         run: |
           set -euo pipefail
-          git fetch origin main
+          git fetch origin main:refs/remotes/origin/main
           test "$(git rev-parse origin/main)" = "$BASE_SHA"
           test "$(sha256sum .hotaru-daily-dashboard.patch.gz.b64 | awk '{print $1}')" = "$PAYLOAD_SHA"
           base64 -d .hotaru-daily-dashboard.patch.gz.b64 > /tmp/hotaru-daily-dashboard.patch.gz
