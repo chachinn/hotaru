@@ -12,6 +12,7 @@ Hotaru is an unofficial Genshin Impact character build companion focused on help
 - Enka.Network public-showcase import with manual JSON fallback.
 - Farming material calculations and character-material map shortcuts.
 - **Farm Today + Resin Planner:** turns active roster goals into a server-day-aware top-three farming plan, separates 0-Resin world materials from Resin activities, respects talent-domain rotations and the 04:00 server reset, budgets current Resin without inventing random drop quantities, and keeps guaranteed progression ahead of artifact RNG.
+- **Daily Dashboard:** Home turns roster focus, top-three Farm Today actions, Resin budget, reviewed team readiness, and quick build actions into one mobile-first daily view.
 - Interactive Teyvat map powered through AppSample's embeddable map, with category/material dropdown filters, quick marker categories, a shared verified marker registry, special-area shortcuts, and access to the provider's complete filter panel.
 - Local material planner with Needed / Owned / Remaining tracking.
 - Local backup/restore and migration-safe storage.
