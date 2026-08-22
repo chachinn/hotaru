@@ -21,10 +21,9 @@ function patchFlexiblePair(){
   const roster=rosterFromState(),allowUnowned=Boolean(smart.querySelector('#team-allow-unowned')?.checked);
   const reaction=smart.querySelector('#hotaru-team-reaction')?.value||'all',flexible=buildFlexiblePairTeams({roster,lockedNames:[lock1,lock2],allowUnowned,limit:12,reaction});
   if(!flexible.supported){pendingGenerate=false;return}
-  const shown=flexible.results.length?flexible.results:(!allowUnowned?flexible.previewResults||[]:[]);
+  const shown=flexible.results||[];
   if(!shown.length){pendingGenerate=false;return}
-  const previewCopy=!flexible.results.length&&!allowUnowned?' No fully owned bridge exists, so Hotaru is showing the sourced missing-character preview instead of a dead end.':'';
-  setHtml(host,`<div class="notice warn"><strong>Flexible Pair Builder · Adapted, not reviewed</strong><br>${esc(flexible.rationale)}${esc(previewCopy)}</div><div class="team-results">${shown.map(card).join('')}</div>`);
+  setHtml(host,`<div class="notice warn"><strong>Flexible Pair Builder · Adapted, not reviewed</strong><br>${esc(flexible.rationale)}</div><div class="team-results">${shown.map(card).join('')}</div>`);
   pendingGenerate=false;
 }
 function schedulePatch(){

@@ -59,11 +59,11 @@ assert.match(ui,/buildFlexiblePairTeams/);
 assert.match(ui,/Flexible Pair Builder · Adapted, not reviewed/);
 assert.match(ui,/team\.adaptationTier\|\|'Adapted'/,'adapted cards must display the actual adaptation tier');
 assert.match(ui,/source\.links/,'adapted cards should show both corroborating sources');
-assert.match(index,/flexible-pair-ui\.js\?v=1\.0\.3/);
-assert.match(sw,/const CACHE = 'hotaru-shell-v45'/);
-assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v44'/);
+assert.match(index,/flexible-pair-ui\.js\?v=1\.0\.4/);
+assert.match(sw,/const CACHE = 'hotaru-shell-v46'/);
+assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v45'/);
 assert.match(sw,/js\/features\/flexible-pair-builder\.js/);
-assert.match(sw,/js\/features\/flexible-pair-ui\.js\?v=1\.0\.3/);
+assert.match(sw,/js\/features\/flexible-pair-ui\.js\?v=1\.0\.4/);
 assert.equal(FLEXIBLE_PAIR_POLICY.specialPairs.length,1,'Odette + Flins keeps its dedicated audited recipe');
 assert.equal(FLEXIBLE_PAIR_POLICY.genericPairBridge,true,'other source-covered pairs should use the generic source-backed bridge instead of dead-ending');
 

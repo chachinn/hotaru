@@ -24,16 +24,13 @@ const fixtureNames=['Mavuika','Citlali','Bennett','Sucrose','Xilonen','Kaeya','R
 const fixtureCharacters=fixtureNames.map(name=>({name}));
 const raw=[];
 let dps=200000;
-// Create >30 unique valid Mavuika compositions. This proves 30 is a floor, not a cap.
 const others=fixtureNames.filter(name=>name!=='Mavuika');
 outer: for(let a=0;a<others.length;a++)for(let b=a+1;b<others.length;b++)for(let c=b+1;c<others.length;c++){
   raw.push({character_1:'Mavuika',character_2:others[a],character_3:others[b],character_4:others[c],DPS:dps--});
   if(raw.length===45)break outer;
 }
 assert.equal(raw.length,45);
-// Duplicate a real composition at a lower DPS: it must not inflate the unique count.
 raw.push({...raw[0],DPS:1});
-// Invalid rows must be dropped.
 raw.push({character_1:'Mavuika',character_2:'Unknown Future Unit',character_3:'Bennett',character_4:'Sucrose',DPS:999999});
 raw.push({character_1:'Mavuika',character_2:'Mavuika',character_3:'Bennett',character_4:'Sucrose',DPS:999998});
 raw.push({character_1:'Mavuika',character_2:'Citlali',character_3:'Bennett',character_4:'Nicole',DPS:0});
@@ -44,7 +41,6 @@ assert.ok(normalized.every(team=>team.confidence==='Simulation-backed'&&team.sou
 assert.ok(normalized.every(team=>!team.reaction),'GI-Rec rows must remain reaction-unknown rather than infer from elements');
 assert.ok(normalized.every(team=>!team.members.includes('Unknown Future Unit')),'unreleased/unknown team members must never enter recommendations');
 
-// A low cap is per-character selection, not a global popularity sort; every character with source rows remains represented.
 const perCharacter=normalizeGIRecTeams(raw,fixtureCharacters,{perCharacterLimit:2});
 for(const name of fixtureNames){
   const sourceHas=raw.some(row=>[row.character_1,row.character_2,row.character_3,row.character_4].includes(name));
@@ -74,8 +70,8 @@ assert.ok(sampleTeams({name:'Mavuika',element:'Pyro',description:''},guideCatalo
 
 const index=read('index.html'),sw=read('service-worker.js'),bootstrap=read('js/features/team-community-bootstrap.js'),matcher=read('js/features/roster-team-matcher.js'),daily=read('js/features/daily-dashboard.js');
 assert.match(index,/team-community-bootstrap\.js\?v=1\.1\.1/);
-assert.match(sw,/hotaru-shell-v45/);
-assert.match(sw,/PREVIOUS_CACHE = 'hotaru-shell-v44'/);
+assert.match(sw,/hotaru-shell-v46/);
+assert.match(sw,/PREVIOUS_CACHE = 'hotaru-shell-v45'/);
 for(const asset of ['js/data/team-recommendations.js','js/data/team-reviewed-v45-batch.js','js/data/community-team-catalog.js','js/data/team-reaction-tags.js','js/features/team-community-bootstrap.js?v=1.1.1'])assert.ok(sw.includes(asset),`PWA shell must package ${asset}`);
 assert.match(sw,/raw\.githubusercontent\.com\/SenjeyB\/gi-rec/,'remote community data should bypass the service-worker app-shell cache');
 assert.match(bootstrap,/sourceGaps/,'community status must publish explicit 30-team source gaps');

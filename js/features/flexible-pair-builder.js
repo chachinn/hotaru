@@ -1,6 +1,7 @@
 import { canonicalTeamCharacter } from '../data/team-profiles/index.js';
 import { recommendedTeamsForCharacter, teamHasValidSource } from '../data/team-recommendations.js';
 import { teamMatchesReaction } from '../data/team-reaction-tags.js';
+import { utilityTagsForCharacter } from '../data/team-utility-tags.js';
 
 const KQM_FLINS='https://keqingmains.com/q/flins-quickguide/';
 const IV_ODETTE='https://www.icy-veins.com/genshin-impact/odette-team-guide';
@@ -20,6 +21,29 @@ function pairKey(values=[]){return unique(values.map(canonicalTeamCharacter)).ma
 function entryTeamName(entry={}){return canonicalTeamCharacter(entry.teamName||entry.name)}
 function rosterSet(roster=[]){return new Set((roster||[]).flatMap(entry=>[entryTeamName(entry),entry.name]).map(key).filter(Boolean))}
 function preference(name=''){return PREFERENCE.get(key(name))||40}
+
+const TEAM_ELEMENTS=['Anemo','Geo','Electro','Dendro','Hydro','Pyro','Cryo'];
+function normalizedElement(value=''){const raw=String(value||'').trim();return TEAM_ELEMENTS.find(element=>element.toLowerCase()===raw.toLowerCase())||''}
+function travelerElementFromText(value=''){const text=String(value||'').toLowerCase();return TEAM_ELEMENTS.find(element=>new RegExp(`(?:^|[^a-z])${element.toLowerCase()}(?:[^a-z]|$)`).test(text))||''}
+function catalogTeamName(character={}){const name=String(character?.name||'').trim(),isTraveler=/^(?:traveler|aether|lumine)(?:\b|\s|[-_(])/i.test(name)||/traveler/i.test(name);if(!isTraveler)return canonicalTeamCharacter(name);const element=normalizedElement(character?.element)||travelerElementFromText([name,character?.slug,character?.sourceId,character?.id,character?.description].join(' '));return element?`${element} Traveler`:canonicalTeamCharacter(name)}
+function elementLookup(roster=[],catalogCharacters=[]){const map=new Map();for(const character of catalogCharacters||[]){const name=catalogTeamName(character),element=normalizedElement(character?.element)||travelerElementFromText([character?.name,character?.slug,character?.sourceId,character?.id].join(' '));if(name&&element)map.set(key(name),element)}for(const entry of roster||[]){const name=entryTeamName(entry),element=normalizedElement(entry?.element)||map.get(key(name))||'';if(name&&element)map.set(key(name),element)}return map}
+function utilityOverlap(a='',b=''){const left=utilityTagsForCharacter(a),right=utilityTagsForCharacter(b),fields=['healer','shielder','buffer','debuffer','crowdControl','interruptionResistance','battery','offFieldDps'];return fields.reduce((score,field)=>score+(left[field]&&right[field]?1:0),0)}
+function rosterReplacementScore(entry={},missing=''){const talents=entry?.talents||{},talentTotal=['attack','skill','burst'].reduce((sum,name)=>sum+Number(talents?.[name]||1),0);return utilityOverlap(entryTeamName(entry),missing)*100+Number(entry?.level||1)+Number(entry?.constellation||0)*8+talentTotal}
+function ownedElementSubstitutions(baseTeams=[],roster=[],catalogCharacters=[],locks=[]){
+  const elements=elementLookup(roster,catalogCharacters),ownedEntries=(roster||[]).map(entry=>({...entry,teamName:entryTeamName(entry)})).filter(entry=>entry.teamName),out=[],seen=new Set();
+  for(const base of baseTeams.slice(0,24)){
+    if(base.ownedComplete||!base.missing?.length)continue;
+    let variants=[{members:[...(base.members||[])],replacements:[]}];
+    for(const missing of base.missing){
+      const element=elements.get(key(missing));if(!element){variants=[];break}
+      const candidates=ownedEntries.filter(entry=>elements.get(key(entry.teamName))===element&&!locks.some(lock=>key(lock)===key(entry.teamName))).sort((a,b)=>rosterReplacementScore(b,missing)-rosterReplacementScore(a,missing)||a.teamName.localeCompare(b.teamName)).slice(0,5);
+      const next=[];
+      for(const variant of variants)for(const candidate of candidates){if(variant.members.some(name=>key(name)===key(candidate.teamName)&&key(name)!==key(missing)))continue;const members=variant.members.map(name=>key(name)===key(missing)?candidate.teamName:name);if(new Set(members.map(key)).size!==4)continue;next.push({members,replacements:[...variant.replacements,{from:missing,to:candidate.teamName,element}]});if(next.length>=20)break}variants=next;if(!variants.length)break;
+    }
+    for(const variant of variants){const comp=compositionKey(variant.members);if(seen.has(comp))continue;seen.add(comp);const replacementCopy=variant.replacements.map(item=>`${item.to} replaces ${item.from} to preserve the ${item.element} slot`).join('; ');out.push({...base,id:`${base.id}-owned-${out.length+1}`,name:`Owned substitution · ${variant.replacements.map(item=>item.to).join(' + ')}`,members:variant.members,why:`${base.why} Owned-only adaptation: ${replacementCopy}.`,notes:'This is a source-informed owned substitution, not the exact sourced lineup. Hotaru preserves the missing slot’s element and prefers similar verified utility where available, but the replacement may not reproduce every buff or mechanic of the original character.',confidence:'Adapted',adaptationTier:'Owned element substitution',adaptedFrom:base.name,missing:[],ownedCount:4,ownedComplete:true,score:4100+Number(base.score||0)*.01+variant.replacements.reduce((sum,item)=>sum+utilityOverlap(item.to,item.from)*20,0)});if(out.length>=24)return out}
+  }
+  return out;
+}
 function source(){return{
   label:'KQM Flins + Icy Veins Odette',
   url:KQM_FLINS,
@@ -78,7 +102,7 @@ function odetteFlinsCandidates(roster=[]){
 }
 
 function sourceRank(team={}){return team.confidence==='Reviewed'?3:team.confidence==='Community-sourced'?2:team.confidence==='Simulation-backed'?1:0}
-function genericPairCandidates(roster=[],locks=[],reaction='all'){
+function genericPairCandidates(roster=[],locks=[],reaction='all',catalogCharacters=[]){
   const owned=rosterSet(roster),pools=locks.map(lock=>recommendedTeamsForCharacter(lock).filter(team=>teamHasValidSource(team)&&teamMatchesReaction(team,reaction)));
   if(pools.some(pool=>!pool.length))return{all:[],coverageGap:true};
   const supportMap=new Map(),sideSources=[[],[]];
@@ -116,10 +140,11 @@ function genericPairCandidates(roster=[],locks=[],reaction='all'){
       score:ownedCount*1000+(a.sides.size+b.sides.size)*100+(a.frequency+b.frequency)*10+(a.sourceRank+b.sourceRank)
     });
   }
-  return{all:out.sort((a,b)=>b.score-a.score||a.name.localeCompare(b.name)),coverageGap:false};
+  const substitutions=ownedElementSubstitutions(out,roster,catalogCharacters,locks),all=[...out,...substitutions],deduped=[],finalSeen=new Set();for(const team of all.sort((a,b)=>b.score-a.score||a.name.localeCompare(b.name))){const comp=compositionKey(team.members||[]);if(finalSeen.has(comp))continue;finalSeen.add(comp);deduped.push(team)}
+  return{all:deduped,coverageGap:false};
 }
 
-export function buildFlexiblePairTeams({roster=[],lockedNames=[],allowUnowned=false,limit=12,reaction='all'}={}){
+export function buildFlexiblePairTeams({roster=[],catalogCharacters=[],lockedNames=[],allowUnowned=false,limit=12,reaction='all'}={}){
   const locks=unique(lockedNames).map(name=>{
     const row=(roster||[]).find(entry=>key(entry.name)===key(name)||key(entry.teamName)===key(name));
     return canonicalTeamCharacter(row?.teamName||name);
@@ -135,7 +160,7 @@ export function buildFlexiblePairTeams({roster=[],lockedNames=[],allowUnowned=fa
       rationale:'No exact sourced Odette + Flins composition is currently in Hotaru. These options preserve Flins’s sourced Lunar-Charged requirements and use Odette only as the flexible off-field slot.'
     };
   }
-  const generic=genericPairCandidates(roster,locks,reaction),eligible=allowUnowned?generic.all:generic.all.filter(team=>team.ownedComplete);
+  const generic=genericPairCandidates(roster,locks,reaction,catalogCharacters),eligible=allowUnowned?generic.all:generic.all.filter(team=>team.ownedComplete);
   return{
     kind:'flexible-pair',supported:!generic.coverageGap,adapted:true,generic:true,coverageGap:generic.coverageGap,lockedNames:locks,
     results:eligible.slice(0,requested),previewResults:generic.all.slice(0,requested),previewAvailable:generic.all.some(team=>!team.ownedComplete),exactPair:false,
@@ -147,5 +172,6 @@ export const FLEXIBLE_PAIR_POLICY={
   label:'Adapted · Source-backed',
   specialPairs:[['Odette','Flins']],
   genericPairBridge:true,
+  ownedElementSubstitution:true,
   sources:[KQM_FLINS,IV_ODETTE]
 };

@@ -5,6 +5,7 @@ import { matchReviewedTeams } from './roster-team-matcher.js';
 import { buildFlexiblePairTeams } from './flexible-pair-builder.js';
 import { planReviewedAbyssTeams } from './abyss-team-planner.js';
 import { applyAbyssCycleIntelligence } from './abyss-intelligence.js';
+import { inferredTravelerElement, teamPickerCharacters } from '../data/team-picker-identities.js';
 
 const app=document.getElementById('app');
 const PICKER_FILTER_KEY='hotaru.smart-team-picker-ownership.v1';
@@ -23,9 +24,8 @@ function setHtml(node,html){if(node&&node.innerHTML!==html)node.innerHTML=html}
 function smartCard(){return document.querySelector('.smart-team-card')}
 function resultsHost(card=smartCard()){return card?.querySelector(':scope > .section')||null}
 function selectedReaction(card=smartCard()){const select=card?.querySelector('#hotaru-team-reaction');return select&&!select.disabled?String(select.value||'all'):'all'}
-function ownedNameSet(state,catalog){const normalized=sortRoster(normalizeRoster(state?.roster||[],catalog?.characters||[])),names=new Set();for(const entry of normalized){for(const value of [entry?.name,entry?.teamName])if(value)names.add(key(value))}return{normalized,names}}
-function travelerIdentity(character={}){const name=String(character?.name||'').trim(),element=String(character?.element||'').trim(),isTraveler=/^(?:traveler|aether|lumine)$/i.test(name)||/traveler/i.test(name);if(!isTraveler)return{name,value:name,label:name};const validElement=['Anemo','Geo','Electro','Dendro','Hydro','Pyro','Cryo'].includes(element),value=validElement?`${element} Traveler`:'Traveler',id=`${character?.id||''} ${character?.sourceId||''}`,sex=/aether/i.test(name)||/10000005/.test(id)?'Aether':/lumine/i.test(name)||/10000007/.test(id)?'Lumine':'';return{name,value,label:sex?`${value} · ${sex}`:value}}
-function pickerCharacters(characters=[]){const out=[],seen=new Set();for(const character of characters){const identity=travelerIdentity(character),value=String(identity.value||'').trim();if(!value)continue;const signature=key(value);if(seen.has(signature))continue;seen.add(signature);out.push({...character,teamPickerValue:value,teamPickerLabel:identity.label||value})}return out}
+function normalizedElement(value=''){const raw=String(value||'').trim();return ['Anemo','Geo','Electro','Dendro','Hydro','Pyro','Cryo'].find(element=>element.toLowerCase()===raw.toLowerCase())||''}
+function ownedNameSet(state,catalog){const byId=new Map((catalog?.characters||[]).map(character=>[String(character?.id||''),character])),byName=new Map((catalog?.characters||[]).map(character=>[key(character?.name),character]));const normalized=sortRoster(normalizeRoster(state?.roster||[],catalog?.characters||[])).map(entry=>{const character=byId.get(String(entry?.id||''))||byName.get(key(entry?.name))||{};return{...entry,element:normalizedElement(entry?.element)||normalizedElement(character?.element)||inferredTravelerElement(character),rarity:Number(entry?.rarity||character?.rarity||0)}}),names=new Set();for(const entry of normalized){for(const value of [entry?.name,entry?.teamName])if(value)names.add(key(value))}return{normalized,names}}
 function matchesPickerFilter(name,owned,filter){const isOwned=owned.has(key(name));return filter==='owned'?isOwned:filter==='unowned'?!isOwned:true}
 
 function ensureOwnershipFilter(card){
@@ -50,7 +50,7 @@ async function syncFullCatalogPickers(){
   const card=smartCard();if(!card)return;
   const mode=card.querySelector('#team-mode')?.value||'roster',filter=ensureOwnershipFilter(card);if(mode==='roster'||mode==='abyss')return;
   try{
-    const catalog=await getCatalog(),state=loadState(),{names:owned}=ownedNameSet(state,catalog),allCharacters=pickerCharacters([...(catalog?.characters||[])].filter(character=>character?.name)).sort((a,b)=>String(a.teamPickerLabel||a.name).localeCompare(String(b.teamPickerLabel||b.name))),characters=allCharacters.filter(character=>matchesPickerFilter(character.teamPickerValue||character.name,owned,filter));
+    const catalog=await getCatalog(),state=loadState(),{names:owned}=ownedNameSet(state,catalog),allCharacters=teamPickerCharacters([...(catalog?.characters||[])].filter(character=>character?.name)).sort((a,b)=>String(a.teamPickerLabel||a.name).localeCompare(String(b.teamPickerLabel||b.name))),characters=allCharacters.filter(character=>matchesPickerFilter(character.teamPickerValue||character.name,owned,filter));
     for(const [id,stateKey] of [['team-lock-1','teamLock1'],['team-lock-2','teamLock2']]){
       const select=card.querySelector(`#${id}`);if(!select)continue;
       const desired=String(state.ui?.[stateKey]||select.value||'');
@@ -80,7 +80,7 @@ function sourcedCard(team,index){
   return`<article class="team-card"><div class="team-card-head"><div><div class="eyebrow">${index===0?'Best match':`Alternative ${index+1}`}</div><h3>${esc(team.name)}</h3></div><div class="team-badges"><span class="pill ${team.ownedComplete?'good':'warn'}">Owned ${team.ownedCount}/4</span><span class="pill gray">${esc(team.confidence||'Sourced')}</span></div></div><div class="team-members">${(team.members||[]).map(name=>`<div class="team-member ${(team.missing||[]).includes(name)?'missing':''}"><strong>${esc(name)}</strong><span>${(team.missing||[]).includes(name)?'Not owned':'Owned'}</span></div>`).join('')}</div><p class="team-why">${esc(team.why||'')}</p>${team.notes?`<p class="muted small">${esc(team.notes)}</p>`:''}<div class="team-source"><span>${esc(sourceType)}</span><div>${links}</div></div></article>`;
 }
 function flexibleCard(team,index){
-  return`<article class="team-card team-adapted"><div class="team-card-head"><div><div class="eyebrow">${index===0?'Best flexible fit':`Flexible option ${index+1}`}</div><h3>${esc(team.name)}</h3></div><div class="team-badges"><span class="pill ${team.ownedComplete?'good':'warn'}">Owned ${team.ownedCount}/4</span><span class="pill warn">Adapted · Off-meta</span></div></div><div class="team-members">${(team.members||[]).map(name=>`<div class="team-member ${(team.missing||[]).includes(name)?'missing':''}"><strong>${esc(name)}</strong><span>${(team.missing||[]).includes(name)?'Not owned':'Owned'}</span></div>`).join('')}</div><p class="muted small"><strong>Source structure:</strong> ${esc(team.adaptedFrom||'')}</p><p class="team-why">${esc(team.why||'')}</p>${team.notes?`<p class="muted small">${esc(team.notes)}</p>`:''}<div class="team-source"><span>Cross-checked adaptation</span><div>${sourceLinks(team.source||{})}</div></div></article>`;
+  return`<article class="team-card team-adapted"><div class="team-card-head"><div><div class="eyebrow">${index===0?'Best flexible fit':`Flexible option ${index+1}`}</div><h3>${esc(team.name)}</h3></div><div class="team-badges"><span class="pill ${team.ownedComplete?'good':'warn'}">Owned ${team.ownedCount}/4</span><span class="pill warn">${esc(team.adaptationTier||'Adapted')}</span></div></div><div class="team-members">${(team.members||[]).map(name=>`<div class="team-member ${(team.missing||[]).includes(name)?'missing':''}"><strong>${esc(name)}</strong><span>${(team.missing||[]).includes(name)?'Not owned':'Owned'}</span></div>`).join('')}</div><p class="muted small"><strong>Source structure:</strong> ${esc(team.adaptedFrom||'')}</p><p class="team-why">${esc(team.why||'')}</p>${team.notes?`<p class="muted small">${esc(team.notes)}</p>`:''}<div class="team-source"><span>Cross-checked adaptation</span><div>${sourceLinks(team.source||{})}</div></div></article>`;
 }
 function abyssTeamSideView(team,side){
   const fit=team?.cycleFit,half=side===1?'First half':'Second half',links=sourceLinks(team?.source||{}),sourceType=team?.source?.type||team?.confidence||'Reviewed team';
@@ -119,18 +119,18 @@ async function generateVisibleTeam(){
     if(mode==='lock2'&&(cleanLocks.length<2||key(cleanLocks[0])===key(cleanLocks[1]))){renderError(host,'Choose two different characters for the 2-character lock.');return}
     setHtml(host,'<div class="notice info"><strong>Creating recommendations…</strong><br>Matching your saved roster against sourced team data.</div>');
     const catalog=await getCatalog(),state=loadState(),{normalized}=ownedNameSet(state,catalog),reaction=selectedReaction(card);
-    const exact=matchReviewedTeams({roster:normalized,lockedNames:cleanLocks,allowUnowned,limit:12,reaction});
+    const exact=matchReviewedTeams({roster:normalized,weapons:state?.weapons||[],lockedNames:cleanLocks,allowUnowned,limit:12,reaction});
     if(exact.results?.length){setHtml(host,`<div class="team-results">${exact.results.map(sourcedCard).join('')}</div>`);return}
-    if(exact.sourceResults?.length&&!allowUnowned){const preview=exact.sourceResults.slice(0,12);setHtml(host,`<div class="notice warn"><strong>Closest sourced preview</strong><br>No fully owned match exists for these locks, so Hotaru is showing the sourced teams anyway and marking missing characters. Turn on Allow unowned if you want missing-team results treated as normal results.</div><div class="team-results">${preview.map(sourcedCard).join('')}</div>`);return}
     if(mode==='lock2'){
-      const flexible=buildFlexiblePairTeams({roster:normalized,lockedNames:cleanLocks,allowUnowned,limit:12,reaction});
+      const flexible=buildFlexiblePairTeams({roster:normalized,catalogCharacters:catalog?.characters||[],lockedNames:cleanLocks,allowUnowned,limit:12,reaction});
       if(flexible.supported){
-        const shown=flexible.results.length?flexible.results:(!allowUnowned?flexible.previewResults||[]:[]);
-        if(shown.length){const previewCopy=!flexible.results.length&&!allowUnowned?' No fully owned bridge exists, so this is a missing-character preview.':'';setHtml(host,`<div class="notice warn"><strong>Flexible Pair Builder · Adapted, not reviewed</strong><br>${esc(flexible.rationale)}${esc(previewCopy)}</div><div class="team-results">${shown.map(flexibleCard).join('')}</div>`);return}
+        const shown=flexible.results||[];
+        if(shown.length){setHtml(host,`<div class="notice warn"><strong>Flexible Pair Builder · Adapted, not reviewed</strong><br>${esc(flexible.rationale)}</div><div class="team-results">${shown.map(flexibleCard).join('')}</div>`);return}
       }
     }
     if(exact.pendingLocks?.length){renderPending(host,exact.pendingLocks);return}
-    setHtml(host,`<div class="notice info"><strong>No sourced pair could be built for this reaction filter.</strong><br>Try All reactions or another Team Reaction. Hotaru will keep the pair visible whenever source-backed coverage exists instead of silently returning a dead end.</div>`);
+    if(!allowUnowned&&(exact.sourceResults?.length||mode==='lock2')){setHtml(host,`<div class="notice info"><strong>No fully owned match for these choices.</strong><br>Owned only never inserts characters you do not own. Hotaru tried source-backed teams and owned element/utility substitutions; turn on Allow unowned only if you want to preview remaining roster gaps.</div>`);return}
+    setHtml(host,`<div class="notice info"><strong>No sourced pair could be built for this reaction filter.</strong><br>Try All reactions or another Team Reaction.</div>`);
   }catch(error){renderError(host,error?.message||'Team recommendations could not be created.');}
   finally{generating=false;syncFullCatalogPickers()}
 }

@@ -20,7 +20,7 @@ for(const row of mates){assert.match(row.explanation,new RegExp(row.name.replace
 for(const pair of [['Navia','Flins'],['Navia','Arlecchino']]){
   const bridge=buildFlexiblePairTeams({roster:pair.map(name=>({name})),lockedNames:pair,allowUnowned:false,limit:12});
   assert.equal(bridge.supported,true,`${pair.join(' + ')} should have a source-backed bridge`);
-  assert.ok(bridge.previewResults.length>0,`${pair.join(' + ')} should return a preview instead of no result`);
+  assert.ok(bridge.previewResults.length>0,`${pair.join(' + ')} should retain source-backed bridge candidates internally`);
   assert.ok(bridge.previewResults.every(team=>pair.every(name=>team.members.includes(name))),`${pair.join(' + ')} bridge must keep both locks`);
 }
 
@@ -37,12 +37,12 @@ const mobile=read('js/features/smart-team-mobile-controller.js');
 const reactionUi=read('js/features/roster-sections-team-filter.js');
 const reactions=read('js/data/team-reaction-tags.js');
 const bootstrap=read('js/features/team-community-bootstrap.js');
-assert.match(mobile,/travelerIdentity/,'picker must label Traveler by element');
-assert.match(mobile,/pickerCharacters/,'duplicate Traveler rows must be collapsed to team-selection identities');
+assert.match(mobile,/teamPickerCharacters/,'picker must use the seven-element Traveler identity layer');
+assert.match(mobile,/team-picker-identities/,'Traveler picker identity logic must live in a deterministic pure module');
 assert.match(mobile,/unownedRow=event\.target\.closest\?\.\('\.team-unowned'\)/,'Allow unowned row must have an explicit mobile tap handler');
 assert.match(mobile,/checkbox\.checked=!checkbox\.checked/,'Allow unowned tap must toggle deterministically');
-assert.match(mobile,/Closest sourced preview/,'missing-character exact teams should preview instead of dead-ending');
-assert.match(mobile,/buildFlexiblePairTeams\(\{roster:normalized,lockedNames:cleanLocks,allowUnowned,limit:12,reaction\}\)/,'two-lock fallback must honor Team Reaction');
+assert.doesNotMatch(mobile,/Closest sourced preview/,'Owned-only results must never leak missing characters');
+assert.match(mobile,/buildFlexiblePairTeams\(\{roster:normalized,catalogCharacters:catalog\?\.characters\|\|\[\],lockedNames:cleanLocks,allowUnowned,limit:12,reaction\}\)/,'two-lock fallback must honor Team Reaction and receive catalog metadata');
 assert.doesNotMatch(bootstrap,/checkbox\.dispatchEvent\(new Event\('change'/,'community bootstrap must not synthesize checkbox changes during rerender');
 for(const label of ['Lunar-Charged','Lunar-Bloom','Lunar-Crystallize','Stellar-Conduct','Stellar-Swirl'])assert.match(reactionUi,new RegExp('TEAM_REACTIONS|reactionOptionsHtml'),'reaction selector must be populated from the reaction registry');
 assert.match(reactions,/lunar-charged/);assert.match(reactions,/lunar-bloom/);assert.match(reactions,/lunar-crystallize/);assert.match(reactions,/stellar-conduct/);assert.match(reactions,/stellar-swirl/);assert.match(reactions,/vaporize/);
