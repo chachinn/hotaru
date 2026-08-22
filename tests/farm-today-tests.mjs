@@ -55,5 +55,5 @@ assert.equal(daily.top.length,3);assert.equal(daily.top[0].title,'Light talent b
 const app=fs.readFileSync(new URL('../app.js',import.meta.url),'utf8'),sw=fs.readFileSync(new URL('../service-worker.js',import.meta.url),'utf8'),state=fs.readFileSync(new URL('../js/core/state.js',import.meta.url),'utf8');
 for(const text of ['Farm Today','Resin Planner','Build Farm Today Plan','Genshin server','farm-server'])assert.match(app,new RegExp(text));
 for(const module of ['js/data/farming-schedule.js','js/features/resin-planner.js','js/features/daily-plan.js'])assert.ok(sw.includes(module),`service worker should cache ${module}`);
-assert.ok(sw.includes('hotaru-shell-v24'));assert.ok(sw.includes('app.js?v=1.10.0'));assert.ok(sw.includes('style.css?v=1.7.0'));assert.match(state,/farmServer:'Asia'/);
+assert.ok(sw.includes('hotaru-shell-v25'));assert.ok(sw.includes('app.js?v=1.11.0'));assert.ok(sw.includes('style.css?v=1.8.0'));assert.match(state,/farmServer:'Asia'/);
 console.log('Farm Today + Resin Planner QA passed.');

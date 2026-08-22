@@ -1,0 +1,52 @@
+import { CURRENT_ABYSS_CYCLE, abyssCycleStatus } from '../data/abyss-cycle.js';
+import { canonicalTeamCharacter } from '../data/team-profiles/index.js';
+
+const PHEC=new Set(['Pyro','Hydro','Electro','Cryo']);
+function key(value=''){return String(value||'').trim().toLowerCase()}
+function unique(values=[]){return[...new Set((values||[]).filter(Boolean))]}
+function characterIndex(characters=[]){return new Map((characters||[]).map(character=>[key(canonicalTeamCharacter(character.name)),character]))}
+export function reviewedTeamElements(team,characters=[]){const index=characterIndex(characters);return unique((team?.members||[]).map(name=>index.get(key(canonicalTeamCharacter(name)))?.element).filter(Boolean))}
+function hasAny(elements,choices=[]){return choices.some(value=>elements.includes(value))}
+function teamTraits(team,elements=[]){const members=(team?.members||[]).map(canonicalTeamCharacter),ids=`${team?.id||''} ${team?.name||''}`.toLowerCase();return{
+  elements,
+  pyroNormalCarry:members.includes('Arlecchino')||ids.includes('arlecchino'),
+  cryoElectro:elements.includes('Cryo')&&elements.includes('Electro'),
+  wardBreaker:hasAny(elements,['Pyro','Cryo','Dendro']),
+  broadPhec:elements.filter(element=>PHEC.has(element)).length>=3,
+  pyro:elements.includes('Pyro'),hydro:elements.includes('Hydro'),cryo:elements.includes('Cryo'),electro:elements.includes('Electro'),dendro:elements.includes('Dendro')
+}}
+function fitLabel(score){return score>=145?'Strong':score>=95?'Good':score>=55?'Partial':'Limited'}
+function firstHalfFit(team,characters=[]){
+  const elements=reviewedTeamElements(team,characters),traits=teamTraits(team,elements),matches=[],gaps=[];let score=20;
+  if(traits.cryoElectro){score+=105;matches.push('Cryo + Electro activates the cycle’s Superconduct lane.')}else{
+    if(traits.cryo){score+=34;matches.push('Cryo helps the 12-2 Electro ward and matches the intended half.')}else gaps.push('No Cryo for the preferred Superconduct/Stellar-Conduct route.');
+    if(traits.electro){score+=24;matches.push('Electro matches the first-half reaction focus.')}else gaps.push('No Electro for the Superconduct bonus.');
+  }
+  if(traits.wardBreaker){score+=24;matches.push('Has Pyro/Cryo/Dendro coverage for the Winged Lion Electro ward.')}else gaps.push('Weak coverage for the 12-2 Electro ward.');
+  if(traits.broadPhec){score+=12;matches.push('Broad PHEC coverage helps the Winged Lion orb mechanic.');}
+  return{side:'first',score,label:fitLabel(score),elements,matches,gaps};
+}
+function secondHalfFit(team,characters=[]){
+  const elements=reviewedTeamElements(team,characters),traits=teamTraits(team,elements),matches=[],gaps=[];let score=15;
+  if(traits.pyroNormalCarry){score+=110;matches.push('Arlecchino directly matches the +75% Pyro Normal Attack disorder.');}
+  else if(traits.pyro){score+=48;matches.push('Pyro is strongly useful throughout the second half.');}
+  else gaps.push('No Pyro despite repeated second-half Pyro checks.');
+  if(traits.hydro){score+=28;matches.push('Hydro answers the Baptist’s Pyro shield.')}else gaps.push('No Hydro answer to the Baptist’s Pyro shield.');
+  if(traits.pyro){score+=18;matches.push('Pyro answers Cryo shields and the Cryo Abyss Mage.');}
+  if(traits.dendro||traits.cryo||traits.pyro){score+=14;matches.push('Has an efficient answer to the Baptist’s Electro shield.');}
+  if(elements.length>=3)score+=10;
+  return{side:'second',score,label:fitLabel(score),elements,matches,gaps};
+}
+function annotateTeam(team,side,characters=[]){const fit=side==='first'?firstHalfFit(team,characters):secondHalfFit(team,characters);return{...team,cycleFit:fit}}
+function orientation(pair,firstIndex,characters=[]){const first=annotateTeam(pair.teams[firstIndex],'first',characters),second=annotateTeam(pair.teams[firstIndex===0?1:0],'second',characters);return{teams:[first,second],cycleScore:first.cycleFit.score+second.cycleFit.score}}
+export function applyAbyssCycleIntelligence(plan,{characters=[],cycle=CURRENT_ABYSS_CYCLE,now=new Date()}={}){
+  const status=abyssCycleStatus(now,cycle),base={...plan,cycle,status};
+  if(!status.active)return{...base,cycleApplied:false,results:(plan?.results||[]).map(pair=>({...pair,cycleScore:null,cycleRankScore:pair.score}))};
+  const results=(plan?.results||[]).map(pair=>{const a=orientation(pair,0,characters),b=orientation(pair,1,characters),best=b.cycleScore>a.cycleScore?b:a;const first=best.teams[0].cycleFit,second=best.teams[1].cycleFit,cycleGaps=[];
+    if(!best.teams[0].cycleFit.elements.includes('Cryo')||!best.teams[0].cycleFit.elements.includes('Electro'))cycleGaps.push('First half does not fully match the Cryo + Electro Superconduct lane.');
+    if(!best.teams[1].cycleFit.elements.includes('Pyro'))cycleGaps.push('Second half has no Pyro character for its strongest matchup checks.');
+    return{...pair,teams:best.teams,cycleScore:best.cycleScore,cycleRankScore:pair.score+(best.cycleScore*4),cycleGaps,sideSummary:{first,second}};
+  });
+  results.sort((a,b)=>b.cycleRankScore-a.cycleRankScore||b.cycleScore-a.cycleScore||b.score-a.score||a.id.localeCompare(b.id));
+  return{...base,cycleApplied:true,results};
+}
