@@ -36,6 +36,12 @@ The first audited flexible pair is **Odette + Flins**. Hotaru starts from KQM's 
 
 Hotaru does **not** treat Cyno, Razor, Flins, or other same-element carries as interchangeable. A new pair must receive its own mechanics review before the Flexible Pair Builder can generate it.
 
+## 5. Team utility filters
+
+The Team Creator can narrow the recommendations already shown by Hotaru using conservative baseline utility tags: **Healer**, **Shielder**, **Healer or shielder**, or **Healing + shielding**. The filter does not create a new team and it does not change a team's Reviewed, Simulation-backed, or Adapted evidence tier.
+
+Utility tags intentionally exclude constellation-only shields/healing and uncertain role assumptions. If a character's baseline sustain role has not been verified in Hotaru, that character is left untagged instead of being guessed into the result. The two-team Abyss planner remains outside this single-team utility filter.
+
 ## Abyss boundary
 
 The dated Spiral Abyss planner continues to use only Hotaru's curated reviewed team pool. The larger simulation-backed community catalog and Adapted pair suggestions are deliberately excluded from the Abyss pair-search engine so current-cycle scoring remains controlled, explainable, and performant.
