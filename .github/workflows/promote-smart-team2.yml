@@ -52,7 +52,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          rm -f .hotaru-team2.payload.b64 .hotaru-team2.chunk.00 .hotaru-team2.chunk-1 .hotaru-team2.chunk-2 .hotaru-team2.chunk-3 .hotaru-team2.chunk-4 .hotaru-team2.additions.b64 .github/workflows/promote-smart-team2.yml
+          rm -f .hotaru-team2* .github/workflows/promote-smart-team2.yml
           git add -A
           cat > /tmp/expected.txt <<'EOF'
           README.md
