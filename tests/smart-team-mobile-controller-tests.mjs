@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
+import { TEAM_UTILITY_OPTIONS } from '../js/data/team-utility-tags.js';
 
 const controller=fs.readFileSync('js/features/smart-team-mobile-controller.js','utf8');
 const flexible=fs.readFileSync('js/features/flexible-pair-ui.js','utf8');
@@ -38,7 +39,8 @@ assert.match(utilityUi,/id="hotaru-team-utility"/,'Team Need must remain a real 
 assert.doesNotMatch(utilityUi,/id="hotaru-team-utility-category"/,'the confusing two-step Team Needs category control must be removed');
 assert.match(utilityUi,/<optgroup label="Sustain">/,'sustain choices must be visible in the one Team Need menu');
 assert.match(utilityUi,/<optgroup label="Utility">/,'utility choices must be visible in the one Team Need menu');
-for(const label of ['Healer','Shielder','Healer or Shielder','Healing + Shielding','Buffer','Debuffer / RES shred','Crowd Control / Grouping','Interruption Resistance','Energy / Battery','Off-field DPS'])assert.ok(utilityUi.includes(label),`${label} must be directly available from Team Need`);
+for(const label of ['Healer','Shielder','Healer or Shielder','Healing + Shielding','Buffer','Debuffer / RES shred','Crowd Control / Grouping','Interruption Resistance','Energy / Battery','Off-field DPS'])assert.ok(TEAM_UTILITY_OPTIONS.some(item=>item.label===label),`${label} must be directly available from Team Need`);
+assert.match(utilityUi,/TEAM_UTILITY_OPTIONS\.filter/,'the direct menu must populate from the verified Team Need registry');
 assert.match(utilityUi,/Team Need filtering is only for single-team recommendations/,'Abyss-disabled state must explain why the Team Need filter is unavailable');
 assert.match(css,/@media\(max-width:600px\)[\s\S]*\.smart-team-card \.team-controls\{grid-template-columns:1fr\}/,'phone Smart Team controls must stack into one full-width column');
 assert.match(css,/@media\(max-width:600px\)[\s\S]*\.hotaru-team-utility-field select\{width:100%\}/,'Team Need must remain full-width on phone');
