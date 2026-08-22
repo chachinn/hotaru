@@ -55,11 +55,14 @@ assert.match(ui,/buildFlexiblePairTeams/);
 assert.match(ui,/Flexible Pair Builder · Adapted, not reviewed/);
 assert.match(ui,/Adapted · Off-meta/);
 assert.match(ui,/source\.links/,'adapted cards should show both corroborating sources');
-assert.match(index,/flexible-pair-ui\.js\?v=1\.0\.0/);
-assert.match(sw,/const CACHE = 'hotaru-shell-v35'/);
-assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v34'/);
+assert.match(index,/flexible-pair-ui\.js\?v=1\.0\.1/);
+assert.match(sw,/const CACHE = 'hotaru-shell-v36'/);
+assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v35'/);
 assert.match(sw,/js\/features\/flexible-pair-builder\.js/);
-assert.match(sw,/js\/features\/flexible-pair-ui\.js\?v=1\.0\.0/);
+assert.match(sw,/js\/features\/flexible-pair-ui\.js\?v=1\.0\.1/);
 assert.equal(FLEXIBLE_PAIR_POLICY.supportedPairs.length,1,'only audited pair rules may ship in this release');
+assert.match(ui,/function shouldCaptureFlexiblePair\(event\)/,'iPhone hotfix must identify the audited pair before the app bubble handler runs');
+assert.match(ui,/event\.stopImmediatePropagation\(\)/,'supported pair must bypass the reviewed-only bubble handler instead of racing its rerender');
+assert.match(ui,/\{capture:true\}/,'Odette + Flins interception must run in capture phase on Safari/PWA');
 
 console.log('Hotaru Flexible Pair Builder + Traveler element-preservation QA passed.');
