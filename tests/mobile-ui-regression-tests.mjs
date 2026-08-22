@@ -24,9 +24,9 @@ assert.match(guideCss,/@media\(max-width:560px\)[\s\S]*\.hotaru-guide-row\{displ
 assert.match(guideCss,/\.hotaru-guide-copy\{min-width:0;width:100%;max-width:100%\}/);
 const rosterCss=fs.readFileSync(path.join(root,'css/roster-sections-team-filter.css'),'utf8');
 assert.match(rosterCss,/@media\(max-width:600px\)[\s\S]*\.smart-team-card \.team-controls\{grid-template-columns:1fr\}/);
-assert.match(rosterCss,/@media\(max-width:600px\)[\s\S]*\.hotaru-team-utility-grid\{grid-template-columns:1fr\}/);
+assert.match(rosterCss,/@media\(max-width:600px\)[\s\S]*\.hotaru-team-utility-field select\{width:100%\}/);
 const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
-assert.match(sw,/const CACHE = 'hotaru-shell-v41'/);assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v40'/);assert.match(sw,/style\.css\?v=1\.8\.0/);assert.match(sw,/css\/guide-ui\.css\?v=1\.3\.0/);assert.match(sw,/css\/roster-sections-team-filter\.css\?v=1\.1\.0/);assert.match(sw,/app\.js\?v=1\.12\.0/);assert.match(sw,/team-community-bootstrap\.js\?v=1\.0\.2/);
+assert.match(sw,/const CACHE = 'hotaru-shell-v42'/);assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v41'/);assert.match(sw,/style\.css\?v=1\.8\.0/);assert.match(sw,/css\/guide-ui\.css\?v=1\.3\.0/);assert.match(sw,/css\/roster-sections-team-filter\.css\?v=1\.2\.0/);assert.match(sw,/app\.js\?v=1\.12\.0/);assert.match(sw,/team-community-bootstrap\.js\?v=1\.0\.2/);assert.match(sw,/smart-team-mobile-controller\.js\?v=1\.0\.3/);
 const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
-assert.match(index,/style\.css\?v=1\.8\.0/);assert.match(index,/css\/guide-ui\.css\?v=1\.3\.0/);assert.match(index,/css\/roster-sections-team-filter\.css\?v=1\.1\.0/);assert.match(index,/app\.js\?v=1\.12\.0/);assert.match(index,/team-community-bootstrap\.js\?v=1\.0\.2/);
-console.log('Hotaru mobile UI + Team Creator cleanup + Abyss fallback + rarity + same-weapon-type regression QA passed.');
+assert.match(index,/style\.css\?v=1\.8\.0/);assert.match(index,/css\/guide-ui\.css\?v=1\.3\.0/);assert.match(index,/css\/roster-sections-team-filter\.css\?v=1\.2\.0/);assert.match(index,/app\.js\?v=1\.12\.0/);assert.match(index,/team-community-bootstrap\.js\?v=1\.0\.2/);assert.match(index,/smart-team-mobile-controller\.js\?v=1\.0\.3/);
+console.log('Hotaru mobile UI + Current Abyss capture path + direct Team Need + rarity + same-weapon-type regression QA passed.');
