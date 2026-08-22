@@ -1,4 +1,4 @@
-import { reviewedTeamProfile } from '../data/team-profiles/index.js';
+import { reviewedTeamsForCharacter, canonicalTeamCharacter } from '../data/team-profiles/index.js';
 import { talentBookSchedule } from '../data/farming-schedule.js';
 const TEAM_LIBRARY={
   Hydro:[['Vaporize',['Xiangling','Bennett','Kazuha']],['Electro-Charged',['Fischl','Ororon','Sucrose']],['Bloom / Hyperbloom',['Nahida','Kuki Shinobu','Nilou']]],
@@ -58,15 +58,15 @@ export function ascensionStages(detail={}){const list=Array.isArray(detail?.mate
 
 export function weaponAcquisition(weapon={}){const text=`${weapon.location||''} ${weapon.description||''}`.toLowerCase();if(/craft|forg/.test(text))return'Crafted';if(/battle pass|gnostic/.test(text))return'Battle Pass';if(/fish/.test(text))return'Fishing';if(/event/.test(text))return'Event';if(/quest/.test(text))return'Quest';if(/wish|gacha/.test(text))return'Gacha';return weapon.rarity>=4?'Gacha / limited source':'In-game source'}
 
-const TEAM_NAME_ALIASES={kazuha:'Kaedehara Kazuha',childe:'Tartaglia',sara:'Kujou Sara'};
-function sameName(a='',b=''){return String(a||'').trim().toLowerCase()===String(b||'').trim().toLowerCase()}
+const TEAM_NAME_ALIASES={kazuha:'Kaedehara Kazuha',childe:'Tartaglia',sara:'Kujou Sara',mizuki:'Yumemizuki Mizuki'};
+function sameName(a='',b=''){return canonicalTeamCharacter(a).trim().toLowerCase()===canonicalTeamCharacter(b).trim().toLowerCase()}
 function available(catalog,name,self){
-  const wanted=TEAM_NAME_ALIASES[String(name||'').trim().toLowerCase()]||name;
+  const wanted=TEAM_NAME_ALIASES[String(name||'').trim().toLowerCase()]||canonicalTeamCharacter(name);
   return catalog?.characters?.find(c=>(sameName(c.name,wanted)||sameName(c.name,name))&&!sameName(c.name,self))||null;
 }
 function completeReviewedTeams(detail={},catalog={}){
-  const profile=reviewedTeamProfile(detail.name);if(!profile)return[];
-  return (profile.archetypes||[]).map(team=>{
+  const teams=reviewedTeamsForCharacter(detail.name);if(!teams.length)return[];
+  return teams.map(team=>{
     const members=(team.members||[]).map(name=>sameName(name,detail.name)?{...detail,role:'Core'}:(()=>{const found=available(catalog,name,detail.name);return found?{...found,role:'Reviewed teammate'}:null})());
     if(members.length!==4||members.some(x=>!x))return null;
     return{name:team.name,members,reviewed:true,source:team.source,why:team.why,notes:team.notes||''};
