@@ -21,5 +21,5 @@ assert.equal(plan.activeCharacters,1);assert.equal(plan.resin.cap,200);assert.eq
 assert.equal(buildSmartFarmPlan({entries:[{entry:{...entry,status:'Not Building'},detail,profile:{}}]}).activeCharacters,0);assert.equal(buildSmartFarmPlan({entries:[{entry:{...entry,status:'Finished'},detail,profile:{}}]}).activeCharacters,0);
 
 const app=fs.readFileSync(new URL('../app.js',import.meta.url),'utf8'),sw=fs.readFileSync(new URL('../service-worker.js',import.meta.url),'utf8'),index=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
-assert.ok(app.includes('Generate Smart Farm Plan'));assert.ok(app.includes('generate-smart-farm'));assert.ok(app.includes('getMapFilterOptions'));assert.ok(sw.includes('hotaru-shell-v20'));assert.ok(sw.includes('js/features/farm-planner.js'));assert.ok(sw.includes('app.js?v=1.7.0'));assert.ok(index.includes('app.js?v=1.7.0'));assert.ok(index.includes('style.css?v=1.4.0'));
+assert.ok(app.includes('Generate Smart Farm Plan'));assert.ok(app.includes('generate-smart-farm'));assert.ok(app.includes('getMapFilterOptions'));assert.ok(sw.includes('hotaru-shell-v21'));assert.ok(sw.includes('js/features/farm-planner.js'));assert.ok(sw.includes('app.js?v=1.7.0'));assert.ok(index.includes('app.js?v=1.7.0'));assert.ok(index.includes('style.css?v=1.4.0'));
 console.log('Smart Farming core QA passed.');

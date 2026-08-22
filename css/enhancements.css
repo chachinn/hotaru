@@ -7,3 +7,11 @@
 @media(max-width:390px){.filters.hotaru-filter-grid{grid-template-columns:1fr 1fr!important}.hotaru-menu-grid{grid-template-columns:1fr 1fr}.hotaru-menu-item{grid-template-columns:36px minmax(0,1fr);gap:8px;padding:10px}.hotaru-menu-icon{width:36px;height:36px;font-size:17px}.hotaru-map-frame-wrap{min-height:350px}.hotaru-map-head{padding-top:18px}.hotaru-target-row{align-items:flex-start;flex-direction:column}.hotaru-target-actions{width:100%;justify-content:flex-end}}
 @media(max-width:340px){.hotaru-menu-grid{grid-template-columns:1fr}.filters.hotaru-filter-grid{grid-template-columns:1fr!important}.filters.hotaru-filter-grid .hotaru-affiliation-filter{grid-column:auto}}
 @media(prefers-reduced-motion:reduce){.hotaru-menu-sheet,.hotaru-map-view{animation:none!important}}
+
+/* Map completion handoff + specific artifact planning. */
+.hotaru-map-completion{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:18px}
+.hotaru-map-completion>div{min-width:0}
+.hotaru-map-completion strong{display:block;margin:3px 0 5px}
+.hotaru-map-completion p{margin:0;color:var(--muted);font-size:12px;line-height:1.5;max-width:620px}
+.hotaru-map-completion button{flex:0 0 auto}
+@media(max-width:700px){.hotaru-map-completion{align-items:stretch;flex-direction:column}.hotaru-map-completion button{width:100%}}

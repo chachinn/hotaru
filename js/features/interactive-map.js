@@ -40,7 +40,7 @@ export function buildMapUrl(names=[],options={}){
 export function remainingTarget(target){return Math.max(0,Number(target?.needed||0)-Number(target?.owned||0))}
 export function normalizeTarget(input={}){
   const name=String(input.name||'').trim();
-  return {id:String(input.id||`${Date.now()}-${Math.random().toString(36).slice(2,8)}`),name,needed:Math.max(0,Number(input.needed||0)),owned:Math.max(0,Number(input.owned||0)),complete:Boolean(input.complete)||(!Number.isNaN(Number(input.needed))&&Number(input.needed)>0&&remainingTarget(input)<=0),createdAt:input.createdAt||new Date().toISOString()};
+  return {id:String(input.id||`${Date.now()}-${Math.random().toString(36).slice(2,8)}`),name,category:String(input.category||'').trim(),needed:Math.max(0,Number(input.needed||0)),owned:Math.max(0,Number(input.owned||0)),complete:Boolean(input.complete)||(!Number.isNaN(Number(input.needed))&&Number(input.needed)>0&&remainingTarget(input)<=0),createdAt:input.createdAt||new Date().toISOString()};
 }
 export function loadMapState(){
   const base={names:[],targets:[],lastOpenedAt:'',browseAll:false,browseUrl:''};

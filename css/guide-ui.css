@@ -3,3 +3,21 @@
 /* Game8-inspired information hierarchy, implemented with Hotaru's own mobile UI. */
 .hotaru-guide-section{scroll-margin-top:84px}.hotaru-build-summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.hotaru-build-summary-grid>div{background:rgba(255,255,255,.72);border:1px solid rgba(75,55,65,.09);border-radius:16px;padding:12px;min-width:0}.hotaru-build-summary-grid span,.hotaru-build-summary-grid strong{display:block}.hotaru-build-summary-grid span{font-size:11px;color:var(--muted,#8b7e84);margin-bottom:5px}.hotaru-build-summary-grid strong{font-size:13px;line-height:1.35}.hotaru-procon-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.hotaru-procon-grid>div{border:1px solid rgba(75,55,65,.09);background:rgba(255,255,255,.68);border-radius:17px;padding:13px}.hotaru-procon-grid h3{margin:0 0 9px;font-size:14px}.hotaru-procon-grid p{display:grid;grid-template-columns:20px 1fr;gap:6px;margin:8px 0;font-size:12px;line-height:1.45;color:#6f646a}.hotaru-procon-grid p span{font-weight:900;color:#c43d70}.hotaru-howto{margin-top:14px;border-top:1px solid rgba(75,55,65,.08);padding-top:12px}.hotaru-howto h3{font-size:14px;margin:0 0 8px}.hotaru-howto>div{display:grid;grid-template-columns:28px 1fr;gap:8px;align-items:start;margin:8px 0}.hotaru-howto>div>b{width:26px;height:26px;border-radius:9px;display:grid;place-items:center;background:#ffe4ee;color:#be3a6b}.hotaru-howto p{margin:2px 0 0;font-size:12px;line-height:1.5;color:#6f646a}.hotaru-talent-details{display:grid;gap:8px;margin-top:14px}.hotaru-talent-details details{border:1px solid rgba(75,55,65,.09);background:rgba(255,255,255,.62);border-radius:14px;padding:0 12px}.hotaru-talent-details summary{padding:11px 0;font-weight:750;cursor:pointer}.hotaru-talent-details p{margin:0 0 12px;font-size:12px;line-height:1.5;color:#6f646a}.hotaru-source-list{display:grid;gap:8px}.hotaru-source-list a{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 12px;border:1px solid rgba(75,55,65,.09);border-radius:14px;background:rgba(255,255,255,.68);text-decoration:none;color:inherit}.hotaru-source-list a strong{font-size:12px}.hotaru-source-list a span{font-size:10px;color:var(--muted,#8b7e84);text-align:right}.hotaru-reviewed-badge{font-size:12px;min-width:38px}.hotaru-role-rating-grid strong{overflow-wrap:anywhere}.hotaru-role-rating-grid strong:not(:empty){font-size:clamp(12px,3.3vw,20px)}
 @media(max-width:560px){.hotaru-build-summary-grid,.hotaru-procon-grid{grid-template-columns:1fr}.hotaru-source-list a{align-items:flex-start}.hotaru-source-list a span{max-width:42%}}
+
+/* Mobile guide hardening: hidden fallbacks must never occupy layout space on Safari. */
+.hotaru-guide-placeholder[hidden]{display:none!important}
+.hotaru-team-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.hotaru-team-title>strong{min-width:0}
+.hotaru-team-title .pill{flex:0 0 auto;font-size:9px;padding:5px 8px}
+.hotaru-team-count{margin:3px 0 0}
+.hotaru-team-why{margin:10px 0 0;font-size:11px;line-height:1.45;color:var(--muted,#8b7e84)}
+.hotaru-notable-row{width:100%;min-width:0;grid-template-columns:48px minmax(0,1fr)}
+.hotaru-notable-copy{min-width:0;width:100%;max-width:100%}
+.hotaru-notable-copy strong,.hotaru-notable-copy p{overflow-wrap:break-word;word-break:normal;white-space:normal}
+@media(max-width:560px){
+  .hotaru-notable-row{display:grid!important;grid-template-columns:44px minmax(0,1fr)!important;align-items:start;gap:10px;width:100%!important}
+  .hotaru-notable-row>.hotaru-guide-avatar,.hotaru-notable-row>.hotaru-guide-placeholder{grid-column:1!important;width:44px;height:44px;min-width:44px}
+  .hotaru-notable-copy{grid-column:2!important;min-width:0!important;width:auto!important}
+  .hotaru-notable-copy strong{display:block;font-size:13px;line-height:1.35}
+  .hotaru-notable-copy p{font-size:12px;line-height:1.5;margin-top:4px}
+}
