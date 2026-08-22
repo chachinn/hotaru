@@ -20,3 +20,6 @@ main[data-hotaru-roster-active]>section[hidden]{display:none!important}
 .hotaru-team-coverage-summary strong{color:var(--text)}
 .hotaru-team-reaction-badge{white-space:nowrap}
 @media(max-width:600px){.hotaru-team-reaction-field{grid-column:1/-1;width:100%}.hotaru-team-reaction-field select{width:100%}}
+
+/* Mobile tap hardening for the Allow unowned control. */
+.team-unowned{position:relative;z-index:2;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none}
