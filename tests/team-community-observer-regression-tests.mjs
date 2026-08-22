@@ -18,11 +18,11 @@ assert.match(bootstrap,/new MutationObserver\(schedulePatch\)/,'MutationObserver
 assert.doesNotMatch(bootstrap,/new MutationObserver\(\(\)=>patchUI\(\)\)/,'the old self-triggering observer callback must never return');
 assert.doesNotMatch(bootstrap,/if\(note\)note\.innerHTML=sourceNotice\(\)/,'status note must not rewrite innerHTML on every observer callback');
 
-// Cache/version alignment is required so an already-installed v31 PWA can fetch the fixed module immediately.
+// Cache/version alignment must keep the repaired module while later shells add new UI safely.
 assert.match(index,/team-community-bootstrap\.js\?v=1\.0\.1/);
-assert.match(sw,/const CACHE = 'hotaru-shell-v33'/);
-assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v32'/);
+assert.match(sw,/const CACHE = 'hotaru-shell-v34'/);
+assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v33'/);
 assert.match(sw,/team-community-bootstrap\.js\?v=1\.0\.1/);
-assert.match(updater,/const RELEASE='v33'/);
+assert.match(updater,/const RELEASE='v34'/);
 
 console.log('Hotaru team-community observer boot-loop regression QA passed.');
