@@ -19,10 +19,10 @@ assert.doesNotMatch(bootstrap,/new MutationObserver\(\(\)=>patchUI\(\)\)/,'the o
 assert.doesNotMatch(bootstrap,/if\(note\)note\.innerHTML=sourceNotice\(\)/,'status note must not rewrite innerHTML on every observer callback');
 
 // Cache/version alignment must keep the repaired module while later shells add new UI safely.
-assert.match(index,/team-community-bootstrap\.js\?v=1\.0\.1/);
-assert.match(sw,/const CACHE = 'hotaru-shell-v40'/);
-assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v39'/);
-assert.match(sw,/team-community-bootstrap\.js\?v=1\.0\.1/);
-assert.match(updater,/const RELEASE='v40'/);
+assert.match(index,/team-community-bootstrap\.js\?v=1\.0\.2/);
+assert.match(sw,/const CACHE = 'hotaru-shell-v41'/);
+assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v40'/);
+assert.match(sw,/team-community-bootstrap\.js\?v=1\.0\.2/);
+assert.match(updater,/const RELEASE='v41'/);
 
 console.log('Hotaru team-community observer boot-loop regression QA passed.');
