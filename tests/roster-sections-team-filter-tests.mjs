@@ -34,6 +34,8 @@ const updater=read('js/pwa-update.js');
 assert.match(ui,/hotaru\.roster-section\.v1/);
 assert.match(ui,/hotaru\.team-utility\.v1/);
 assert.match(ui,/section\.hidden=id!==resolved/,'inactive roster modules must be hidden rather than stacked in one long page');
+assert.match(ui,/function openRosterTab\(\)/,'hamburger entries must be able to enter Roster from any screen');
+assert.match(ui,/querySelector\('\.bottom-nav \[data-tab="roster"\]'\)/,'cross-screen hamburger navigation must use the real Roster tab');
 assert.match(ui,/new MutationObserver\(schedulePatch\)\.observe\(app,\{childList:true,subtree:true\}\)/,'DOM refresh handling must remain coalesced and must not observe attributes it changes itself');
 assert.match(ui,/id==='hotaru-team-utility'/);
 assert.match(ui,/teamMatchesUtility/);
