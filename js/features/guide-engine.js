@@ -1,9 +1,5 @@
 import { reviewedTeamProfile } from '../data/team-profiles/index.js';
-const DAY_GROUPS={
-  'Monday / Thursday / Sunday':['Freedom','Prosperity','Transience','Admonition','Equity','Contention','Moonlight'],
-  'Tuesday / Friday / Sunday':['Resistance','Diligence','Elegance','Ingenuity','Justice','Kindling','Elysium'],
-  'Wednesday / Saturday / Sunday':['Ballad','Gold','Light','Praxis','Order','Conflict','Vagrancy']
-};
+import { talentBookSchedule } from '../data/farming-schedule.js';
 const TEAM_LIBRARY={
   Hydro:[['Vaporize',['Xiangling','Bennett','Kazuha']],['Electro-Charged',['Fischl','Ororon','Sucrose']],['Bloom / Hyperbloom',['Nahida','Kuki Shinobu','Nilou']]],
   Pyro:[['Vaporize',['Yelan','Xingqiu','Bennett']],['Overload',['Chevreuse','Fischl','Bennett']],['Melt',['Kaeya','Rosaria','Bennett']]],
@@ -56,7 +52,7 @@ export function talentPriority(detail={},reference={},profile={}){
 export function constellationList(detail={},reference={}){const source=Array.isArray(reference.constellations)&&reference.constellations.length?reference.constellations:detail.constellations||[];return source.slice(0,6).map((item,index)=>({index:index+1,name:stripMarkup(item.name||`Constellation ${index+1}`),description:stripMarkup(item.description||'')}))}
 export function constellationRating(item={}){const text=String(item.description||'').toLowerCase();let score=1;if(/crit|damage.*increase|dmg.*increase|resistance.*decrease|res shred|energy|cooldown|additional|level.*3|buff/.test(text))score++;if(/crit dmg|increase.*40|increase.*50|increase.*60|additional.*damage|all nearby party|lunar reaction dmg/.test(text))score++;return Math.min(3,score)}
 
-export function inferTalentBookSchedule(materials=[]){const names=materials.map(x=>String(x?.name||x||''));for(const [days,series] of Object.entries(DAY_GROUPS))for(const family of series){const escaped=family.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),pattern=new RegExp(`(?:Teachings of|Guide (?:to|of)|Philosophies of) ${escaped}`,'i');if(names.some(name=>pattern.test(name)))return{days,series:family,domain:['Moonlight','Elysium','Vagrancy'].includes(family)?'Lightless Capital':'Domain of Mastery'}}return{days:'Check current domain schedule',series:'',domain:'Domain of Mastery'}}
+export function inferTalentBookSchedule(materials=[]){for(const item of materials){const schedule=talentBookSchedule(String(item?.name||item||''));if(schedule.known)return{days:schedule.daysLabel,series:schedule.series,domain:schedule.domain}}return{days:'Check current domain schedule',series:'',domain:'Domain of Mastery'}}
 
 export function ascensionStages(detail={}){const list=Array.isArray(detail?.materials?.ascensions)?detail.materials.ascensions:[];const thresholds=[[20,40],[40,50],[50,60],[60,70],[70,80],[80,90]];return list.slice(0,6).map((stage,index)=>{const mats=(stage.mats||stage.materials||[]).map(x=>({name:x.name||x.item?.name||'Material',count:Number(x.count||x.value||x.item?.count||0)||0,icon:x.icon||x.item?.icon||''}));const cost=Number(stage.cost||stage.mora_cost||0)||0;if(cost)mats.push({name:'Mora',count:cost,icon:''});const from=Number(stage.fromLevel||stage.from||stage.level_from||thresholds[index]?.[0]),to=Number(stage.toLevel||stage.to||stage.level_to||thresholds[index]?.[1]);return{label:`Lv.${from} → Lv.${to}`,materials:mats}})}
 

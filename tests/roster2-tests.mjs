@@ -13,7 +13,7 @@ assert.equal(sortRoster([{name:'B',priority:'Low',status:'Building'},{name:'A',p
 
 const state=fs.readFileSync(new URL('../js/core/state.js',import.meta.url),'utf8');assert.ok(state.includes("SCHEMA_VERSION=3"));assert.ok(state.includes("hotaru.app.v3"));assert.ok(state.includes("hotaru.app.v2"));assert.ok(state.includes('inventory:{}'));assert.ok(state.includes('teamPresets:[]'));
 const app=fs.readFileSync(new URL('../app.js',import.meta.url),'utf8');assert.ok(app.includes('Build status'));assert.ok(app.includes('Current talents'));assert.ok(app.includes('Build goals'));assert.ok(app.includes('modal-build-variant'));assert.ok(app.includes('normalizeRoster(state.roster,catalog.characters)'));assert.ok(app.includes('rosterProgress(entry,weapon)'));assert.ok(app.includes('if(roster?.buildVariant&&!context.buildVariant)'));
-const sw=fs.readFileSync(new URL('../service-worker.js',import.meta.url),'utf8');assert.ok(sw.includes('hotaru-shell-v21'));assert.ok(sw.includes('js/features/roster-intelligence.js'));assert.ok(sw.includes('js/features/build-goals.js'));assert.ok(sw.includes('app.js?v=1.7.0'));assert.ok(sw.includes('style.css?v=1.4.0'));
+const sw=fs.readFileSync(new URL('../service-worker.js',import.meta.url),'utf8');assert.ok(sw.includes('hotaru-shell-v22'));assert.ok(sw.includes('js/features/roster-intelligence.js'));assert.ok(sw.includes('js/features/build-goals.js'));assert.ok(sw.includes('app.js?v=1.8.0'));assert.ok(sw.includes('style.css?v=1.5.0'));
 console.log('Personal Roster 2.0 + Build Goals QA passed.');
 
 // Variant-aware roster goals and owned-weapon bounds.
