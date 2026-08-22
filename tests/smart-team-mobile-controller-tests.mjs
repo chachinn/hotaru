@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 const controller=fs.readFileSync('js/features/smart-team-mobile-controller.js','utf8');
 const flexible=fs.readFileSync('js/features/flexible-pair-ui.js','utf8');
+const css=fs.readFileSync('css/roster-sections-team-filter.css','utf8');
 const index=fs.readFileSync('index.html','utf8');
 const sw=fs.readFileSync('service-worker.js','utf8');
 const updater=fs.readFileSync('js/pwa-update.js','utf8');
@@ -11,6 +12,7 @@ const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 assert.match(controller,/catalog\?\.characters\|\|\[\]/,'locked-character picker must be sourced from the full catalog');
 assert.match(controller,/data-owned=/,'full-catalog options must retain explicit ownership metadata');
 assert.match(controller,/Owned'\:'Not owned'/,'picker must distinguish owned from unowned characters');
+assert.match(controller,/label=filter==='all'/,'ownership suffixes should only be shown when All characters is selected');
 assert.match(controller,/hotaru\.smart-team-picker-ownership\.v1/,'picker ownership filter must persist locally');
 assert.match(controller,/All characters/,'picker must expose an All filter');
 assert.match(controller,/Owned only/,'picker must expose an Owned filter');
@@ -25,13 +27,16 @@ assert.match(controller,/event\.stopPropagation\(\)/,'mobile generator must prev
 assert.match(controller,/state\.ui\?\.\[stateKey\]/,'unowned lock selection must survive the base app rerender');
 assert.match(flexible,/loadState/,'flexible pair ownership must read saved Hotaru state');
 assert.doesNotMatch(flexible,/rosterFromSelect/,'flexible pair ownership must not be inferred from picker options');
-assert.match(index,/smart-team-mobile-controller\.js\?v=1\.0\.1/,'index must load the ownership-filtered Smart Team controller');
+assert.match(css,/@media\(max-width:600px\)[\s\S]*\.smart-team-card \.team-controls\{grid-template-columns:1fr\}/,'phone Smart Team controls must stack into one full-width column');
+assert.match(index,/roster-sections-team-filter\.css\?v=1\.0\.1/,'index must load the phone-layout stylesheet revision');
+assert.match(index,/smart-team-mobile-controller\.js\?v=1\.0\.2/,'index must load the cleaned Smart Team controller');
 assert.match(index,/flexible-pair-ui\.js\?v=1\.0\.2/,'index must load the ownership-safe flexible pair UI');
-assert.match(sw,/hotaru-shell-v38/,'service worker shell must advance to v38');
-assert.match(sw,/PREVIOUS_CACHE = 'hotaru-shell-v37'/,'service worker must migrate from v37');
-assert.match(sw,/smart-team-mobile-controller\.js\?v=1\.0\.1/,'service worker must cache the ownership-filtered controller');
+assert.match(sw,/hotaru-shell-v39/,'service worker shell must advance to v39');
+assert.match(sw,/PREVIOUS_CACHE = 'hotaru-shell-v38'/,'service worker must migrate from v38');
+assert.match(sw,/roster-sections-team-filter\.css\?v=1\.0\.1/,'service worker must cache the phone-layout stylesheet revision');
+assert.match(sw,/smart-team-mobile-controller\.js\?v=1\.0\.2/,'service worker must cache the cleaned controller');
 assert.match(sw,/flexible-pair-ui\.js\?v=1\.0\.2/,'service worker must cache the updated flexible pair UI');
-assert.match(updater,/RELEASE='v38'/,'PWA updater must request v38');
+assert.match(updater,/RELEASE='v39'/,'PWA updater must request v39');
 assert.equal(pkg.version,'1.0.0','package version must remain 1.0.0');
 
-console.log('Smart Team mobile controller + ownership picker filter tests passed');
+console.log('Smart Team mobile controller + ownership picker layout tests passed');
