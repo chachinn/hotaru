@@ -1,4 +1,4 @@
-import { canonicalTeamCharacter } from '../data/team-profiles/index.js';
+import { allReviewedTeams, canonicalTeamCharacter, teamReviewStatus } from '../data/team-profiles/index.js';
 import { allRecommendedTeams, teamRecommendationStatus } from '../data/team-recommendations.js';
 import { scoreReviewedTeam } from './team-scoring.js';
 function key(value=''){return String(value||'').trim().toLowerCase()}
@@ -9,16 +9,19 @@ function referenceBonus(team={}){const score=Number(team.referenceScore);return 
 export function teamCoverage(roster=[]){
   return(roster||[]).map(entry=>({name:entry.name,...teamRecommendationStatus(entry.name)}));
 }
-export function matchReviewedTeams({roster=[],lockedNames=[],allowUnowned=false,limit=12}={}){
+export function matchReviewedTeams({roster=[],lockedNames=[],allowUnowned=false,limit=12,curatedOnly=false}={}){
   const ownedNames=rosterNames(roster),owned=new Set(ownedNames.map(key)),locks=unique(lockedNames.map(canonicalTeamCharacter)).slice(0,2);
-  const pendingLocks=locks.filter(name=>teamRecommendationStatus(name).status==='pending');
+  const statusFor=name=>curatedOnly?teamReviewStatus(name):teamRecommendationStatus(name);
+  const pendingLocks=locks.filter(name=>statusFor(name).status==='pending');
   if(pendingLocks.length)return{results:[],pendingLocks,coverage:teamCoverage(roster),ownedNames};
   const scoringRoster=(roster||[]).map(entry=>({...entry,name:canonicalTeamCharacter(entry.name)}));
-  const candidates=allRecommendedTeams().filter(team=>locks.every(name=>(team.members||[]).some(member=>key(canonicalTeamCharacter(member))===key(name))));
+  const pool=curatedOnly?allReviewedTeams():allRecommendedTeams();
+  const candidates=pool.filter(team=>locks.every(name=>(team.members||[]).some(member=>key(canonicalTeamCharacter(member))===key(name))));
   const results=candidates.map(team=>{
     const members=(team.members||[]).map(canonicalTeamCharacter),missing=members.filter(name=>!owned.has(key(name))),ownedCount=members.length-missing.length;
     const baseScore=scoreReviewedTeam({...team,members},{roster:scoringRoster,ownedNames,lockedNames:locks});
     return{...team,members,missing,ownedCount,ownedComplete:missing.length===0,score:baseScore+sourceBonus(team)+referenceBonus(team)};
-  }).filter(team=>allowUnowned||team.ownedComplete).sort((a,b)=>b.score-a.score||a.name.localeCompare(b.name)).slice(0,Math.max(12,Math.min(30,Number(limit)||12)));
-  return{results,pendingLocks,coverage:teamCoverage(roster),ownedNames};
+  }).filter(team=>allowUnowned||team.ownedComplete).sort((a,b)=>b.score-a.score||a.name.localeCompare(b.name));
+  const requested=Math.max(1,Math.min(30,Number(limit)||12)),resultLimit=requested===1?1:Math.max(12,requested);
+  return{results:results.slice(0,resultLimit),pendingLocks,coverage:teamCoverage(roster),ownedNames};
 }
