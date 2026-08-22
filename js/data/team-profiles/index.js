@@ -54,18 +54,18 @@ export const REVIEWED_TEAM_PROFILES=[
 ];
 
 function key(value=''){return String(value||'').trim().toLowerCase()}
-const aliasToCanonical=new Map();
+const aliasToCanonical=new Map([['kazuha','Kaedehara Kazuha']]);
 const anchorIndex=new Map();
 const memberIndex=new Map();
 for(const profile of REVIEWED_TEAM_PROFILES){
   const names=[profile.character,...(profile.aliases||[])];
   for(const name of names){aliasToCanonical.set(key(name),profile.character);anchorIndex.set(key(name),profile)}
-  for(const archetype of profile.archetypes||[])for(const member of archetype.members||[]){
-    const canon=aliasToCanonical.get(key(member))||member,memberKey=key(canon),list=memberIndex.get(memberKey)||[];
-    if(!list.some(item=>item.id===archetype.id))list.push(archetype);memberIndex.set(memberKey,list);
-  }
 }
-for(const profile of REVIEWED_TEAM_PROFILES)for(const alias of profile.aliases||[])for(const [memberKey,list] of [...memberIndex.entries()])if(memberKey===key(profile.character))memberIndex.set(key(alias),list);
+for(const profile of REVIEWED_TEAM_PROFILES)for(const archetype of profile.archetypes||[])for(const member of archetype.members||[]){
+  const canon=aliasToCanonical.get(key(member))||member,memberKey=key(canon),list=memberIndex.get(memberKey)||[];
+  if(!list.some(item=>item.id===archetype.id))list.push(archetype);memberIndex.set(memberKey,list);
+}
+for(const [alias,canonical] of aliasToCanonical){const list=memberIndex.get(key(canonical));if(list)memberIndex.set(alias,list)}
 
 export function canonicalTeamCharacter(name=''){return aliasToCanonical.get(key(name))||String(name||'').trim()}
 export function reviewedTeamProfile(name=''){return anchorIndex.get(key(name))||null}
