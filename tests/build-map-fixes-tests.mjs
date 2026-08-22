@@ -50,6 +50,6 @@ assert.match(guide,/guideExplorationMarkers/,'Deep guide should use the canonica
 assert.doesNotMatch(`${guide}\n${exploration}\n${read('js/features/guide-taxonomy.js')}`,/Cryoculus/,'Runtime must not invent Cryoculus');
 assert.doesNotMatch(`${exploration}\n${read('js/features/guide-taxonomy.js')}`,/(Mondstadt|Liyue|Inazuma|Sumeru|Fontaine|Natlan) Shrine of Depths/,'No enhancement may overwrite the canonical shrine marker with a stale regional alias');
 assert.match(registry,/MAP_PROVIDER_ORIGIN/);
-assert.match(worker,/hotaru-shell-v26/,'Installed PWAs should receive a deliberate cache refresh for consistency hardening');
+assert.match(worker,/hotaru-shell-v27/,'Installed PWAs should receive a deliberate cache refresh for roster/team expansion');
 assert.match(worker,/js\/data\/map-registry\.js/,'PWA app shell must include the shared map registry');
 console.log('Build/map/rarity/talent regression tests passed.');

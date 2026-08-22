@@ -1,0 +1,63 @@
+/* Hotaru roster UI refresh — compact, scannable and iPhone-first. */
+.card:has(.roster-row){padding:14px;background:rgba(255,255,255,.96)}
+.card:has(.roster-row)>.section-head{align-items:flex-start;margin-bottom:13px}
+.card:has(.roster-row)>.section-head h2{font-size:20px}
+.card:has(.roster-row)>.section-head .muted.small{margin:4px 0 0;max-width:440px;line-height:1.35}
+.card:has(.roster-row)>.list{gap:10px}
+
+.roster-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  gap:0;
+  padding:14px;
+  border:1px solid rgba(181,63,108,.12)!important;
+  border-radius:18px;
+  background:linear-gradient(145deg,#fff 0%,#fff9fb 100%);
+  box-shadow:0 7px 20px rgba(151,74,103,.055);
+}
+.roster-row:last-child{border-bottom:1px solid rgba(181,63,108,.12)!important}
+.roster-row+.roster-row{margin-top:1px}
+.roster-row .row-main{width:100%;min-width:0}
+.roster-title-line{gap:6px;align-items:center}
+.roster-title-line .row-title{font-size:16px;font-weight:880;letter-spacing:-.02em;margin-right:2px}
+.roster-title-line .pill{padding:5px 8px;font-size:10px}
+.roster-row .roster-title-line+.row-sub{margin-top:7px;font-size:11px;font-weight:700;color:#75676f}
+.roster-row .roster-title-line+.row-sub+.row-sub{margin-top:5px;font-size:12px;line-height:1.38;color:var(--muted)}
+.roster-next{
+  margin-top:8px!important;
+  padding:8px 10px;
+  border-radius:11px;
+  background:rgba(255,238,244,.72);
+  color:var(--pink-700)!important;
+  font-size:11px!important;
+  font-weight:800!important;
+  line-height:1.35;
+}
+.roster-progress{height:7px;margin-top:9px;max-width:none;background:#f3e9ed}
+.roster-row .section-actions{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:7px;
+  width:100%;
+  margin-top:11px;
+  padding-top:11px;
+  border-top:1px solid var(--line);
+}
+.roster-row .section-actions button{min-height:38px;padding:0 10px;border-radius:11px;font-size:12px}
+.roster-row .section-actions .ghost{background:#f6f3f4}
+
+@media(max-width:640px){
+  main:has(.roster-row){padding-left:13px;padding-right:13px}
+  .card:has(.roster-row){border-radius:22px;padding:12px}
+  .card:has(.roster-row)>.section-head{display:grid;grid-template-columns:1fr;gap:10px}
+  .card:has(.roster-row)>.section-head .section-actions{display:grid;grid-template-columns:1fr 1fr;width:100%;gap:8px}
+  .card:has(.roster-row)>.section-head .section-actions button{width:100%;min-height:42px;padding:0 10px}
+  .roster-row{display:grid;padding:13px;border-radius:17px}
+  .roster-row .section-actions{margin-top:10px;padding-top:10px}
+}
+
+@media(max-width:370px){
+  .roster-title-line .row-title{width:100%;font-size:15px}
+  .roster-row .section-actions{gap:5px}
+  .roster-row .section-actions button{font-size:11px;padding:0 7px}
+}
