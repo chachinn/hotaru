@@ -52,7 +52,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          rm -f .hotaru-team2.payload.b64 .hotaru-team2.chunk-1 .hotaru-team2.chunk-2 .hotaru-team2.chunk-3 .hotaru-team2.chunk-4 .hotaru-team2.additions.b64 .github/workflows/promote-smart-team2.yml
+          rm -f .hotaru-team2.payload.b64 .hotaru-team2.chunk.00 .hotaru-team2.chunk-1 .hotaru-team2.chunk-2 .hotaru-team2.chunk-3 .hotaru-team2.chunk-4 .hotaru-team2.additions.b64 .github/workflows/promote-smart-team2.yml
+          git add -A
           cat > /tmp/expected.txt <<'EOF'
           README.md
           app.js
@@ -82,9 +83,9 @@ jobs:
           tests/smart-team-creator-tests.mjs
           EOF
           sed -i 's/^          //' /tmp/expected.txt
-          git diff --name-only origin/main | sort > /tmp/actual.txt
+          git diff --cached --name-only origin/main | sort > /tmp/actual.txt
           diff -u /tmp/expected.txt /tmp/actual.txt
-          test -z "$(git diff --diff-filter=D --name-only origin/main)"
+          test -z "$(git diff --cached --diff-filter=D --name-only origin/main)"
           test "$(wc -l < /tmp/actual.txt | tr -d ' ')" = "26"
           ! find . -maxdepth 2 -name '.hotaru-team2*' -print -quit | grep -q .
       - name: Commit clean source only
@@ -93,6 +94,5 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -A
           git commit -m 'Add Smart Team Creator 2.0 Abyss planner'
           git push origin HEAD:feature/smart-team-creator-2-abyss
