@@ -1,0 +1,107 @@
+name: Promote Farm Today and Resin Planner
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.hotaru-farm-today.parts/**'
+      - '.github/workflows/promote-farm-today.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/farm-today-resin-planner
+          fetch-depth: 0
+
+      - name: Verify exact source patch and run full QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE_SHA='8d8b80a0af9518b093961ae3bc3486ea8c34e5db'
+          B64_SHA='f66bab52b088bbeb1c98cb6591f109c8b81625afbc857ee7a5cbfe429fec8d87'
+          GZ_SHA='56ba2264554228f89af6e473f17fa6e794ba8eb2051d2ac17f3bfbdf80dbd007'
+          PATCH_SHA='70727c8d6ea03cb2eb7096ffe963fcaf122076a2f4894b63d06b186c3a57c446'
+
+          test "$(git rev-parse "$BASE_SHA^{commit}")" = "$BASE_SHA"
+          test "$(sha256sum .hotaru-farm-today.parts/part-00 | awk '{print $1}')" = '088393c7cbe20ffdd87f67bce2a6dddb9a311785bf765eed61f1597aaada4018'
+          test "$(sha256sum .hotaru-farm-today.parts/part-01 | awk '{print $1}')" = '528d4597de216f14a2c47ba1a0a404514ede04ed893bb3a7e826b4dfd6592779'
+          test "$(sha256sum .hotaru-farm-today.parts/part-02 | awk '{print $1}')" = 'c172a4ba0471586f303fda667a065f6b7cac522daf22cf7af2dc650bce5fab09'
+          test "$(sha256sum .hotaru-farm-today.parts/part-03 | awk '{print $1}')" = 'a90700272bfda9562ac79c2a097e6b17a593807da555e95581eee6a964692569'
+          test "$(sha256sum .hotaru-farm-today.parts/part-04 | awk '{print $1}')" = 'a30f34c5a9e2ff12d431ccd543b9d1bc239060d03df474f7857f1b25fda0ad54'
+          test "$(sha256sum .hotaru-farm-today.parts/part-05 | awk '{print $1}')" = 'dec5e0d218efd3ee96228720cb1f673c03167808ad129ff8039c2e1898ac6c29'
+
+          cat .hotaru-farm-today.parts/part-* > /tmp/farm-today.patch.gz.b64
+          test "$(sha256sum /tmp/farm-today.patch.gz.b64 | awk '{print $1}')" = "$B64_SHA"
+          base64 -d /tmp/farm-today.patch.gz.b64 > /tmp/farm-today.patch.gz
+          test "$(sha256sum /tmp/farm-today.patch.gz | awk '{print $1}')" = "$GZ_SHA"
+          gzip -dc /tmp/farm-today.patch.gz > /tmp/farm-today.patch
+          test "$(sha256sum /tmp/farm-today.patch | awk '{print $1}')" = "$PATCH_SHA"
+
+          git apply --check /tmp/farm-today.patch
+          git apply /tmp/farm-today.patch
+          npm test
+          while IFS= read -r -d '' file; do node --check "$file" >/dev/null; done < <(find . -type f \( -name '*.js' -o -name '*.mjs' \) -not -path './node_modules/*' -print0)
+
+          rm -rf .hotaru-farm-today.parts
+          rm -f .github/workflows/promote-farm-today.yml
+          git add -A
+
+          cat > /tmp/expected-files <<'FILES'
+          README.md
+          app.js
+          docs/SMART_BUILD_PLAN.md
+          docs/SMART_BUILD_SOURCE_POLICY.md
+          index.html
+          js/core/state.js
+          js/data/farming-schedule.js
+          js/features/daily-plan.js
+          js/features/farm-planner.js
+          js/features/guide-engine.js
+          js/features/resin-planner.js
+          package.json
+          service-worker.js
+          style.css
+          tests/build-intelligence2-tests.mjs
+          tests/build-map-fixes-tests.mjs
+          tests/character-search-focus-tests.mjs
+          tests/consistency-tests.mjs
+          tests/farm-today-tests.mjs
+          tests/game8-structure-tests.mjs
+          tests/guide-tests.mjs
+          tests/mobile-content-cleanup-tests.mjs
+          tests/mobile-ui-regression-tests.mjs
+          tests/roster2-tests.mjs
+          tests/run-tests.mjs
+          tests/smart-farming-tests.mjs
+          tests/smart-team-creator-tests.mjs
+          FILES
+          sed -i 's/^          //' /tmp/expected-files
+          sort -o /tmp/expected-files /tmp/expected-files
+          git diff --cached --name-only "$BASE_SHA" -- | sort > /tmp/actual-files
+          diff -u /tmp/expected-files /tmp/actual-files
+          test "$(wc -l < /tmp/actual-files)" -eq 27
+          test "$(git diff --cached --diff-filter=D --name-only "$BASE_SHA" -- | wc -l)" -eq 0
+
+          grep -q "hotaru-shell-v22" service-worker.js
+          grep -q "./app.js?v=1.8.0" service-worker.js
+          grep -q "./style.css?v=1.5.0" service-worker.js
+          grep -q "./js/data/farming-schedule.js" service-worker.js
+          grep -q "./js/features/resin-planner.js" service-worker.js
+          grep -q "./js/features/daily-plan.js" service-worker.js
+          grep -q "Farm Today + Resin Planner QA passed" <(npm test)
+
+      - name: Replace helpers with tested source commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Add Farm Today and Resin Planner'
+          git push origin HEAD:feature/farm-today-resin-planner
