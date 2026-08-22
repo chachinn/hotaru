@@ -1,3 +1,4 @@
+# Trigger promotion after workflow registration
 name: Promote Smart Team Creator 2.0
 
 on:
