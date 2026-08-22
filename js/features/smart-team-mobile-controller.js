@@ -5,36 +5,65 @@ import { matchReviewedTeams } from './roster-team-matcher.js';
 import { buildFlexiblePairTeams } from './flexible-pair-builder.js';
 
 const app=document.getElementById('app');
+const PICKER_FILTER_KEY='hotaru.smart-team-picker-ownership.v1';
+const PICKER_FILTERS=new Set(['all','owned','unowned']);
 let catalogPromise=null;
 let patchQueued=false;
 let generating=false;
 
 function esc(value=''){return String(value||'').replace(/[&<>'"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]))}
 function key(value=''){return String(value||'').trim().toLowerCase()}
+function safeGet(keyName,fallback=''){try{return localStorage.getItem(keyName)||fallback}catch{return fallback}}
+function safeSet(keyName,value){try{localStorage.setItem(keyName,value)}catch{}}
+function pickerFilter(){const value=safeGet(PICKER_FILTER_KEY,'all');return PICKER_FILTERS.has(value)?value:'all'}
 function getCatalog(){if(!catalogPromise)catalogPromise=loadCatalog().catch(error=>{catalogPromise=null;throw error});return catalogPromise}
 function setHtml(node,html){if(node&&node.innerHTML!==html)node.innerHTML=html}
 function smartCard(){return document.querySelector('.smart-team-card')}
 function resultsHost(card=smartCard()){return card?.querySelector(':scope > .section')||null}
 function ownedNameSet(state,catalog){const normalized=sortRoster(normalizeRoster(state?.roster||[],catalog?.characters||[]));return{normalized,names:new Set(normalized.map(entry=>key(entry.name)))}}
+function matchesPickerFilter(name,owned,filter){const isOwned=owned.has(key(name));return filter==='owned'?isOwned:filter==='unowned'?!isOwned:true}
 
+function ensureOwnershipFilter(card){
+  const controls=card?.querySelector('.team-controls');if(!controls)return'all';
+  const mode=card.querySelector('#team-mode')?.value||'roster';
+  let field=controls.querySelector('.hotaru-team-picker-ownership-field');
+  if(mode==='roster'||mode==='abyss'){field?.remove();return'all'}
+  if(!field){
+    field=document.createElement('div');field.className='field hotaru-team-picker-ownership-field';
+    field.innerHTML='<label for="hotaru-team-picker-ownership">Character ownership</label><select id="hotaru-team-picker-ownership"><option value="all">All characters</option><option value="owned">Owned only</option><option value="unowned">Not owned only</option></select><small>Filters the locked-character picker only. It does not change your roster.</small>';
+    const firstLock=controls.querySelector('#team-lock-1')?.closest('.field');
+    if(firstLock)controls.insertBefore(field,firstLock);else controls.appendChild(field);
+  }
+  const select=field.querySelector('#hotaru-team-picker-ownership'),filter=pickerFilter();
+  if(select&&select.value!==filter)select.value=filter;
+  return filter;
+}
 function optionMarkup(characters,owned,selected){
   return`<option value="">Choose character</option>${characters.map(character=>{const name=String(character?.name||'').trim();if(!name)return'';const isOwned=owned.has(key(name));return`<option value="${esc(name)}" data-owned="${isOwned?'1':'0'}" ${name===selected?'selected':''}>${esc(name)} · ${isOwned?'Owned':'Not owned'}</option>`}).join('')}`;
 }
 async function syncFullCatalogPickers(){
   const card=smartCard();if(!card)return;
-  const mode=card.querySelector('#team-mode')?.value||'roster';if(mode==='roster'||mode==='abyss')return;
+  const mode=card.querySelector('#team-mode')?.value||'roster',filter=ensureOwnershipFilter(card);if(mode==='roster'||mode==='abyss')return;
   try{
-    const catalog=await getCatalog(),state=loadState(),{names:owned}=ownedNameSet(state,catalog),characters=[...(catalog?.characters||[])].filter(character=>character?.name).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
+    const catalog=await getCatalog(),state=loadState(),{names:owned}=ownedNameSet(state,catalog),allCharacters=[...(catalog?.characters||[])].filter(character=>character?.name).sort((a,b)=>String(a.name).localeCompare(String(b.name))),characters=allCharacters.filter(character=>matchesPickerFilter(character.name,owned,filter));
     for(const [id,stateKey] of [['team-lock-1','teamLock1'],['team-lock-2','teamLock2']]){
       const select=card.querySelector(`#${id}`);if(!select)continue;
       const desired=String(state.ui?.[stateKey]||select.value||'');
-      const signature=`${characters.length}|${[...owned].sort().join('|')}|${desired}`;
+      const signature=`${filter}|${characters.length}|${[...owned].sort().join('|')}|${desired}`;
       if(select.dataset.hotaruCatalogSignature===signature)continue;
       select.dataset.hotaruCatalogSignature=signature;
       setHtml(select,optionMarkup(characters,owned,desired));
       if([...select.options].some(option=>option.value===desired))select.value=desired;
     }
   }catch{}
+}
+function clearLocksExcludedByFilter(card,filter){
+  for(const id of ['team-lock-1','team-lock-2']){
+    const select=card?.querySelector(`#${id}`);if(!select?.value)continue;
+    const option=select.selectedOptions?.[0],isOwned=option?.dataset?.owned==='1';
+    const keep=filter==='all'||(filter==='owned'&&isOwned)||(filter==='unowned'&&!isOwned);if(keep)continue;
+    select.value='';select.dispatchEvent(new Event('change',{bubbles:true}));
+  }
 }
 
 function sourceLinks(source={}){
@@ -88,5 +117,10 @@ document.addEventListener('click',event=>{
   event.preventDefault();event.stopPropagation();generateVisibleTeam();
 },{capture:true});
 
-document.addEventListener('change',event=>{if(event.target?.id==='team-mode'||event.target?.id==='team-lock-1'||event.target?.id==='team-lock-2')schedulePickerPatch()});
+document.addEventListener('change',event=>{
+  if(event.target?.id==='hotaru-team-picker-ownership'){
+    const filter=PICKER_FILTERS.has(event.target.value)?event.target.value:'all';safeSet(PICKER_FILTER_KEY,filter);clearLocksExcludedByFilter(smartCard(),filter);schedulePickerPatch();return;
+  }
+  if(event.target?.id==='team-mode'||event.target?.id==='team-lock-1'||event.target?.id==='team-lock-2')schedulePickerPatch();
+});
 schedulePickerPatch();
