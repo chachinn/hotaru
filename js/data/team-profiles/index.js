@@ -1,6 +1,7 @@
 const KQM_ARLECCHINO='https://keqingmains.com/q/arlecchino-quickguide/';
 const KQM_COLUMBINA='https://keqingmains.com/q/columbina-quickguide/';
 const KQM_TARTAGLIA='https://keqingmains.com/q/tartaglia-quickguide/';
+const ICY_ODETTE='https://www.icy-veins.com/genshin-impact/odette-team-guide';
 
 const source=(label,url)=>({label,url,type:'Reviewed theorycraft',reviewedAt:'2026-08-22'});
 const team=(id,name,members,why,sourceInfo,notes='')=>({id,name,members,why,notes,confidence:'Reviewed',source:sourceInfo});
@@ -50,11 +51,31 @@ export const REVIEWED_TEAM_PROFILES=[
       team('columbina-lcrys-ningguang','Lunar-Crystallize · Ningguang',['Columbina','Ningguang','Illuga','Chiori'],'Illuga buffs the on-field Geo damage while Chiori adds off-field Geo damage and Columbina enables Lunar-Crystallize.',source('KQM Columbina Quick Guide',KQM_COLUMBINA)),
       team('columbina-lcrys-noelle','Lunar-Crystallize · accessible Noelle',['Columbina','Noelle','Kachina','Gorou'],'A comfortable limited-roster Lunar-Crystallize option with Noelle sustain and the Kachina/Gorou Geo support core.',source('KQM Columbina Quick Guide',KQM_COLUMBINA),'Reviewed limited-roster alternative.')
     ]
+  },
+  {
+    id:'odette',character:'Odette',aliases:[],
+    source:source('Icy Veins Odette Team Guide',ICY_ODETTE),
+    archetypes:[
+      team('odette-conduct-sandrone-yae-alyosha','Stellar-Conduct · Sandrone',['Odette','Sandrone','Yae Miko','Alyosha'],'Odette enables and buffs Stellar-Conduct while Sandrone handles the on-field damage, Yae Miko supplies strong off-field Electro, and Alyosha provides Electro support plus sustain.',source('Icy Veins Odette Team Guide',ICY_ODETTE),'Premium Stellar-Conduct shell.'),
+      team('odette-conduct-wriothesley-nicole-yae','Stellar-Conduct · Wriothesley',['Odette','Wriothesley','Nicole','Yae Miko'],'Odette enables Stellar-Conduct for Wriothesley while Yae Miko supplies Electro and Nicole provides offensive support and shielding.',source('Icy Veins Odette Team Guide',ICY_ODETTE)),
+      team('odette-conduct-cyno-yae-alyosha','Stellar-Conduct · Cyno',['Odette','Cyno','Yae Miko','Alyosha'],'Odette enables Stellar-Conduct for Cyno while Yae Miko and Alyosha reinforce the Electro side of the team and provide off-field support.',source('Icy Veins Odette Team Guide',ICY_ODETTE)),
+      team('odette-conduct-traveler-yae-alyosha','Stellar-Conduct · Cryo Traveler',['Odette','Cryo Traveler','Yae Miko','Alyosha'],'Cryo Traveler can take the damage slot while Odette supports Stellar-Conduct and Yae Miko plus Alyosha provide the Electro core.',source('Icy Veins Odette Team Guide',ICY_ODETTE),'Lower-cost Stellar-Conduct route when the premium carries are unavailable.'),
+      team('odette-conduct-eula-qiqi-yae','Stellar-Conduct · Eula',['Odette','Eula','Qiqi','Yae Miko'],'Odette and Yae Miko form the Stellar-Conduct engine around Eula while Qiqi covers Cryo sustain.',source('Icy Veins Odette Team Guide',ICY_ODETTE)),
+      team('odette-conduct-razor-nicole-yae','Stellar-Conduct · Razor',['Odette','Razor','Nicole','Yae Miko'],'Razor provides the on-field Electro pressure while Odette enables Stellar-Conduct, Yae Miko contributes off-field damage, and Nicole supplies support utility.',source('Icy Veins Odette Team Guide',ICY_ODETTE)),
+      team('odette-conduct-chasca-yae-alyosha','Stellar-Conduct · Chasca',['Odette','Chasca','Yae Miko','Alyosha'],'Odette, Yae Miko, and Alyosha create the reviewed Stellar-Conduct support shell around Chasca.',source('Icy Veins Odette Team Guide',ICY_ODETTE)),
+      team('odette-conduct-lohen-nicole-alyosha','Stellar-Conduct · Lohen',['Odette','Lohen','Nicole','Alyosha'],'Lohen supplies fast Cryo application while Odette supports the Stellar-Conduct reaction and Nicole plus Alyosha cover buffing, Electro application, and sustain.',source('Icy Veins Odette Team Guide',ICY_ODETTE)),
+      team('odette-swirl-mizuki-traveler-faruzan','Stellar-Swirl · Mizuki + Faruzan',['Odette','Yumemizuki Mizuki','Cryo Traveler','Faruzan'],'Odette enables Stellar-Swirl while Mizuki drives the team, Cryo Traveler adds the Cryo-side Stellar reaction contribution, and Faruzan supports the Anemo side.',source('Icy Veins Odette Team Guide',ICY_ODETTE)),
+      team('odette-swirl-mizuki-traveler-sucrose','Stellar-Swirl · Mizuki + Sucrose',['Odette','Yumemizuki Mizuki','Cryo Traveler','Sucrose'],'A reviewed Stellar-Swirl variation using Mizuki as the driver, Cryo Traveler for the Cryo side, and Sucrose for Anemo support.',source('Icy Veins Odette Team Guide',ICY_ODETTE)),
+      team('odette-swirl-sandrone-traveler-sucrose','Stellar-Swirl · Sandrone',['Odette','Sandrone','Cryo Traveler','Sucrose'],'Odette supports Stellar-Swirl while Sandrone and Cryo Traveler provide the damage core and Sucrose supplies Anemo support.',source('Icy Veins Odette Team Guide',ICY_ODETTE)),
+      team('odette-swirl-sandrone-qiqi-sucrose','Stellar-Swirl · Sandrone + Qiqi',['Odette','Sandrone','Qiqi','Sucrose'],'A sustain-oriented Stellar-Swirl variation with Qiqi covering healing and Cryo application while Sucrose supports the Anemo side.',source('Icy Veins Odette Team Guide',ICY_ODETTE)),
+      team('odette-swirl-varka-prune-escoffier','Stellar-Swirl · Varka + Escoffier',['Odette','Varka','Prune','Escoffier'],'Odette supports the reviewed Stellar-Swirl shell around Varka, with Prune and Escoffier filling the reaction-support slots.',source('Icy Veins Odette Team Guide',ICY_ODETTE)),
+      team('odette-swirl-varka-prune-qiqi','Stellar-Swirl · Varka + Qiqi',['Odette','Varka','Prune','Qiqi'],'A reviewed Varka Stellar-Swirl variation that uses Qiqi for sustain alongside Odette and Prune.',source('Icy Veins Odette Team Guide',ICY_ODETTE))
+    ]
   }
 ];
 
 function key(value=''){return String(value||'').trim().toLowerCase()}
-const aliasToCanonical=new Map([['kazuha','Kaedehara Kazuha']]);
+const aliasToCanonical=new Map([['kazuha','Kaedehara Kazuha'],['mizuki','Yumemizuki Mizuki']]);
 const anchorIndex=new Map();
 const memberIndex=new Map();
 for(const profile of REVIEWED_TEAM_PROFILES){
