@@ -20,9 +20,9 @@ assert.doesNotMatch(bootstrap,/if\(note\)note\.innerHTML=sourceNotice\(\)/,'stat
 
 // Cache/version alignment is required so an already-installed v31 PWA can fetch the fixed module immediately.
 assert.match(index,/team-community-bootstrap\.js\?v=1\.0\.1/);
-assert.match(sw,/const CACHE = 'hotaru-shell-v32'/);
-assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v31'/);
+assert.match(sw,/const CACHE = 'hotaru-shell-v33'/);
+assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v32'/);
 assert.match(sw,/team-community-bootstrap\.js\?v=1\.0\.1/);
-assert.match(updater,/const RELEASE='v32'/);
+assert.match(updater,/const RELEASE='v33'/);
 
 console.log('Hotaru team-community observer boot-loop regression QA passed.');
