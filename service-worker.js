@@ -1,4 +1,5 @@
 const CACHE = 'hotaru-shell-v27';
+const PREVIOUS_CACHE = 'hotaru-shell-v26';
 const APP_SHELL = [
   './','./index.html','./style.css?v=1.8.0','./css/enhancements.css?v=1.4.0','./css/content-enhancements.css?v=1.0.0','./css/guide-ui.css?v=1.3.0','./css/exploration-ui.css?v=1.0.0','./css/roster-ui.css?v=1.0.0','./app.js?v=1.12.0','./js/enhancements.js?v=1.7.0','./js/content-enhancements.js?v=1.2.0','./js/features/guide-loader.js?v=1.1.0','./tools/hotaru-hoyolab-export.user.js',
   './manifest.json',
@@ -16,7 +17,7 @@ self.addEventListener('install', event => {
 });
 self.addEventListener('activate', event => {
   event.waitUntil(Promise.all([
-    caches.keys().then(keys => Promise.all(keys.filter(key => key.startsWith('hotaru-shell-') && key !== CACHE).map(key => caches.delete(key)))),
+    caches.keys().then(keys => Promise.all(keys.filter(key => key === PREVIOUS_CACHE || (key.startsWith('hotaru-shell-') && key !== CACHE)).map(key => caches.delete(key)))),
     self.clients.claim()
   ]));
 });
