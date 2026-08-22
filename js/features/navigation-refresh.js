@@ -11,10 +11,11 @@ function routeLabel(){
 function refreshBottomNav(){
   const nav=app?.querySelector('.bottom-nav');if(!nav)return;
   nav.classList.add('hotaru-nav-expanded');
-  const roster=nav.querySelector('[data-tab="roster"]'),build=nav.querySelector('[data-tab="build"]'),more=nav.querySelector('[data-tab="more"]');
+  const roster=nav.querySelector('[data-tab="roster"]'),build=nav.querySelector('[data-tab="build"]'),more=nav.querySelector('[data-tab="more"]'),menu=nav.querySelector('[data-hotaru-menu]');
   roster?.classList.remove('hotaru-overflow-nav');
   more?.classList.add('hotaru-overflow-nav');
   if(roster&&build&&roster.nextElementSibling!==build)nav.insertBefore(roster,build);
+  menu?.classList.toggle('active',Boolean(document.getElementById('hotaru-map-view'))||Boolean(more?.classList.contains('active')));
 }
 function ensureTopSectionsButton(){
   const brand=app?.querySelector('.topbar .brand');if(!brand)return;
