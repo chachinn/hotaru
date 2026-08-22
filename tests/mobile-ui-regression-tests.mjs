@@ -23,7 +23,7 @@ const guideCss=fs.readFileSync(path.join(root,'css/guide-ui.css'),'utf8');
 assert.match(guideCss,/@media\(max-width:560px\)[\s\S]*\.hotaru-guide-row\{display:flex;/);
 assert.match(guideCss,/\.hotaru-guide-copy\{min-width:0;width:100%;max-width:100%\}/);
 const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
-assert.match(sw,/const CACHE = 'hotaru-shell-v31'/);assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v30'/);assert.match(sw,/style\.css\?v=1\.8\.0/);assert.match(sw,/css\/guide-ui\.css\?v=1\.3\.0/);assert.match(sw,/app\.js\?v=1\.12\.0/);
+assert.match(sw,/const CACHE = 'hotaru-shell-v32'/);assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v31'/);assert.match(sw,/style\.css\?v=1\.8\.0/);assert.match(sw,/css\/guide-ui\.css\?v=1\.3\.0/);assert.match(sw,/app\.js\?v=1\.12\.0/);
 const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
 assert.match(index,/style\.css\?v=1\.8\.0/);assert.match(index,/css\/guide-ui\.css\?v=1\.3\.0/);assert.match(index,/app\.js\?v=1\.12\.0/);
 console.log('Hotaru mobile UI + rarity + same-weapon-type regression QA passed.');
