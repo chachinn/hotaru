@@ -17,8 +17,8 @@ const index=read('index.html');
 assert.doesNotMatch(guideEngine,/return output\.slice\(0,4\)/);
 for(const name of ['Arlecchino','Tartaglia','Columbina'])assert.ok((reviewedTeamProfile(name)?.archetypes||[]).length>4,`${name} should expose more than four reviewed variations`);
 assert.ok(reviewedTeamsForCharacter('Bennett').length>3,'Reviewed teammates should inherit the complete reviewed teams they appear in');
-assert.match(guideEngine,/reviewedTeamsForCharacter/);
-assert.match(guideEngine,/members\.length!==4\|\|members\.some/,'Reviewed guide teams must be complete four-character teams');
+assert.match(guideEngine,/recommendedTeamsForCharacter/,'Character guides should read the expanded sourced recommendation registry');
+assert.match(guideEngine,/members\.length!==4\|\|members\.some/,'Sourced guide teams must be complete four-character teams');
 assert.match(guideEngine,/Kaedehara Kazuha/,'Kazuha alias should resolve against canonical catalogue naming');
 
 const arle={name:'Arlecchino',element:'Pyro',description:'',skills:[],passives:[]};

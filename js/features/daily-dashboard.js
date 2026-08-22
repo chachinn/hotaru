@@ -15,7 +15,7 @@ export function buildDailyDashboard({roster=[],characters=[],weapons=[],dailyPla
   const active=normalized.filter(entry=>entry.status!=='Not Building'&&entry.status!=='Finished');
   const focus=active.map(entry=>{const weapon=weaponFor(entry,weapons),goal=buildGoal(entry,variantProfile(entry.name,entry.buildVariant),weapon);return{name:entry.name,id:entry.id,status:entry.status,priority:entry.priority,progress:rosterProgress(entry,weapon),nextGoal:goalSummary(goal),complete:goal.complete}}).slice(0,3);
   const coverage=teamCoverage(normalized),pendingTeams=coverage.filter(item=>item.status==='pending');
-  const bestTeam=matchReviewedTeams({roster:normalized,allowUnowned:false,limit:1}).results?.[0]||null;
+  const bestTeam=matchReviewedTeams({roster:normalized,allowUnowned:false,limit:1,curatedOnly:true}).results?.[0]||null;
   return{
     counts:{saved:normalized.length,active:active.length,building:normalized.filter(entry=>entry.status==='Building').length,finished:normalized.filter(entry=>entry.status==='Finished').length},
     focus,
