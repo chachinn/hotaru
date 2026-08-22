@@ -20,9 +20,9 @@ assert.doesNotMatch(bootstrap,/if\(note\)note\.innerHTML=sourceNotice\(\)/,'stat
 
 // Cache/version alignment must keep the repaired module while later shells add new UI safely.
 assert.match(index,/team-community-bootstrap\.js\?v=1\.0\.1/);
-assert.match(sw,/const CACHE = 'hotaru-shell-v38'/);
-assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v37'/);
+assert.match(sw,/const CACHE = 'hotaru-shell-v39'/);
+assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v38'/);
 assert.match(sw,/team-community-bootstrap\.js\?v=1\.0\.1/);
-assert.match(updater,/const RELEASE='v38'/);
+assert.match(updater,/const RELEASE='v39'/);
 
 console.log('Hotaru team-community observer boot-loop regression QA passed.');

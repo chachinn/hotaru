@@ -38,8 +38,8 @@ function ensureOwnershipFilter(card){
   if(select&&select.value!==filter)select.value=filter;
   return filter;
 }
-function optionMarkup(characters,owned,selected){
-  return`<option value="">Choose character</option>${characters.map(character=>{const name=String(character?.name||'').trim();if(!name)return'';const isOwned=owned.has(key(name));return`<option value="${esc(name)}" data-owned="${isOwned?'1':'0'}" ${name===selected?'selected':''}>${esc(name)} · ${isOwned?'Owned':'Not owned'}</option>`}).join('')}`;
+function optionMarkup(characters,owned,selected,filter='all'){
+  return`<option value="">Choose character</option>${characters.map(character=>{const name=String(character?.name||'').trim();if(!name)return'';const isOwned=owned.has(key(name)),label=filter==='all'?`${name} · ${isOwned?'Owned':'Not owned'}`:name;return`<option value="${esc(name)}" data-owned="${isOwned?'1':'0'}" ${name===selected?'selected':''}>${esc(label)}</option>`}).join('')}`;
 }
 async function syncFullCatalogPickers(){
   const card=smartCard();if(!card)return;
@@ -52,7 +52,7 @@ async function syncFullCatalogPickers(){
       const signature=`${filter}|${characters.length}|${[...owned].sort().join('|')}|${desired}`;
       if(select.dataset.hotaruCatalogSignature===signature)continue;
       select.dataset.hotaruCatalogSignature=signature;
-      setHtml(select,optionMarkup(characters,owned,desired));
+      setHtml(select,optionMarkup(characters,owned,desired,filter));
       if([...select.options].some(option=>option.value===desired))select.value=desired;
     }
   }catch{}
