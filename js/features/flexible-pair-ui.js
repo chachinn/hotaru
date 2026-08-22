@@ -19,6 +19,17 @@ function patchFlexiblePair(){
   }
   host.innerHTML=`<div class="notice warn"><strong>Flexible Pair Builder · Adapted, not reviewed</strong><br>${esc(flexible.rationale)} Hotaru is preserving sourced mechanics instead of treating same-element characters as interchangeable.</div><div class="team-results">${flexible.results.map(card).join('')}</div>`;
 }
-function schedulePatch(){queueMicrotask(()=>requestAnimationFrame(patchFlexiblePair))}
+function shouldCaptureFlexiblePair(event){
+  const button=event.target.closest('[data-action="generate-smart-team"]');if(!button)return false;
+  const smart=button.closest('.smart-team-card');if(!smart||smart.querySelector('#team-mode')?.value!=='lock2')return false;
+  const lock1=smart.querySelector('#team-lock-1')?.value||'',lock2=smart.querySelector('#team-lock-2')?.value||'';
+  if(!lock1||!lock2||lock1===lock2)return false;
+  const probe=buildFlexiblePairTeams({roster:rosterFromSelect(smart.querySelector('#team-lock-1')),lockedNames:[lock1,lock2],allowUnowned:Boolean(smart.querySelector('#team-allow-unowned')?.checked),limit:1});
+  return probe.supported;
+}
 
-document.addEventListener('click',event=>{if(event.target.closest('[data-action="generate-smart-team"]'))schedulePatch()});
+document.addEventListener('click',event=>{
+  if(!shouldCaptureFlexiblePair(event))return;
+  event.preventDefault();event.stopImmediatePropagation();
+  patchFlexiblePair();
+},{capture:true});
