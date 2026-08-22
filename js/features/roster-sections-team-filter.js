@@ -1,8 +1,9 @@
-import { TEAM_UTILITY_OPTIONS, teamMatchesUtility, teamUtilitySummary } from '../data/team-utility-tags.js';
+import { TEAM_UTILITY_CATEGORIES, TEAM_UTILITY_OPTIONS, utilityOptionsForCategory, teamMatchesUtility, teamUtilitySummary } from '../data/team-utility-tags.js';
 
 const app=document.getElementById('app');
 const SECTION_KEY='hotaru.roster-section.v1';
 const UTILITY_KEY='hotaru.team-utility.v1';
+const UTILITY_CATEGORY_KEY='hotaru.team-utility-category.v1';
 const SECTIONS=[
   {id:'characters',heading:'Characters',label:'Roster Characters'},
   {id:'teams',heading:'Smart Team Creator',label:'Teams & Abyss'},
@@ -15,6 +16,9 @@ function safeGet(key,fallback=''){try{return localStorage.getItem(key)||fallback
 function safeSet(key,value){try{localStorage.setItem(key,value)}catch{}}
 function validSection(value){return SECTIONS.some(item=>item.id===value)?value:'characters'}
 function validUtility(value){return TEAM_UTILITY_OPTIONS.some(item=>item.id===value)?value:'any'}
+function validUtilityCategory(value){return TEAM_UTILITY_CATEGORIES.some(item=>item.id===value)?value:'any'}
+function utilityOption(value){return TEAM_UTILITY_OPTIONS.find(item=>item.id===validUtility(value))||TEAM_UTILITY_OPTIONS[0]}
+function categoryForUtility(value){return utilityOption(value).category||'any'}
 function rosterMain(){const main=app?.querySelector('main');return main?.querySelector('h1')?.textContent?.trim()==='My Roster'?main:null}
 function sectionByHeading(main,heading){return[...main.querySelectorAll(':scope > section')].find(section=>section.querySelector('h2')?.textContent?.trim()===heading)||null}
 function sectionMap(main){return new Map(SECTIONS.map(item=>[item.id,sectionByHeading(main,item.heading)]).filter(([,section])=>section))}
@@ -44,41 +48,57 @@ function chooseRosterSection(id){
   requestAnimationFrame(()=>{applyRosterSection();document.dispatchEvent(new CustomEvent('hotaru:roster-section-changed',{detail:{section:value}}));window.scrollTo({top:0,behavior:'smooth'})});
 }
 
-function utilityLabel(value){return TEAM_UTILITY_OPTIONS.find(item=>item.id===value)?.label||'No preference'}
+function utilityLabel(value){return utilityOption(value).label}
+function categoryOptionsHtml(){return TEAM_UTILITY_CATEGORIES.map(item=>`<option value="${item.id}">${item.label}</option>`).join('')}
+function utilityOptionsHtml(category){return utilityOptionsForCategory(category).map(item=>`<option value="${item.id}">${item.label}</option>`).join('')}
+function storedUtilityState(){
+  const requirement=validUtility(safeGet(UTILITY_KEY,'any'));
+  const requirementCategory=categoryForUtility(requirement);
+  const savedCategory=validUtilityCategory(safeGet(UTILITY_CATEGORY_KEY,requirementCategory));
+  const category=requirement!=='any'?requirementCategory:savedCategory;
+  return{category,requirement:category==='any'?'any':requirement};
+}
 function ensureUtilityControl(){
   const smart=document.querySelector('.smart-team-card');if(!smart)return null;
   const controls=smart.querySelector('.team-controls');if(!controls)return null;
   let field=controls.querySelector('.hotaru-team-utility-field');
   if(!field){
     field=document.createElement('div');field.className='field hotaru-team-utility-field';
-    field.innerHTML=`<label for="hotaru-team-utility">Team needs</label><select id="hotaru-team-utility">${TEAM_UTILITY_OPTIONS.map(item=>`<option value="${item.id}">${item.label}</option>`).join('')}</select><small>Verified baseline utility only; Hotaru will not guess constellation-only roles.</small>`;
+    field.innerHTML=`<div class="hotaru-team-utility-grid"><label>Team Needs<select id="hotaru-team-utility-category">${categoryOptionsHtml()}</select></label><label>Need<select id="hotaru-team-utility"></select></label></div><small>Verified baseline utility only; Hotaru will not guess constellation-, artifact-, or weapon-only roles.</small>`;
     const generate=controls.querySelector('.team-generate');if(generate)controls.insertBefore(field,generate);else controls.appendChild(field);
   }
-  const select=field.querySelector('#hotaru-team-utility'),abyss=smart.querySelector('#team-mode')?.value==='abyss';
-  const stored=validUtility(safeGet(UTILITY_KEY,'any'));if(select.value!==stored)select.value=stored;
-  select.disabled=abyss;field.classList.toggle('disabled',abyss);
-  setText(field.querySelector('small'),abyss?'Utility filtering is disabled for the two-team Abyss planner.':'Verified baseline utility only; Hotaru will not guess constellation-only roles.');
-  return select;
+  const categorySelect=field.querySelector('#hotaru-team-utility-category'),select=field.querySelector('#hotaru-team-utility'),abyss=smart.querySelector('#team-mode')?.value==='abyss';
+  const stored=storedUtilityState();
+  if(categorySelect.value!==stored.category)categorySelect.value=stored.category;
+  setHtml(select,utilityOptionsHtml(stored.category));
+  const available=utilityOptionsForCategory(stored.category).some(item=>item.id===stored.requirement)?stored.requirement:'any';
+  if(select.value!==available)select.value=available;
+  categorySelect.disabled=abyss;select.disabled=abyss;field.classList.toggle('disabled',abyss);
+  setText(field.querySelector('small'),abyss?'Team Needs filtering is disabled for the two-team Abyss planner.':'Verified baseline utility only; Hotaru will not guess constellation-, artifact-, or weapon-only roles.');
+  return{categorySelect,select};
 }
 
 function cardMembers(card){return[...card.querySelectorAll('.team-members .team-member strong')].map(node=>node.textContent?.trim()).filter(Boolean)}
+const HINT_FIELDS=[
+  ['healerNames','Healing'],['shielderNames','Shield'],['bufferNames','Buffer'],['debufferNames','Debuff / RES shred'],['crowdControlNames','Grouping'],['interruptionResistanceNames','Interruption resistance'],['batteryNames','Energy / Battery'],['offFieldDpsNames','Off-field DPS']
+];
 function syncUtilityHint(card,summary,requirement){
   let hint=card.querySelector('.hotaru-team-utility-hint');if(requirement==='any'){hint?.remove();return}
-  const parts=[];if(summary.healerNames.length)parts.push(`Healing: ${summary.healerNames.join(', ')}`);if(summary.shielderNames.length)parts.push(`Shield: ${summary.shielderNames.join(', ')}`);
+  const parts=[];for(const [field,label] of HINT_FIELDS){if(summary[field]?.length)parts.push(`${label}: ${summary[field].join(', ')}`)}
   if(!hint){hint=document.createElement('p');hint.className='muted small hotaru-team-utility-hint';card.querySelector('.team-members')?.after(hint)}
   setText(hint,parts.join(' · '));
 }
 
 function applyUtilityFilter(){
   const smart=document.querySelector('.smart-team-card');if(!smart)return;
-  const select=ensureUtilityControl();if(!select)return;
-  const abyss=smart.querySelector('#team-mode')?.value==='abyss',requirement=abyss?'any':validUtility(select.value);
+  const control=ensureUtilityControl();if(!control)return;
+  const abyss=smart.querySelector('#team-mode')?.value==='abyss',requirement=abyss?'any':validUtility(control.select.value);
   const results=smart.querySelector('.team-results');let empty=smart.querySelector('.hotaru-team-utility-empty');if(!results){empty?.remove();return}
   const cards=[...results.querySelectorAll(':scope > .team-card')];let visible=0;
   for(const card of cards){const members=cardMembers(card),summary=teamUtilitySummary(members),match=teamMatchesUtility(members,requirement);card.hidden=!match;if(match)visible+=1;syncUtilityHint(card,summary,requirement)}
   if(requirement!=='any'&&cards.length&&visible===0){
     if(!empty){empty=document.createElement('div');empty.className='notice info hotaru-team-utility-empty';results.after(empty)}
-    setHtml(empty,`<strong>No shown teams match “${utilityLabel(requirement)}”.</strong><br>Try Allow unowned or a different utility requirement. Hotaru will not relabel uncertain characters just to satisfy the filter.`);
+    setHtml(empty,`<strong>No shown teams match “${utilityLabel(requirement)}”.</strong><br>Try Allow unowned or a different Team Need. Hotaru will not relabel uncertain characters or invent a team just to satisfy the filter.`);
   }else empty?.remove();
 }
 
@@ -93,5 +113,15 @@ document.addEventListener('click',event=>{
   const menuJump=event.target.closest('[data-hotaru-nav-jump]');if(menuJump)safeSet(SECTION_KEY,menuJump.dataset.hotaruNavJump==='teams'?'teams':'farming');
 },{capture:true});
 
-document.addEventListener('change',event=>{if(event.target?.id!=='hotaru-team-utility')return;safeSet(UTILITY_KEY,validUtility(event.target.value));applyUtilityFilter()});
+document.addEventListener('change',event=>{
+  if(event.target?.id==='hotaru-team-utility-category'){
+    const category=validUtilityCategory(event.target.value);safeSet(UTILITY_CATEGORY_KEY,category);
+    const previous=validUtility(safeGet(UTILITY_KEY,'any'));
+    const requirement=categoryForUtility(previous)===category?previous:'any';safeSet(UTILITY_KEY,requirement);applyUtilityFilter();return;
+  }
+  if(event.target?.id!=='hotaru-team-utility')return;
+  const requirement=validUtility(event.target.value);safeSet(UTILITY_KEY,requirement);
+  const currentCategory=validUtilityCategory(document.getElementById('hotaru-team-utility-category')?.value||safeGet(UTILITY_CATEGORY_KEY,'any'));
+  safeSet(UTILITY_CATEGORY_KEY,requirement==='any'?currentCategory:categoryForUtility(requirement));applyUtilityFilter();
+});
 schedulePatch();
