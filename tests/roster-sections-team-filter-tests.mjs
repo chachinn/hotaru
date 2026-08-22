@@ -37,6 +37,8 @@ assert.match(ui,/section\.hidden=id!==resolved/,'inactive roster modules must be
 assert.match(ui,/function openRosterTab\(\)/,'hamburger entries must be able to enter Roster from any screen');
 assert.match(ui,/querySelector\('\.bottom-nav \[data-tab="roster"\]'\)/,'cross-screen hamburger navigation must use the real Roster tab');
 assert.match(ui,/new MutationObserver\(schedulePatch\)\.observe\(app,\{childList:true,subtree:true\}\)/,'DOM refresh handling must remain coalesced and must not observe attributes it changes itself');
+assert.match(ui,/function setText\(node,text\)\{if\(node&&node\.textContent!==text\)node\.textContent=text\}/,'team UI text writes must be idempotent so the observer cannot trigger itself forever');
+assert.match(ui,/function setHtml\(node,html\)\{if\(node&&node\.innerHTML!==html\)node\.innerHTML=html\}/,'team empty-state HTML writes must be idempotent');
 assert.match(ui,/hotaru-team-utility/);
 assert.match(ui,/teamMatchesUtility/);
 assert.match(ui,/team-card/);
@@ -46,13 +48,13 @@ for(const section of ['characters','teams','farming','weapons'])assert.ok(nav.in
 assert.match(css,/section\[hidden\]/);
 assert.match(css,/\.hotaru-team-utility-field/);
 assert.match(index,/roster-sections-team-filter\.css\?v=1\.0\.0/);
-assert.match(index,/roster-sections-team-filter\.js\?v=1\.0\.0/);
+assert.match(index,/roster-sections-team-filter\.js\?v=1\.0\.1/);
 assert.match(index,/navigation-refresh\.js\?v=1\.2\.0/);
-assert.match(sw,/const CACHE = 'hotaru-shell-v34'/);
-assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v33'/);
+assert.match(sw,/const CACHE = 'hotaru-shell-v35'/);
+assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v34'/);
 assert.match(sw,/team-utility-tags\.js/);
-assert.match(sw,/roster-sections-team-filter\.js\?v=1\.0\.0/);
+assert.match(sw,/roster-sections-team-filter\.js\?v=1\.0\.1/);
 assert.match(sw,/navigation-refresh\.js\?v=1\.2\.0/);
-assert.match(updater,/RELEASE='v34'/);
+assert.match(updater,/RELEASE='v35'/);
 
 console.log('Hotaru clean Roster hamburger sections + team utility filter QA passed.');
