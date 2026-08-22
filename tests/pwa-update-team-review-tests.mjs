@@ -16,10 +16,10 @@ assert.deepEqual(screenshotPair.pendingLocks,[],'A reviewed Odette + Flins lock 
 
 const index=read('index.html'),sw=read('service-worker.js'),updater=read('js/pwa-update.js');
 assert.ok(index.indexOf('js/pwa-update.js?v=1.0.0')<index.indexOf('app.js?v=1.12.0'),'PWA updater must start before app modules so stale installed PWAs recover promptly');
-assert.match(sw,/const CACHE = 'hotaru-shell-v44'/);
-assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v43'/);
+assert.match(sw,/const CACHE = 'hotaru-shell-v45'/);
+assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v44'/);
 assert.match(sw,/js\/pwa-update\.js\?v=1\.0\.0/,'PWA updater must be available offline after the fresh shell is installed');
-assert.match(updater,/RELEASE='v44'/,'PWA reload marker must advance with the shell');
+assert.match(updater,/RELEASE='v45'/,'PWA reload marker must advance with the shell');
 assert.match(updater,/updateViaCache:'none'/,'Service-worker update checks must bypass stale HTTP caches');
 assert.match(updater,/controllerchange/,'A newly activated worker must be detected');
 assert.match(updater,/location\.reload\(\)/,'The page must reload once under the new worker so unversioned internal modules cannot remain stale');

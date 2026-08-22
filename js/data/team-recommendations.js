@@ -1,7 +1,10 @@
-import { allReviewedTeams, canonicalTeamCharacter, teamReviewStatus } from './team-profiles/index.js';
+import { allReviewedTeams, canonicalTeamCharacter, registerReviewedTeams, teamReviewStatus } from './team-profiles/index.js';
+import { normalizeReactionId, teamReaction } from './team-reaction-tags.js';
+import { V45_REVIEWED_TEAM_BATCH } from './team-reviewed-v45-batch.js';
 
-const reviewedSource=(label,url)=>({label,url,type:'Reviewed theorycraft',reviewedAt:'2026-08-22'});
-const reviewedTeam=(id,name,members,why,source,notes='')=>({id,name,members,why,notes,confidence:'Reviewed',source});
+export const TEAM_SOURCE_PLATFORMS=['Guide','HoYoLAB','YouTube','TikTok','GitHub'];
+const reviewedSource=(label,url,platform='Guide',creator='')=>({label,url,type:'Reviewed theorycraft',platform,creator,reviewedAt:'2026-08-22'});
+const reviewedTeam=(id,name,members,why,source,notes='',reaction='')=>({id,name,members,why,notes,confidence:'Reviewed',reaction:normalizeReactionId(reaction)||teamReaction({name}),source});
 
 const SANDRONE='https://www.icy-veins.com/genshin-impact/sandrone-team-guide';
 const NICOLE='https://www.icy-veins.com/genshin-impact/nicole-team-guide';
@@ -71,29 +74,63 @@ export const CURRENT_REVIEWED_TEAM_SUPPLEMENT=[
   reviewedTeam('alyosha-clorinde-xingqiu-sucrose','Electro reaction · Clorinde',['Clorinde','Alyosha','Xingqiu','Sucrose'],'Alyosha provides off-field Electro and sustain in a Clorinde reaction-driver team.',alyoshaSource,'General Electro-support use rather than Alyosha’s premier Stellar-Conduct role.'),
   reviewedTeam('alyosha-raiden-furina-jean','Electro-Charged · Raiden',['Raiden Shogun','Alyosha','Furina','Jean'],'Alyosha adds off-field Electro and utility to a Raiden/Furina/Jean shell.',alyoshaSource,'General support variation rather than a dedicated Stellar-Conduct team.'),
   reviewedTeam('alyosha-flins-aino-sucrose','Lunar/Electro · Flins',['Flins','Alyosha','Aino','Sucrose'],'Alyosha supplies off-field Electro support and healing around Flins with Aino and Sucrose.',alyoshaSource,'General Electro-support variation.'),
+
+  ...V45_REVIEWED_TEAM_BATCH,
 ];
 
 let communityTeams=[];
+let registryCache=null;
 function key(value=''){return String(value||'').trim().toLowerCase()}
-function compositionKey(team={}){return [...new Set((team.members||[]).map(canonicalTeamCharacter).map(key))].sort().join('|')}
-function dedupeTeams(teams=[]){const seen=new Set(),out=[];for(const team of teams){const comp=compositionKey(team);if(!comp||seen.has(comp))continue;seen.add(comp);out.push(team)}return out}
-
-export function registerCommunityTeams(teams=[]){communityTeams=dedupeTeams(Array.isArray(teams)?teams:[]);return communityTeams.length}
+export function compositionKey(team={}){return [...new Set((team.members||[]).map(canonicalTeamCharacter).map(key))].sort().join('|')}
+function validSource(item={}){return Boolean(item?.label&&item?.type&&TEAM_SOURCE_PLATFORMS.includes(item?.platform)&&/^https?:\/\//i.test(String(item?.url||'')))}
+function sourceList(source={}){const candidates=[...(Array.isArray(source?.links)?source.links:[]),source];const seen=new Set(),out=[];for(const item of candidates){if(!validSource(item))continue;const sig=`${item.type}|${item.label}|${item.url}`;if(seen.has(sig))continue;seen.add(sig);out.push({...item,links:undefined})}return out}
+export function teamHasValidSource(team={}){return sourceList(team.source||{}).length>0}
+function sourceRank(team={}){return team.confidence==='Reviewed'?3:team.confidence==='Community-sourced'?2:team.confidence==='Simulation-backed'?1:0}
+export function mergeDedupedTeams(teams=[]){
+  const merged=new Map();
+  for(const incoming of teams||[]){
+    const comp=compositionKey(incoming);if(!comp)continue;
+    const team={...incoming,reaction:teamReaction(incoming)},prior=merged.get(comp);
+    if(!prior){const links=sourceList(team.source);if(!links.length)continue;merged.set(comp,{...team,source:{...(team.source||{}),links}});continue}
+    const preferred=sourceRank(team)>sourceRank(prior)?team:prior,other=preferred===team?prior:team;
+    const links=sourceList({...(preferred.source||{}),links:[...sourceList(preferred.source),...sourceList(other.source)]});
+    merged.set(comp,{...preferred,source:{...(preferred.source||{}),links}});
+  }
+  return [...merged.values()];
+}
+function rebuildRegistry(){
+  const all=mergeDedupedTeams([...allReviewedTeams(),...communityTeams]).filter(teamHasValidSource),byCharacter=new Map(),byReaction=new Map(),byTier=new Map();
+  for(const team of all){
+    for(const member of team.members||[]){const memberKey=key(canonicalTeamCharacter(member)),list=byCharacter.get(memberKey)||[];list.push(team);byCharacter.set(memberKey,list)}
+    if(team.reaction){const list=byReaction.get(team.reaction)||[];list.push(team);byReaction.set(team.reaction,list)}
+    const tier=team.confidence||'Sourced';const tierList=byTier.get(tier)||[];tierList.push(team);byTier.set(tier,tierList);
+  }
+  registryCache={all,byCharacter,byReaction,byTier};return registryCache;
+}
+function registry(){return registryCache||rebuildRegistry()}
+function invalidateRegistry(){registryCache=null}
+registerReviewedTeams(CURRENT_REVIEWED_TEAM_SUPPLEMENT);
+export function registerCommunityTeams(teams=[]){communityTeams=mergeDedupedTeams(Array.isArray(teams)?teams:[]);invalidateRegistry();return communityTeams.length}
 export function communityRecommendedTeams(){return [...communityTeams]}
-export function allRecommendedTeams(){return dedupeTeams([...allReviewedTeams(),...CURRENT_REVIEWED_TEAM_SUPPLEMENT,...communityTeams])}
-export function recommendedTeamsForCharacter(name=''){
-  const wanted=key(canonicalTeamCharacter(name));
-  return allRecommendedTeams().filter(team=>(team.members||[]).some(member=>key(canonicalTeamCharacter(member))===wanted));
+export function allRecommendedTeams(){return [...registry().all]}
+export function recommendedTeamsForCharacter(name=''){return [...(registry().byCharacter.get(key(canonicalTeamCharacter(name)))||[])]}
+export function queryRecommendedTeams({lockedNames=[],reaction='all',curatedOnly=false}={}){
+  const locks=[...new Set((lockedNames||[]).map(canonicalTeamCharacter).map(key).filter(Boolean))];
+  const source=curatedOnly?allReviewedTeams():registry().all;let candidates=source;
+  if(locks.length&&!curatedOnly){const buckets=locks.map(lock=>registry().byCharacter.get(lock)||[]).sort((a,b)=>a.length-b.length);candidates=buckets[0]||[]}
+  if(locks.length)candidates=candidates.filter(team=>locks.every(lock=>(team.members||[]).some(member=>key(canonicalTeamCharacter(member))===lock)));
+  const wanted=normalizeReactionId(reaction);if(wanted)candidates=candidates.filter(team=>team.reaction===wanted);
+  return candidates;
 }
 export function teamRecommendationStatus(name=''){
   const base=teamReviewStatus(name);if(base.status!=='pending')return base;
-  const canonical=canonicalTeamCharacter(name),teams=recommendedTeamsForCharacter(canonical);
-  const reviewed=teams.filter(team=>team.confidence==='Reviewed');
+  const canonical=canonicalTeamCharacter(name),teams=recommendedTeamsForCharacter(canonical),reviewed=teams.filter(team=>team.confidence==='Reviewed');
   if(reviewed.length)return{status:'editorial-reviewed',label:'Reviewed team coverage',canonical,teams};
   if(teams.length)return{status:'simulation-backed',label:'Simulation-backed team coverage',canonical,teams};
   return{status:'pending',label:'Team review pending',canonical,teams:[]};
 }
-export function recommendationCoverage(characterNames=[]){
-  const rows=(characterNames||[]).map(name=>({name,count:recommendedTeamsForCharacter(name).length,status:teamRecommendationStatus(name).status}));
-  return{rows,total:rows.length,sixPlus:rows.filter(row=>row.count>=6).length,covered:rows.filter(row=>row.count>0).length,pending:rows.filter(row=>row.count===0)};
+export function recommendationCoverage(characterNames=[],{target=30}={}){
+  const floor=Math.max(1,Number(target)||30),rows=(characterNames||[]).map(name=>{const count=recommendedTeamsForCharacter(name).filter(teamHasValidSource).length;return{name,count,target:floor,gap:Math.max(0,floor-count),meetsTarget:count>=floor,status:teamRecommendationStatus(name).status}}),sourceGaps=rows.filter(row=>!row.meetsTarget);
+  return{rows,total:rows.length,target:floor,thirtyPlus:rows.filter(row=>row.count>=30).length,floorMet:rows.filter(row=>row.meetsTarget).length,sixPlus:rows.filter(row=>row.count>=6).length,covered:rows.filter(row=>row.count>0).length,pending:rows.filter(row=>row.count===0),sourceGaps};
 }
+export function recommendationRegistryStats(){const current=registry();return{teams:current.all.length,characters:current.byCharacter.size,reactions:current.byReaction.size,tiers:current.byTier.size}}

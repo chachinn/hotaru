@@ -74,7 +74,7 @@ function completeRecommendedTeams(detail={},catalog={}){
     return{name:team.name,members,reviewed,confidence:team.confidence||'Sourced',source:team.source,why:team.why,notes:team.notes||''};
   }).filter(Boolean);
 }
-function synergyExplanation(character,teammate,archetype,team){if(team?.why)return team.why;const element=teammate?.element||'';return `${teammate?.name||'This teammate'} fills a ${element||'complementary'} slot in Hotaru's ${archetype} template and should be adjusted for your actual rotation, sustain, and energy needs.`}
+function synergyExplanation(character,teammate,archetype,team){const self=character?.name||'this character',mate=teammate?.name||'This teammate',role=teammate?.role||'teammate',context=String(team?.why||'').trim();return `In ${archetype}, ${mate} is the ${role} shown alongside ${self}.${context?` ${context}`:''}`}
 export function sampleTeams(detail={},catalog={}){
   const self=detail.name,sourced=completeRecommendedTeams(detail,catalog);if(sourced.length)return sourced;
   const element=detail.element||'Unknown',text=kitText(detail,{}),output=[];
@@ -82,7 +82,7 @@ export function sampleTeams(detail={},catalog={}){
   for(const [name,candidates] of TEAM_LIBRARY[element]||[]){const mates=candidates.map(x=>available(catalog,x,self));if(mates.length===3&&mates.every(Boolean))output.push({name,members:[{...detail,role:'Core'},...mates.map((x,i)=>({...x,role:i===0?'Main DPS / Driver':i===1?'Sub-DPS / Support':'Support'}))],reviewed:false,confidence:'Template'})}
   return output;
 }
-export function notableTeammates(detail={},catalog={}){const seen=new Set(),rows=[];for(const team of sampleTeams(detail,catalog))for(const member of team.members.slice(1)){if(seen.has(member.name))continue;seen.add(member.name);rows.push({...member,archetype:team.name,reviewed:Boolean(team.reviewed),explanation:synergyExplanation(detail,member,team.name,team)})}return rows.slice(0,12)}
+export function notableTeammates(detail={},catalog={}){const seen=new Set(),rows=[];for(const team of sampleTeams(detail,catalog))for(const member of team.members||[]){if(sameName(member.name,detail.name))continue;const memberKey=canonicalTeamCharacter(member.name).trim().toLowerCase();if(!memberKey||seen.has(memberKey))continue;seen.add(memberKey);rows.push({...member,archetype:team.name,reviewed:Boolean(team.reviewed),explanation:synergyExplanation(detail,member,team.name,team)})}return rows.slice(0,12)}
 
 export function extractVoiceActors(detail={}){
   const result=[];const raw=detail.raw||{};const seen=new Set();

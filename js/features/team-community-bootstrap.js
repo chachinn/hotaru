@@ -1,8 +1,9 @@
 import { loadCatalog } from '../data/game-data.js';
 import { loadCommunityTeamCatalog, COMMUNITY_TEAM_SOURCE } from '../data/community-team-catalog.js';
-import { registerCommunityTeams, recommendationCoverage } from '../data/team-recommendations.js';
+import { registerCommunityTeams } from '../data/team-recommendations.js';
+import { auditTeamCatalog } from '../data/team-character-audit.js';
 
-let status={state:'loading',teams:0,total:0,sixPlus:0,covered:0,pending:[],source:COMMUNITY_TEAM_SOURCE};
+let status={state:'loading',teams:0,total:0,target:COMMUNITY_TEAM_SOURCE.coverageFloor||30,thirtyPlus:0,floorMet:0,sixPlus:0,covered:0,pending:[],sourceGaps:[],source:COMMUNITY_TEAM_SOURCE};
 let patchQueued=false;
 
 function setText(node,value=''){
@@ -60,7 +61,7 @@ function schedulePatch(){
 }
 function safeRefreshVisibleTeamCard(){
   const card=document.querySelector('.smart-team-card'),results=card?.querySelector('.team-results,.abyss-results');if(!card||results)return;
-  const checkbox=card.querySelector('#team-allow-unowned');if(checkbox&&document.activeElement!==checkbox)checkbox.dispatchEvent(new Event('change',{bubbles:true}));
+  document.dispatchEvent(new CustomEvent('hotaru:team-catalog-ready',{detail:status}));
 }
 function refreshOpenCharacterGuide(){
   const deep=document.getElementById('hotaru-deep-guide');if(deep?.dataset.section==='build')deep.remove();
@@ -69,8 +70,8 @@ async function load(){
   try{
     const catalog=await loadCatalog();
     const result=await loadCommunityTeamCatalog({catalogCharacters:catalog?.characters||[]});
-    const count=registerCommunityTeams(result.teams||[]),coverage=recommendationCoverage((catalog?.characters||[]).map(character=>character.name));
-    status={state:result.status,teams:count,total:coverage.total,sixPlus:coverage.sixPlus,covered:coverage.covered,pending:coverage.pending,warning:result.warning||'',source:COMMUNITY_TEAM_SOURCE};
+    const count=registerCommunityTeams(result.teams||[]),coverage=auditTeamCatalog(catalog?.characters||[],{target:COMMUNITY_TEAM_SOURCE.coverageFloor||30}),eligible=coverage.rows.filter(row=>row.teamEligible),covered=eligible.filter(row=>row.count>0);
+    status={state:result.status,teams:count,total:coverage.total,eligible:coverage.teamEligible,notApplicable:coverage.notApplicable,target:COMMUNITY_TEAM_SOURCE.coverageFloor||30,thirtyPlus:coverage.thirtyPlus,floorMet:coverage.thirtyPlus,sixPlus:eligible.filter(row=>row.count>=6).length,covered:covered.length,pending:eligible.filter(row=>row.count===0),sourceGaps:coverage.sourceGaps,blockers:coverage.blockers,warning:result.warning||'',source:COMMUNITY_TEAM_SOURCE};
   }catch(error){status={...status,state:'unavailable',warning:error?.message||String(error)}}
   publish();refreshOpenCharacterGuide();safeRefreshVisibleTeamCard();schedulePatch();
 }

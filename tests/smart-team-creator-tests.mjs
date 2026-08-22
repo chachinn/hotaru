@@ -32,5 +32,5 @@ assert.ok(matchReviewedTeams({roster:sparse,lockedNames:['Columbina'],allowUnown
 
 const app=fs.readFileSync(new URL('../app.js',import.meta.url),'utf8'),sw=fs.readFileSync(new URL('../service-worker.js',import.meta.url),'utf8'),index=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
 assert.ok(app.includes('Smart Team Creator'));assert.ok(app.includes('Team review pending'));assert.ok(app.includes('team-lock-1'));assert.ok(app.includes('team-lock-2'));assert.ok(app.includes('team-allow-unowned'));assert.ok(app.includes('generate-smart-team'));
-assert.ok(sw.includes('hotaru-shell-v26'));assert.ok(sw.includes('js/data/team-profiles/index.js'));assert.ok(sw.includes('js/features/team-scoring.js'));assert.ok(sw.includes('js/features/roster-team-matcher.js'));assert.ok(index.includes('app.js?v=1.12.0'));assert.ok(index.includes('style.css?v=1.8.0'));
+assert.ok(sw.includes('hotaru-shell-v26'));assert.ok(sw.includes('js/data/team-profiles/index.js'));assert.ok(sw.includes('js/features/team-scoring.js'));assert.ok(sw.includes('js/features/roster-team-matcher.js'));assert.ok(index.includes('app.js?v=1.12.0'));assert.ok(index.includes('style.css?v=1.8.1'));
 console.log('Smart Team Creator foundation QA passed.');

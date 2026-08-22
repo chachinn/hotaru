@@ -35,7 +35,11 @@ assert.equal(ownedOnly.results.length,0);
 assert.equal(ownedOnly.previewAvailable,true,'Allow unowned should reveal missing-support routes');
 const preview=buildFlexiblePairTeams({roster:pairOnly,lockedNames:['Odette','Flins'],allowUnowned:true});
 assert.ok(preview.results.length>=6,'Allow unowned should expose a useful range of audited adaptations');
-assert.equal(buildFlexiblePairTeams({roster:ownedRoster,lockedNames:['Odette','Arlecchino'],allowUnowned:true}).supported,false,'unreviewed pair recipes must not be generated generically');
+const generic=buildFlexiblePairTeams({roster:ownedRoster,lockedNames:['Odette','Arlecchino'],allowUnowned:true});
+assert.equal(generic.supported,true,'source-covered character pairs should no longer dead-end');
+assert.ok(generic.previewResults.length>0,'generic pair bridge should expose sourced adaptations');
+assert.ok(generic.previewResults.every(team=>team.members.includes('Odette')&&team.members.includes('Arlecchino')),'pair bridge must keep both selected locks');
+assert.ok(generic.previewResults.every(team=>team.confidence==='Adapted'&&team.adaptationTier==='Source-backed pair bridge'),'generic pair results must stay clearly labeled as adaptations');
 
 // HoYoLAB/GOOD Traveler variants must survive import so Cryo Traveler no longer looks pending after re-import.
 const travelerCatalog=[{id:'10000007',name:'Traveler',slug:'traveler'}];
@@ -53,14 +57,15 @@ assert.equal(travelerCoverage.canonical,'Cryo Traveler');
 const ui=read('js/features/flexible-pair-ui.js'),sw=read('service-worker.js'),index=read('index.html');
 assert.match(ui,/buildFlexiblePairTeams/);
 assert.match(ui,/Flexible Pair Builder · Adapted, not reviewed/);
-assert.match(ui,/Adapted · Off-meta/);
+assert.match(ui,/team\.adaptationTier\|\|'Adapted'/,'adapted cards must display the actual adaptation tier');
 assert.match(ui,/source\.links/,'adapted cards should show both corroborating sources');
-assert.match(index,/flexible-pair-ui\.js\?v=1\.0\.2/);
-assert.match(sw,/const CACHE = 'hotaru-shell-v44'/);
-assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v43'/);
+assert.match(index,/flexible-pair-ui\.js\?v=1\.0\.3/);
+assert.match(sw,/const CACHE = 'hotaru-shell-v45'/);
+assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v44'/);
 assert.match(sw,/js\/features\/flexible-pair-builder\.js/);
-assert.match(sw,/js\/features\/flexible-pair-ui\.js\?v=1\.0\.2/);
-assert.equal(FLEXIBLE_PAIR_POLICY.supportedPairs.length,1,'only audited pair rules may ship in this release');
+assert.match(sw,/js\/features\/flexible-pair-ui\.js\?v=1\.0\.3/);
+assert.equal(FLEXIBLE_PAIR_POLICY.specialPairs.length,1,'Odette + Flins keeps its dedicated audited recipe');
+assert.equal(FLEXIBLE_PAIR_POLICY.genericPairBridge,true,'other source-covered pairs should use the generic source-backed bridge instead of dead-ending');
 
 assert.match(ui,/pendingGenerate=true/,'the iPhone hotfix must remember the generate tap before the main app rerenders');
 assert.match(ui,/\{capture:true\}/,'the generate tap must be captured before the app bubble listener replaces the DOM');

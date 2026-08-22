@@ -3,7 +3,7 @@ const KQM_COLUMBINA='https://keqingmains.com/q/columbina-quickguide/';
 const KQM_TARTAGLIA='https://keqingmains.com/q/tartaglia-quickguide/';
 const ICY_ODETTE='https://www.icy-veins.com/genshin-impact/odette-team-guide';
 
-const source=(label,url)=>({label,url,type:'Reviewed theorycraft',reviewedAt:'2026-08-22'});
+const source=(label,url)=>({label,url,type:'Reviewed theorycraft',platform:'Guide',reviewedAt:'2026-08-22'});
 const team=(id,name,members,why,sourceInfo,notes='')=>({id,name,members,why,notes,confidence:'Reviewed',source:sourceInfo});
 
 export const REVIEWED_TEAM_PROFILES=[
@@ -78,17 +78,30 @@ function key(value=''){return String(value||'').trim().toLowerCase()}
 const aliasToCanonical=new Map([['kazuha','Kaedehara Kazuha'],['mizuki','Yumemizuki Mizuki']]);
 const anchorIndex=new Map();
 const memberIndex=new Map();
+let registeredReviewedTeams=[];
+let reviewedCatalog=[];
+
 for(const profile of REVIEWED_TEAM_PROFILES){
   const names=[profile.character,...(profile.aliases||[])];
-  for(const name of names){aliasToCanonical.set(key(name),profile.character);anchorIndex.set(key(name),profile)}
+  for(const name of names)aliasToCanonical.set(key(name),profile.character);
 }
-for(const profile of REVIEWED_TEAM_PROFILES)for(const archetype of profile.archetypes||[])for(const member of archetype.members||[]){
-  const canon=aliasToCanonical.get(key(member))||member,memberKey=key(canon),list=memberIndex.get(memberKey)||[];
-  if(!list.some(item=>item.id===archetype.id))list.push(archetype);memberIndex.set(memberKey,list);
-}
-for(const [alias,canonical] of aliasToCanonical){const list=memberIndex.get(key(canonical));if(list)memberIndex.set(alias,list)}
 
 export function canonicalTeamCharacter(name=''){return aliasToCanonical.get(key(name))||String(name||'').trim()}
+function baseReviewedTeams(){return REVIEWED_TEAM_PROFILES.flatMap(profile=>(profile.archetypes||[]).map(archetype=>({...archetype,anchor:profile.character,profileId:profile.id})))}
+function compositionKey(team={}){return [...new Set((team.members||[]).map(canonicalTeamCharacter).map(key))].sort().join('|')}
+function normalizeRegisteredTeam(team={}){return{...team,confidence:'Reviewed',profileId:team.profileId||'reviewed-supplement'}}
+function sourceLinks(source={}){const items=[...(Array.isArray(source?.links)?source.links:[]),source],seen=new Set(),out=[];for(const item of items){if(!item?.url)continue;const sig=`${item.type||''}|${item.label||''}|${item.url}`;if(seen.has(sig))continue;seen.add(sig);out.push({...item,links:undefined})}return out}
+function buildReviewedCatalog(){const map=new Map();for(const team of [...baseReviewedTeams(),...registeredReviewedTeams]){const comp=compositionKey(team);if(!comp)continue;const prior=map.get(comp);if(!prior){map.set(comp,{...team,source:{...(team.source||{}),links:sourceLinks(team.source)}});continue}const links=sourceLinks({...(prior.source||{}),links:[...sourceLinks(prior.source),...sourceLinks(team.source)]});map.set(comp,{...prior,source:{...(prior.source||{}),links}})}return [...map.values()]}
+function rebuildReviewedIndexes(){
+  reviewedCatalog=buildReviewedCatalog();anchorIndex.clear();memberIndex.clear();
+  for(const profile of REVIEWED_TEAM_PROFILES){const names=[profile.character,...(profile.aliases||[])];for(const name of names)anchorIndex.set(key(name),profile)}
+  for(const archetype of reviewedCatalog)for(const member of archetype.members||[]){
+    const canon=canonicalTeamCharacter(member),memberKey=key(canon),list=memberIndex.get(memberKey)||[];
+    if(!list.some(item=>compositionKey(item)===compositionKey(archetype)))list.push(archetype);memberIndex.set(memberKey,list);
+  }
+  for(const [alias,canonical] of aliasToCanonical){const list=memberIndex.get(key(canonical));if(list)memberIndex.set(alias,list)}
+}
+export function registerReviewedTeams(teams=[]){registeredReviewedTeams=[...registeredReviewedTeams,...(Array.isArray(teams)?teams:[]).map(normalizeRegisteredTeam)];rebuildReviewedIndexes();return registeredReviewedTeams.length}
 export function reviewedTeamProfile(name=''){return anchorIndex.get(key(name))||null}
 export function reviewedTeamsForCharacter(name=''){return memberIndex.get(key(canonicalTeamCharacter(name)))||[]}
 export function teamReviewStatus(name=''){
@@ -97,4 +110,5 @@ export function teamReviewStatus(name=''){
   if(teams.length)return{status:'teammate-reviewed',label:'Reviewed teammate',canonical,teams};
   return{status:'pending',label:'Team review pending',canonical,teams:[]};
 }
-export function allReviewedTeams(){return REVIEWED_TEAM_PROFILES.flatMap(profile=>(profile.archetypes||[]).map(archetype=>({...archetype,anchor:profile.character,profileId:profile.id}))) }
+export function allReviewedTeams(){return [...reviewedCatalog]}
+rebuildReviewedIndexes();

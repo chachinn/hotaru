@@ -41,9 +41,9 @@ assert.match(css,/\.hotaru-team-results-tools/,'results toolbar must have dedica
 assert.match(css,/\.hotaru-team-results-pager/,'paged results must have a stable dedicated footer');
 assert.match(css,/@media\(max-width:600px\)[\s\S]*\.hotaru-team-results-tools\{grid-template-columns:1fr\}/,'sort/filter controls must stack on phones');
 assert.match(css,/@media\(max-width:600px\)[\s\S]*\.hotaru-team-results-pager\{align-items:stretch;flex-direction:column\}/,'pager controls must remain phone-friendly');
-assert.match(index,/smart-team-results-pagination\.js\?v=1\.1\.0/,'index must cache-miss the new sort/filter result layer');
-assert.match(sw,/smart-team-results-pagination\.js\?v=1\.1\.0/,'service worker must cache the new sort/filter result layer');
-assert.match(index,/roster-sections-team-filter\.css\?v=1\.2\.2/,'index must cache-miss the result toolbar CSS');
-assert.match(sw,/roster-sections-team-filter\.css\?v=1\.2\.2/,'service worker must cache the result toolbar CSS');
+assert.match(index,/smart-team-results-pagination\.js\?v=1\.2\.1/,'index must cache-miss the new sort/filter result layer');
+assert.match(sw,/smart-team-results-pagination\.js\?v=1\.2\.1/,'service worker must cache the new sort/filter result layer');
+assert.match(index,/roster-sections-team-filter\.css\?v=1\.3\.0/,'index must cache-miss the result toolbar CSS');
+assert.match(sw,/roster-sections-team-filter\.css\?v=1\.3\.0/,'service worker must cache the result toolbar CSS');
 
 console.log('Hotaru full team-result access + incremental sort/filter rendering stability QA passed.');

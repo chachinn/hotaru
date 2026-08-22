@@ -1,9 +1,11 @@
 import { TEAM_UTILITY_OPTIONS, teamMatchesUtility, teamUtilitySummary } from '../data/team-utility-tags.js';
+import { TEAM_REACTIONS } from '../data/team-reaction-tags.js';
 
 const app=document.getElementById('app');
 const SECTION_KEY='hotaru.roster-section.v1';
 const UTILITY_KEY='hotaru.team-utility.v1';
 const UTILITY_CATEGORY_KEY='hotaru.team-utility-category.v1';
+const REACTION_KEY='hotaru.team-reaction.v1';
 const SECTIONS=[
   {id:'characters',heading:'Characters',label:'Roster Characters'},
   {id:'teams',heading:'Smart Team Creator',label:'Teams & Abyss'},
@@ -16,6 +18,7 @@ function safeGet(key,fallback=''){try{return localStorage.getItem(key)||fallback
 function safeSet(key,value){try{localStorage.setItem(key,value)}catch{}}
 function validSection(value){return SECTIONS.some(item=>item.id===value)?value:'characters'}
 function validUtility(value){return TEAM_UTILITY_OPTIONS.some(item=>item.id===value)?value:'any'}
+function validReaction(value){return value==='all'||TEAM_REACTIONS.some(item=>item.id===value)?value:'all'}
 function utilityOption(value){return TEAM_UTILITY_OPTIONS.find(item=>item.id===validUtility(value))||TEAM_UTILITY_OPTIONS[0]}
 function rosterMain(){const main=app?.querySelector('main');return main?.querySelector('h1')?.textContent?.trim()==='My Roster'?main:null}
 function sectionByHeading(main,heading){return[...main.querySelectorAll(':scope > section')].find(section=>section.querySelector('h2')?.textContent?.trim()===heading)||null}
@@ -55,9 +58,23 @@ function utilityOptionsHtml(){
   return`<option value="${any?.id||'any'}">${any?.label||'No preference'}</option><optgroup label="Sustain">${options(sustain)}</optgroup><optgroup label="Utility">${options(utility)}</optgroup>`;
 }
 function storedUtility(){return validUtility(safeGet(UTILITY_KEY,'any'))}
+function storedReaction(){return validReaction(safeGet(REACTION_KEY,'all'))}
+function reactionOptionsHtml(){
+  const normal=TEAM_REACTIONS.filter(item=>!item.id.startsWith('lunar-')&&!item.id.startsWith('stellar-'));
+  const lunar=TEAM_REACTIONS.filter(item=>item.id.startsWith('lunar-'));
+  const stellar=TEAM_REACTIONS.filter(item=>item.id.startsWith('stellar-'));
+  const options=items=>items.map(item=>`<option value="${item.id}">${item.label}</option>`).join('');
+  return`<option value="all">All reactions</option><optgroup label="Reactions">${options(normal)}</optgroup><optgroup label="Lunar">${options(lunar)}</optgroup><optgroup label="Stellar">${options(stellar)}</optgroup>`;
+}
+function ensureReactionControl(smart,controls){
+  let field=controls.querySelector('.hotaru-team-reaction-field');
+  if(!field){field=document.createElement('div');field.className='field hotaru-team-reaction-field';field.innerHTML=`<label for="hotaru-team-reaction">Team Reaction</label><select id="hotaru-team-reaction">${reactionOptionsHtml()}</select><small>Filter by explicit sourced tags: classic reactions, Lunar-Charged/Bloom/Crystallize, and Stellar-Conduct/Swirl. Vaporize remains a classic reaction.</small>`;const generate=controls.querySelector('.team-generate');if(generate)controls.insertBefore(field,generate);else controls.appendChild(field)}
+  const select=field.querySelector('#hotaru-team-reaction'),abyss=smart.querySelector('#team-mode')?.value==='abyss',stored=storedReaction();if(select&&select.value!==stored)select.value=stored;select.disabled=abyss;field.classList.toggle('disabled',abyss);setText(field.querySelector('small'),abyss?'Team Reaction filtering is disabled for Current Abyss because it builds two teams together.':'Filter by explicit sourced tags: classic reactions, Lunar-Charged/Bloom/Crystallize, and Stellar-Conduct/Swirl. Vaporize remains a classic reaction.');return{select};
+}
 function ensureUtilityControl(){
   const smart=document.querySelector('.smart-team-card');if(!smart)return null;
   const controls=smart.querySelector('.team-controls');if(!controls)return null;
+  ensureReactionControl(smart,controls);
   let field=controls.querySelector('.hotaru-team-utility-field');
   if(!field){
     field=document.createElement('div');field.className='field hotaru-team-utility-field';
@@ -107,6 +124,7 @@ document.addEventListener('click',event=>{
 },{capture:true});
 
 document.addEventListener('change',event=>{
+  if(event.target?.id==='hotaru-team-reaction'){safeSet(REACTION_KEY,validReaction(event.target.value));return}
   if(event.target?.id!=='hotaru-team-utility')return;
   const requirement=validUtility(event.target.value);safeSet(UTILITY_KEY,requirement);safeSet(UTILITY_CATEGORY_KEY,utilityOption(requirement).category||'any');applyUtilityFilter();
 });
