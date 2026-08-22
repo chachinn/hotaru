@@ -25,6 +25,6 @@ async function registerFreshShell(){
   }catch{}
 }
 
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',registerFreshShell,{once:true});else registerFreshShell();
+registerFreshShell();
 window.addEventListener('pageshow',()=>requestUpdate());
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')requestUpdate()});
