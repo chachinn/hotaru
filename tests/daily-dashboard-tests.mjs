@@ -15,5 +15,5 @@ const sw=fs.readFileSync(new URL('../service-worker.js',import.meta.url),'utf8')
 const index=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
 assert.ok(app.includes('Your day, sorted.'));assert.ok(app.includes('Roster focus'));assert.ok(app.includes('Team snapshot'));assert.ok(app.includes('scheduleHomeFarmRefresh'));assert.ok(app.includes('refresh-daily-dashboard'));assert.ok(app.includes('open-farm-planner'));assert.ok(app.includes('open-team-creator'));
 assert.ok(style.includes('.daily-hero-stats'));assert.ok(style.includes('.daily-task-row'));assert.ok(style.includes('.daily-split'));
-assert.ok(sw.includes('hotaru-shell-v26'));assert.ok(sw.includes('js/features/daily-dashboard.js'));assert.ok(index.includes('app.js?v=1.12.0'));assert.ok(index.includes('style.css?v=1.8.1'));
+assert.ok(sw.includes('hotaru-shell-v26'));assert.ok(sw.includes('js/features/daily-dashboard.js'));assert.ok(index.includes('app.js?v=1.12.1'));assert.ok(index.includes('style.css?v=1.8.1'));
 console.log('Daily Dashboard tests passed.');
