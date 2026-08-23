@@ -10,8 +10,9 @@ import aloy from './aloy.js';
 import amber from './amber.js';
 import aratakiItto from './arataki-itto.js';
 import baizhu from './baizhu.js';
+import chasca from './chasca.js';
 
-export const REVIEWED_BUILD_PROFILES=[arlecchino,tartaglia,columbina,clorinde,odette,aino,alhaitham,albedo,aloy,amber,aratakiItto,baizhu];
+export const REVIEWED_BUILD_PROFILES=[arlecchino,tartaglia,columbina,clorinde,odette,aino,alhaitham,albedo,aloy,amber,aratakiItto,baizhu,chasca];
 
 function key(value=''){return String(value||'').trim().toLowerCase()}
 const PROFILE_INDEX=new Map();
