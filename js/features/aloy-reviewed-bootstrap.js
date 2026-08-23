@@ -10,6 +10,7 @@ import { CYNO_REVIEWED_TEAMS } from '../data/team-profiles/cyno-reviewed.js';
 import { DEHYA_REVIEWED_TEAMS } from '../data/team-profiles/dehya-reviewed.js';
 import { DILUC_REVIEWED_TEAMS } from '../data/team-profiles/diluc-reviewed.js';
 import { EMILIE_REVIEWED_TEAMS } from '../data/team-profiles/emilie-reviewed.js';
+import { ESCOFFIER_REVIEWED_TEAMS } from '../data/team-profiles/escoffier-reviewed.js';
 
 registerReviewedTeams(ALOY_REVIEWED_TEAMS);
 registerReviewedTeams(AMBER_REVIEWED_TEAMS);
@@ -22,3 +23,4 @@ registerReviewedTeams(CYNO_REVIEWED_TEAMS);
 registerReviewedTeams(DEHYA_REVIEWED_TEAMS);
 registerReviewedTeams(DILUC_REVIEWED_TEAMS);
 registerReviewedTeams(EMILIE_REVIEWED_TEAMS);
+registerReviewedTeams(ESCOFFIER_REVIEWED_TEAMS);
