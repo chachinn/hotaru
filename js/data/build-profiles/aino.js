@@ -27,7 +27,7 @@ export default {
   ],
   roleReason:'Aino is primarily a swap-in Hydro support whose Burst provides off-field Hydro application, raises the team’s Moonsign level, and enables reaction-focused teams. Her personal Talent damage is usually a small part of team DPS, so Burst uptime and support utility take priority over conventional DPS stats.',
   scaling:'EM',
-  scalingDetail:'Her Talents have ATK scaling, while her A4 adds Burst damage based on Elemental Mastery and her relevant transformative reaction damage scales with EM. In practice she is built around ER first, then the stats required by her weapon and reaction role.',
+  scalingDetail:'Her Talents have ATK scaling, while her A4 adds Burst damage based on Elemental Mastery. Her practical build changes meaningfully depending on whether she is only enabling reactions, personally triggering Bloom, or contributing Lunar-Charged reaction damage.',
   focus:'Elemental Burst',
   reactionDriven:true,
   targets:{
@@ -44,25 +44,12 @@ export default {
   substats:['Energy Recharge','CRIT Rate (Favonius)','Elemental Mastery','CRIT Rate','CRIT DMG','ATK%'],
   talentPriority:['burst','skill','attack'],
   weaponPriority:[
-    'Flame-Forged Insight',
-    'Master Key',
-    'Favonius Greatsword',
-    'Makhaira Aquamarine',
-    'Forest Regalia',
-    'Sacrificial Greatsword',
-    'Katsuragikiri Nagamasa'
+    'Flame-Forged Insight','Master Key','Favonius Greatsword','Makhaira Aquamarine','Forest Regalia','Sacrificial Greatsword','Katsuragikiri Nagamasa'
   ],
   f2pWeapon:'Master Key',
-  artifactPriority:[
-    "Silken Moon's Serenade",
-    'Noblesse Oblige',
-    'Aubade of Morningstar and Moon',
-    'Instructor',
-    'Scroll of the Hero of Cinder City',
-    'Deepwood Memories'
-  ],
+  artifactPriority:["Silken Moon's Serenade",'Noblesse Oblige','Aubade of Morningstar and Moon','Instructor','Scroll of the Hero of Cinder City','Deepwood Memories','Flower of Paradise Lost','Gilded Dreams'],
   buildSummaryTeams:[
-    {name:'Flins Lunar Charge',members:['Aino','Flins','Ineffa','Sucrose']},
+    {name:'Flins Lunar-Charged',members:['Aino','Flins','Ineffa','Sucrose']},
     {name:'Nilou Bloom',members:['Aino','Nahida','Nilou','Baizhu']}
   ],
   defaultVariant:'offfield-hydro-support',
@@ -70,30 +57,71 @@ export default {
     {
       id:'offfield-hydro-support',
       name:'Off-field Hydro Support',
-      note:'Aino has one primary source-supported playstyle: keep her Burst available for off-field Hydro and Moonsign support. ER is weapon- and team-dependent; EM becomes more valuable when she owns reaction damage.',
+      note:'General support build for reliable Burst uptime, off-field Hydro and Moonsign utility. Meet ER first; use Favonius CRIT or optional EM/damage stats only after the rotation is stable.',
       overrides:{
+        role:'Off-field Hydro Support / Enabler',roleGroup:'Support',focus:'Elemental Burst',
         mainStats:{sands:['Energy Recharge','Elemental Mastery'],goblet:['Elemental Mastery','Hydro DMG%'],circlet:['Elemental Mastery','CRIT Rate','CRIT DMG']},
         substats:['Energy Recharge','CRIT Rate (Favonius)','Elemental Mastery','CRIT Rate','CRIT DMG','ATK%'],
         weaponPriority:['Flame-Forged Insight','Master Key','Favonius Greatsword','Makhaira Aquamarine','Forest Regalia','Sacrificial Greatsword','Katsuragikiri Nagamasa'],
-        artifactPriority:["Silken Moon's Serenade",'Noblesse Oblige','Aubade of Morningstar and Moon','Instructor','Scroll of the Hero of Cinder City','Deepwood Memories'],
+        artifactPriority:["Silken Moon's Serenade",'Noblesse Oblige','Instructor','Scroll of the Hero of Cinder City','Deepwood Memories'],
         goalStats:[
-          {label:'Energy Recharge',value:'KQM: 190–250%+ baseline · 155–205% Favonius · 100–140% Flame-Forged Insight; C4 lowers requirements further'},
-          {label:'Elemental Mastery',value:'Game8 reaction-oriented target around 700–800; do not sacrifice required ER just to reach EM'},
+          {label:'Energy Recharge',value:'190–250%+ baseline · 155–205% with Favonius · 100–140% with Flame-Forged Insight; C4 lowers requirements further'},
           {label:'Favonius CRIT Rate',value:'Build enough CRIT Rate to trigger Favonius consistently when using it'},
-          {label:'Damage stats',value:'EM for Bloom/Lunar-Charged ownership; otherwise personal damage is low priority'}
+          {label:'Optional offense',value:'Only invest in EM or CRIT after the Burst can be used on the intended rotation'}
         ],
         buildSummaryTeams:[
-          {name:'Flins Lunar Charge',members:['Aino','Flins','Ineffa','Sucrose']},
-          {name:'Nilou Bloom',members:['Aino','Nahida','Nilou','Baizhu']}
+          {name:'Flins Lunar-Charged',members:['Aino','Flins','Ineffa','Sucrose']},
+          {name:'Freeze Support',members:['Aino','Rosaria','Kaeya','Lan Yan']}
+        ]
+      }
+    },
+    {
+      id:'bloom-trigger',
+      name:'Bloom Trigger / Full EM',
+      note:'Use when Aino personally owns meaningful Bloom damage. Keep enough ER for Burst uptime, then push Elemental Mastery instead of conventional ATK/CRIT damage stats.',
+      overrides:{
+        role:'Off-field Bloom Trigger / Hydro Enabler',roleGroup:'Support',focus:'Elemental Burst',reactionDriven:true,
+        mainStats:{sands:['Elemental Mastery','Energy Recharge'],goblet:['Elemental Mastery'],circlet:['Elemental Mastery']},
+        substats:['Energy Recharge','Elemental Mastery','CRIT Rate (Favonius)'],
+        weaponPriority:['Flame-Forged Insight','Master Key','Makhaira Aquamarine','Forest Regalia','Favonius Greatsword','Sacrificial Greatsword','Katsuragikiri Nagamasa'],
+        artifactPriority:["Silken Moon's Serenade",'Flower of Paradise Lost','Gilded Dreams','Instructor'],
+        goalStats:[
+          {label:'Energy Recharge',value:'Meet the exact rotation requirement before stacking EM'},
+          {label:'Elemental Mastery',value:'Full-EM priority once Burst uptime is secure'},
+          {label:'Character Level',value:'Level 90 is valuable when Aino owns Bloom reaction damage'}
+        ],
+        buildSummaryTeams:[
+          {name:'Nilou Bloom',members:['Aino','Lauma','Nilou','Kirara']},
+          {name:'Burgeon',members:['Aino','Nahida','Barbara','Thoma']}
+        ]
+      }
+    },
+    {
+      id:'lunar-charged-damage',
+      name:'Lunar-Charged Damage',
+      note:'Use when Aino contributes meaningful Lunar-Charged reaction damage. After ER, balance EM with CRIT rather than building pure EM.',
+      overrides:{
+        role:'Off-field Lunar-Charged Enabler / Reaction DPS',roleGroup:'Support',focus:'Elemental Burst',reactionDriven:true,
+        mainStats:{sands:['Energy Recharge','Elemental Mastery'],goblet:['Elemental Mastery','Hydro DMG%'],circlet:['CRIT Rate','CRIT DMG','Elemental Mastery']},
+        substats:['Energy Recharge','CRIT Rate','CRIT DMG','Elemental Mastery','ATK%'],
+        weaponPriority:['Flame-Forged Insight','Master Key','Favonius Greatsword','Makhaira Aquamarine','Forest Regalia','Sacrificial Greatsword'],
+        artifactPriority:["Silken Moon's Serenade",'Aubade of Morningstar and Moon','Gilded Dreams'],
+        goalStats:[
+          {label:'Energy Recharge',value:'Meet Burst uptime first; weapon and team particles change the requirement substantially'},
+          {label:'Elemental Mastery',value:'Build meaningful EM for reaction damage without sacrificing required ER'},
+          {label:'CRIT',value:'Add CRIT once ER is solved because Lunar-Charged damage can reward a hybrid EM/CRIT setup'}
+        ],
+        buildSummaryTeams:[
+          {name:'Flins Lunar-Charged',members:['Aino','Flins','Ineffa','Sucrose']},
+          {name:'Ineffa Quickswap',members:['Aino','Ineffa','Fischl','Shikanoin Heizou']}
         ]
       }
     }
   ],
   goalStats:[
-    {label:'Energy Recharge',value:'KQM: 190–250%+ baseline · 155–205% Favonius · 100–140% Flame-Forged Insight; C4 lowers requirements further'},
-    {label:'Elemental Mastery',value:'Game8 reaction-oriented target around 700–800; ER remains the first requirement for reliable Burst uptime'},
-    {label:'Favonius CRIT Rate',value:'Prioritize enough CRIT Rate to trigger Favonius before optional personal-damage stats'},
-    {label:'Main-stat context',value:'ER / EM Sands · EM / Hydro DMG Goblet · EM / CRIT Circlet depending on weapon and reaction ownership'}
+    {label:'Energy Recharge',value:'190–250%+ baseline · 155–205% Favonius · 100–140% Flame-Forged Insight; C4 lowers requirements further'},
+    {label:'Reaction ownership',value:'Full EM for Bloom ownership; EM + CRIT for meaningful Lunar-Charged damage; support uptime first otherwise'},
+    {label:'Favonius CRIT Rate',value:'Prioritize enough CRIT Rate to trigger Favonius before optional personal-damage stats'}
   ],
   strengths:[
     'Provides consistent off-field Hydro through her Burst with very short field time.',
@@ -109,10 +137,9 @@ export default {
   ],
   playstyleTips:[
     'Use Skill for particles/repositioning, then Burst, then swap to the team’s driver or DPS.',
-    'Meet ER requirements before chasing EM or personal damage; KQM’s baseline can exceed 200% without an Energy-focused weapon.',
+    'Meet ER requirements before chasing EM or personal damage.',
     'If Favonius Greatsword is equipped, secure enough CRIT Rate to trigger its passive consistently.',
-    'A second Nod-Krai teammate improves her Burst application rate and AoE through Ascendant Gleam.',
-    'Use EM main stats when Aino owns meaningful Bloom/Lunar-Charged reaction damage; otherwise support uptime is more important than personal damage.'
+    'Use the Bloom Trigger build only when Aino actually owns Bloom damage; use the Lunar-Charged build when her reaction damage is a meaningful team contribution.'
   ],
   sourceRefs:[
     {label:'Game8 Aino Best Builds and Teams',kind:'Primary build reference',url:'https://game8.co/games/Genshin-Impact/archives/537903'},
