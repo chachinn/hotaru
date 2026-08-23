@@ -2,7 +2,7 @@ const KQM='https://keqingmains.com/q/albedo-quickguide/';
 const GAME8='https://game8.co/games/Genshin-Impact/archives/312182';
 const source=(label,url,type='Reviewed theorycraft')=>({label,url,platform:'Guide',type,reviewedAt:'2026-08-23'});
 const kqm=()=>source('KQM Albedo Quick Guide',KQM);
-const game8=()=>source('Game8 Albedo Rating and Best Builds',GAME8,'Primary reviewed guide');
+const game8=()=>source('Game8 Albedo Rating and Best Builds',GAME8,'Source-backed guide');
 const team=(id,name,members,reaction,why,sourceInfo,notes='',provenance='exact')=>({id,name,members,reaction,why,notes,provenance,confidence:provenance==='exact'?'Reviewed':'Source-informed',source:sourceInfo,anchor:'Albedo',profileId:'albedo'});
 export const ALBEDO_REVIEWED_TEAMS=[
 team('alb-itto-durin-gorou','Geo · Itto + Durin + Gorou',['Albedo','Arataki Itto','Durin','Gorou'],'geo','Current KQM example.',kqm()),
