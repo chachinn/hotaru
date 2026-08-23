@@ -19,7 +19,6 @@ export const DEHYA_REVIEWED_TEAMS=[
   team('dehya-game8-burgeon-ayato-nahida-kokomi','Burgeon · Ayato/Nahida/Kokomi',['Dehya','Kamisato Ayato','Nahida','Sangonomiya Kokomi'],'burgeon','Game8 exact Burgeon team.',game8()),
   team('dehya-game8-burgeon-nahida-xingqiu-kokomi','Burgeon · Nahida/Xingqiu/Kokomi',['Dehya','Nahida','Xingqiu','Sangonomiya Kokomi'],'burgeon','Game8 exact Burgeon team.',game8()),
   team('dehya-game8-f2p-xiangling-sucrose-bennett','F2P Pyro · Xiangling/Sucrose/Bennett',['Dehya','Xiangling','Sucrose','Bennett'],'mono-pyro','Game8 exact F2P team.',game8()),
-
   team('dehya-kqm-support-mualani-emilie-xilonen','Vaporize Support · Mualani/Emilie/Xilonen',['Dehya','Mualani','Emilie','Xilonen'],'vaporize','KQM exact Mualani/Emilie/Xilonen off-field support example.',kqm()),
   team('dehya-kqm-support-mualani-emilie-nahida','Vaporize Support · Mualani/Emilie/Nahida',['Dehya','Mualani','Emilie','Nahida'],'vaporize','KQM exact Mualani variant; Emilie supplies the extra hit source KQM requires when Nahida is used here.',kqm()),
   team('dehya-kqm-melt-ganyu-emilie-bennett','Melt Support · Ganyu/Emilie/Bennett',['Dehya','Ganyu','Emilie','Bennett'],'melt','KQM exact Ganyu/Emilie Melt team.',kqm()),
@@ -28,22 +27,17 @@ export const DEHYA_REVIEWED_TEAMS=[
   team('dehya-kqm-support-clorinde-sara-chevreuse','Overloaded Support · Clorinde/Sara/Chevreuse',['Dehya','Clorinde','Kujou Sara','Chevreuse'],'overload','KQM exact Clorinde/C2+ Sara example.',kqm()),
   team('dehya-kqm-support-clorinde-fischl-chevreuse','Overloaded Support · Clorinde/Fischl/Chevreuse',['Dehya','Clorinde','Fischl','Chevreuse'],'overload','KQM exact Clorinde/Fischl example.',kqm()),
   team('dehya-kqm-support-neuvi-furina-kazuha','Hydro Support · Neuvillette/Furina/Kazuha',['Dehya','Neuvillette','Furina','Kaedehara Kazuha'],'vaporize','KQM exact Neuvillette team using Dehya as a defensive support.',kqm()),
-
   team('dehya-kqm-hyperburgeon-lauma-xingqiu-kuki','Hyperburgeon · Lauma/Xingqiu/Kuki',['Dehya','Lauma','Xingqiu','Kuki Shinobu'],'burgeon','KQM exact Hyperburgeon example; Kuki triggers Hyperblooms between Dehya Burgeons.',kqm()),
   team('dehya-kqm-hyperburgeon-lauma-xingqiu-raiden','Hyperburgeon · Lauma/Xingqiu/Raiden',['Dehya','Lauma','Xingqiu','Raiden Shogun'],'burgeon','KQM exact Hyperburgeon example with Raiden as Hyperbloom trigger.',kqm()),
   team('dehya-kqm-burgeon-nahida-kokomi-fischl','Burgeon · Nahida/Kokomi/Fischl',['Dehya','Nahida','Sangonomiya Kokomi','Fischl'],'burgeon','KQM exact damage-oriented Burgeon example.',kqm()),
   team('dehya-kqm-burgeon-nahida-kokomi-furina','Burgeon · Nahida/Kokomi/Furina',['Dehya','Nahida','Sangonomiya Kokomi','Furina'],'burgeon','KQM exact Burgeon example with Kokomi healing through Furina drain and Burgeon self-damage.',kqm()),
-
   team('dehya-kqm-dps-bennett-furina-xilonen','Vaporize DPS · Bennett/Furina/Xilonen',['Dehya','Bennett','Furina','Xilonen'],'vaporize','KQM current on-field Dehya shell using Furina and Xilonen.',kqm()),
   team('dehya-kqm-dps-bennett-furina-kazuha','Vaporize DPS · Bennett/Furina/Kazuha',['Dehya','Bennett','Furina','Kaedehara Kazuha'],'vaporize','KQM current Furina Vaporize shell.',kqm()),
   team('dehya-kqm-dps-bennett-escoffier-citlali','Melt DPS · Bennett/Escoffier/Citlali',['Dehya','Bennett','Escoffier','Citlali'],'melt','KQM exact Melt team where Escoffier + Citlali provide enough Cryo for Dehya to Melt Burst hits in single target.',kqm()),
   team('dehya-kqm-dps-bennett-furina-ineffa','Overvape DPS · Bennett/Furina/Ineffa',['Dehya','Bennett','Furina','Ineffa'],'overvape','KQM exact Overvape example; Ineffa adds Lunar-Charged and AoE damage.',kqm()),
   team('dehya-kqm-dps-bennett-furina-fischl','Overvape DPS · Bennett/Furina/Fischl',['Dehya','Bennett','Furina','Fischl'],'overvape','KQM exact Overvape example with Fischl.',kqm()),
   team('dehya-kqm-dps-bennett-fischl-chevreuse','Overloaded DPS · Bennett/Fischl/Chevreuse',['Dehya','Bennett','Fischl','Chevreuse'],'overload','KQM exact Chevreuse Overloaded shell.',kqm()),
-  team('dehya-kqm-dps-bennett-raiden-chevreuse','Overloaded DPS · Bennett/Raiden/Chevreuse',['Dehya','Bennett','Raiden Shogun','Chevreuse'],'overload','KQM exact Raiden Chevreuse shell and lowest listed on-field ER scenario.',kqm()),
   team('dehya-kqm-dps-bennett-emilie-kazuha','Burning DPS · Bennett/Emilie/Kazuha',['Dehya','Bennett','Emilie','Kaedehara Kazuha'],'burning','KQM exact on-field Burning shell with Emilie.',kqm()),
-  team('dehya-kqm-dps-bennett-xiangling-kazuha','Mono Pyro DPS · Bennett/Xiangling/Kazuha',['Dehya','Bennett','Xiangling','Kaedehara Kazuha'],'mono-pyro','KQM exact Mono Pyro shell and Game8 exact team.',{...kqm(),links:[kqm(),game8()]}),
-
   team('dehya-nodkrai-ineffa-aino-bennett','Nod-Krai Overvape · Ineffa/Aino/Bennett',['Dehya','Ineffa','Aino','Bennett'],'overvape','KQM specifically requires both Ineffa and Aino to fully activate Night of the Sky’s Unveiling and full-effect Master Key for on-field Dehya.',kqm(),'Source-informed from the exact Nod-Krai build requirement; Vaporize procs are inconsistent.','adapted'),
   team('dehya-adapt-support-wrio-emilie-bennett','Melt Support · Wriothesley/Emilie/Bennett',['Dehya','Wriothesley','Emilie','Bennett'],'melt','KQM lists Wriothesley as a Cryo/Hydro DPS option and Emilie as the preferred consistent Burning partner.',kqm(),'Source-informed off-field support shell.','adapted'),
   team('dehya-adapt-support-varesa-fischl-chevreuse','Overloaded Support · Varesa/Fischl/Chevreuse',['Dehya','Varesa','Fischl','Chevreuse'],'overload','KQM lists Varesa among DPS units that benefit from Dehya and supports Dehya as off-field Pyro in Chevreuse teams.',kqm(),'Source-informed Chevreuse support shell.','adapted'),
