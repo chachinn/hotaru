@@ -16,6 +16,9 @@ assert.deepEqual(screenshotPair.pendingLocks,[],'A reviewed Odette + Flins lock 
 
 const index=read('index.html'),sw=read('service-worker.js'),updater=read('js/pwa-update.js');
 assert.ok(index.indexOf('js/pwa-update.js?v=1.1.0')<index.indexOf('app.js?v=1.12.0'),'PWA updater must start before app modules so stale installed PWAs recover promptly');
+assert.match(index,/new URL\('\.\/js\/core\/cache\.js',location\.href\)\.href/,'fresh index must evict stale cache.js before app.js imports it');
+assert.match(index,/new URL\('\.\/js\/data\/game-data\.js',location\.href\)\.href/,'fresh index must evict stale game-data.js before app.js imports it');
+assert.ok(index.indexOf("new URL('./js/core/cache.js',location.href).href")<index.indexOf("await import('./js/features/aloy-reviewed-bootstrap.js?v=1.0.0')"),'startup cache eviction must finish before the app module graph begins');
 assert.match(sw,/const CACHE = 'hotaru-shell-v46'/);
 assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v45'/);
 assert.match(sw,/js\/pwa-update\.js\?v=1\.1\.0/,'PWA updater must be available offline after the fresh shell is installed');
@@ -25,4 +28,4 @@ assert.match(updater,/controllerchange/,'A newly activated worker must be detect
 assert.match(updater,/location\.reload\(\)/,'The page must reload once under the new worker so unversioned internal modules cannot remain stale');
 assert.match(updater,/hotaru\.pwa-reload/,'Reload protection must prevent an update loop');
 
-console.log('Hotaru stale-PWA recovery + reviewed-team status regression QA passed.');
+console.log('Hotaru stale-PWA recovery + startup module cache-bust + reviewed-team status regression QA passed.');
