@@ -18,6 +18,7 @@ const pager=fs.readFileSync('js/features/smart-team-results-pagination.js','utf8
 const css=fs.readFileSync('css/smart-team-v48.css','utf8');
 const index=fs.readFileSync('index.html','utf8');
 const sw=fs.readFileSync('service-worker.js','utf8');
+const scrollFix=fs.readFileSync('js/features/smart-team-filter-scroll-fix.js','utf8');
 assert.match(pager,/const PAGE_SIZE=10/,'Smart Team pages must render exactly 10 entries');
 assert.match(pager,/matchReviewedTeams\(\{roster,weapons:state\?\.weapons\|\|\[\],artifacts:state\?\.ownedArtifacts\|\|\[\],lockedNames:cleanLocks,allowUnowned,limit:'all'\}\)/,'pagination layer must request the full valid set');
 assert.match(pager,/const start=\(session\.page-1\)\*PAGE_SIZE,end=Math\.min\(results\.length,start\+PAGE_SIZE\)/,'each page must slice the full filtered set into a bounded 10-result window');
@@ -37,5 +38,12 @@ assert.match(css,/\.hotaru-team-results-pager/,'paged results must have stable c
 assert.match(css,/\.hotaru-team-page-actions/,'Previous/Next controls must have a dedicated layout');
 assert.match(css,/@media\(max-width:600px\)[\s\S]*\.hotaru-team-results-pager\{align-items:stretch;flex-direction:column\}/,'pager controls must remain phone-friendly');
 assert.match(index,/smart-team-results-pagination\.js\?v=1\.2\.1&hotfix=48/);assert.match(sw,/smart-team-results-pagination\.js\?v=1\.2\.1/,'stable v46 shell may keep the old cached URL because the index requests a fresh versioned pagination module');
+
+assert.match(index,/smart-team-filter-scroll-fix\.js\?v=1\.0\.0/,'iPhone filter scroll guard must be loaded after pagination');
+assert.match(scrollFix,/hotaru-team-result-filter/);assert.match(scrollFix,/hotaru-team-result-sort/);
+assert.match(scrollFix,/document\.addEventListener\('pointerdown'/,'scroll guard must remember the result-toolbar position before Safari opens its picker');
+assert.match(scrollFix,/document\.addEventListener\('change'/,'scroll guard must restore the toolbar after the native picker commits a selection');
+assert.match(scrollFix,/getBoundingClientRect\(\)\.top/,'scroll restoration must use a stable viewport anchor instead of forcing the app top');
+assert.match(scrollFix,/setTimeout\(restore,180\)/,'scroll guard must cover Safari delayed post-picker scroll settling');
 assert.match(index,/roster-sections-team-filter\.css\?v=1\.3\.0/);assert.match(sw,/roster-sections-team-filter\.css\?v=1\.3\.0/);
 console.log('Hotaru 10-per-page Smart Team pagination + full-set sort/filter QA passed.');
