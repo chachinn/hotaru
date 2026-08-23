@@ -27,6 +27,11 @@ assert.match(pager,/data-hotaru-team-page/,'pager must use explicit page navigat
 assert.doesNotMatch(pager,/data-hotaru-team-load-more|insertAdjacentHTML\('beforeend'/,'legacy Load more append behavior must be removed');
 assert.match(pager,/scrollIntoView\(\{behavior:'smooth',block:'start'\}\)/,'page changes should anchor to the result-page header instead of jumping to the app top');
 assert.match(pager,/filteredResults/,'Team Need filtering must be applied to the complete in-memory result set before paging');
+assert.match(pager,/hotaru-team-results-body/,'results must render inside a dedicated body below stable controls');
+assert.match(pager,/preserveControls&&existingTools&&existingBody/,'Show/Sort updates must preserve their native select nodes on iPhone');
+assert.match(pager,/existingBody\.innerHTML=resultsBodyMarkup\(results,sort\)/,'filter/sort changes should update only the results body');
+assert.match(pager,/hotaru-team-result-filter[\s\S]*renderSession\(true,true\)/,'Show changes must use the stable-control render path');
+assert.match(pager,/hotaru-team-result-sort[\s\S]*renderSession\(true,true\)/,'Sort changes must use the stable-control render path');
 assert.match(pager,/includes\('Creating recommendations'\)\)return false/,'pagination must wait for the capture-phase iPhone controller to finish its initial render before replacing it with the full account-aware result set');
 assert.match(pager,/hotaru\.smart-team-result-filter\.v1/,'result filter choice must have a stable preference key');
 assert.match(pager,/hotaru\.smart-team-result-sort\.v1/,'result sort choice must have a stable preference key');
@@ -37,7 +42,7 @@ assert.match(pager,/return sortResults\(results,sort\)/,'sorting must happen bef
 assert.match(css,/\.hotaru-team-results-pager/,'paged results must have stable controls');
 assert.match(css,/\.hotaru-team-page-actions/,'Previous/Next controls must have a dedicated layout');
 assert.match(css,/@media\(max-width:600px\)[\s\S]*\.hotaru-team-results-pager\{align-items:stretch;flex-direction:column\}/,'pager controls must remain phone-friendly');
-assert.match(index,/smart-team-results-pagination\.js\?v=1\.2\.1&hotfix=48/);assert.match(sw,/smart-team-results-pagination\.js\?v=1\.2\.1/,'stable v46 shell may keep the old cached URL because the index requests a fresh versioned pagination module');
+assert.match(index,/smart-team-results-pagination\.js\?v=1\.2\.1&hotfix=50/);assert.match(sw,/smart-team-results-pagination\.js\?v=1\.2\.1/,'stable v46 shell may keep the old cached URL because the index requests a fresh versioned pagination module');
 
 assert.match(index,/smart-team-filter-scroll-fix\.js\?v=1\.0\.0/,'iPhone filter scroll guard must be loaded after pagination');
 assert.match(scrollFix,/hotaru-team-result-filter/);assert.match(scrollFix,/hotaru-team-result-sort/);
