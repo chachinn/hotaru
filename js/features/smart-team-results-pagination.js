@@ -17,7 +17,7 @@ let session=null;
 let pendingUntil=0;
 let scanQueued=false;
 
-function esc(value=''){return String(value||'').replace(/[&<>'"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]))}
+function esc(value=''){return String(value||'').replace(/[&<>'\"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[char]))}
 function safeGet(key,fallback=''){try{return localStorage.getItem(key)||fallback}catch{return fallback}}
 function safeSet(key,value){try{localStorage.setItem(key,value)}catch{}}
 function resultFilter(){const value=safeGet(RESULT_FILTER_KEY,'all');return RESULT_FILTERS.has(value)?value:'all'}
@@ -42,19 +42,33 @@ function resultsBodyMarkup(results,sort){
   const start=(session.page-1)*PAGE_SIZE,end=Math.min(results.length,start+PAGE_SIZE),pageResults=results.slice(start,end);
   return`${pagerMarkup(session.page,results.length,'top')}<div class="team-results">${pageResults.map((team,index)=>cardMarkup(team,start+index,sort)).join('')}</div>${pagerMarkup(session.page,results.length,'bottom')}`;
 }
+function updatePagerNode(pager,page,total){
+  if(!pager)return;
+  const totalPages=Math.max(1,Math.ceil(total/PAGE_SIZE)),current=Math.max(1,Math.min(totalPages,page||1)),from=(current-1)*PAGE_SIZE+1,to=Math.min(total,current*PAGE_SIZE),summary=pager.querySelector(':scope > span'),previous=pager.querySelector('[data-hotaru-team-page]:first-of-type'),next=pager.querySelector('[data-hotaru-team-page]:last-of-type');
+  if(summary)summary.innerHTML=`Page <strong>${current}</strong> of <strong>${totalPages}</strong> · results <strong>${from}–${to}</strong> of <strong>${total}</strong>`;
+  if(previous){previous.dataset.hotaruTeamPage=String(current-1);previous.disabled=current<=1}
+  if(next){next.dataset.hotaruTeamPage=String(current+1);next.disabled=current>=totalPages}
+}
+function patchPageBody(results,sort){
+  const body=session?.host?.querySelector('.hotaru-team-results-body');if(!body||!results.length)return false;
+  const cards=body.querySelector(':scope > .team-results'),pagers=[...body.querySelectorAll(':scope > .hotaru-team-results-pager')];if(!cards||pagers.length!==2)return false;
+  const start=(session.page-1)*PAGE_SIZE,end=Math.min(results.length,start+PAGE_SIZE),pageResults=results.slice(start,end);
+  cards.innerHTML=pageResults.map((team,index)=>cardMarkup(team,start+index,sort)).join('');
+  pagers.forEach(pager=>updatePagerNode(pager,session.page,results.length));
+  return true;
+}
 function renderSession(reset=false,preserveControls=false){
   if(!session?.host?.isConnected)return;
   const results=filteredResults(),sort=resultSort(),totalPages=Math.max(1,Math.ceil(results.length/PAGE_SIZE));if(reset)session.page=1;else session.page=Math.max(1,Math.min(session.page||1,totalPages));
   const existingTools=session.host.querySelector('.hotaru-team-results-tools'),existingBody=session.host.querySelector('.hotaru-team-results-body');
   if(preserveControls&&existingTools&&existingBody){
-    // Never remove the native Show/Sort selects while Mobile Safari is closing its picker.
-    // Replacing an active <select> makes iOS restore focus/scroll to the Smart Team card top.
+    // Keep the result toolbar mounted so mobile controls are never torn down during filter/sort/page updates.
     existingBody.innerHTML=resultsBodyMarkup(results,sort);
     return;
   }
   session.host.innerHTML=`${coverageMarkup()}${toolbarMarkup()}<div class="hotaru-team-results-body">${resultsBodyMarkup(results,sort)}</div>`;
 }
-function goToPage(page){if(!session?.host?.isConnected)return;const results=filteredResults(),totalPages=Math.max(1,Math.ceil(results.length/PAGE_SIZE)),target=Math.max(1,Math.min(totalPages,Number(page)||1));if(target===session.page)return;session.page=target;renderSession(false);requestAnimationFrame(()=>session.host.querySelector('.hotaru-team-results-pager.is-top')?.scrollIntoView({behavior:'smooth',block:'start'}));}
+function goToPage(page){if(!session?.host?.isConnected)return;const results=filteredResults(),totalPages=Math.max(1,Math.ceil(results.length/PAGE_SIZE)),target=Math.max(1,Math.min(totalPages,Number(page)||1));if(target===session.page)return;session.page=target;const sort=resultSort();if(!patchPageBody(results,sort))renderSession(false,true);}
 async function buildSession(){
   const card=smartCard(),host=resultsHost(card);if(!card||!host)return false;
   const mode=card.querySelector('#team-mode')?.value||'roster';if(mode==='abyss')return false;
