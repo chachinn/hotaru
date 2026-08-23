@@ -49,14 +49,14 @@ assert.match(index,/roster-sections-team-filter\.js\?v=1\.3\.1/,'index must load
 assert.match(index,/smart-team-mobile-controller\.js\?v=1\.0\.5/,'index must preserve the Current Abyss mobile controller revision');
 assert.match(index,/smart-team-results-pagination\.js\?v=1\.2\.1/,'index must load the incremental team-results layer');
 assert.match(index,/flexible-pair-ui\.js\?v=1\.0\.4/,'index must load the ownership-safe flexible pair UI');
-assert.match(sw,/const CACHE = 'hotaru-shell-v46'/,'service worker shell must advance to v45');
-assert.match(sw,/PREVIOUS_CACHE = 'hotaru-shell-v45'/,'service worker must migrate from v44');
+assert.match(sw,/const CACHE = 'hotaru-shell-v47'/,'service worker shell must advance to v45');
+assert.match(sw,/PREVIOUS_CACHE = 'hotaru-shell-v46'/,'service worker must migrate from v44');
 assert.match(sw,/roster-sections-team-filter\.css\?v=1\.3\.0/,'service worker must cache the stability stylesheet revision');
 assert.match(sw,/roster-sections-team-filter\.js\?v=1\.3\.1/,'service worker must cache the direct Team Need controller revision');
 assert.match(sw,/smart-team-mobile-controller\.js\?v=1\.0\.5/,'service worker must keep the Current Abyss mobile controller');
 assert.match(sw,/smart-team-results-pagination\.js\?v=1\.2\.1/,'service worker must cache the incremental team-results layer');
 assert.match(sw,/flexible-pair-ui\.js\?v=1\.0\.4/,'service worker must cache the ownership-safe flexible pair UI');
-assert.match(updater,/RELEASE='v46'/,'PWA updater must request v45');
+assert.match(updater,/RELEASE='v47'/,'PWA updater must request v45');
 assert.equal(pkg.version,'1.0.0','package version must remain 1.0.0');
 
 console.log('Smart Team mobile controller + Current Abyss + direct Team Need QA passed');
