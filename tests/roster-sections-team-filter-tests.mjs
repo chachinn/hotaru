@@ -58,8 +58,8 @@ assert.match(css,/@media\(max-width:600px\)[\s\S]*\.smart-team-card \.team-contr
 assert.match(css,/\.hotaru-team-results-tools/); assert.match(css,/@media\(max-width:600px\)[\s\S]*\.hotaru-team-results-tools\{grid-template-columns:1fr\}/);
 assert.match(index,/roster-sections-team-filter\.css\?v=1\.3\.0/); assert.match(index,/roster-sections-team-filter\.js\?v=1\.3\.1/);
 assert.match(index,/smart-team-mobile-controller\.js\?v=1\.0\.5/); assert.match(index,/smart-team-results-pagination\.js\?v=1\.2\.1/);
-assert.match(sw,/const CACHE = 'hotaru-shell-v46'/); assert.match(sw,/PREVIOUS_CACHE = 'hotaru-shell-v45'/);
+assert.match(sw,/const CACHE = 'hotaru-shell-v47'/); assert.match(sw,/PREVIOUS_CACHE = 'hotaru-shell-v46'/);
 assert.match(sw,/smart-team-results-pagination\.js\?v=1\.2\.1/); assert.match(sw,/roster-sections-team-filter\.css\?v=1\.3\.0/);
-assert.match(updater,/RELEASE='v46'/);
+assert.match(updater,/RELEASE='v47'/);
 
 console.log('Hotaru clean Roster + Team Need + result-tools mobile layout QA passed.');
