@@ -68,7 +68,7 @@ function available(catalog,name,self){
 function completeRecommendedTeams(detail={},catalog={}){
   const teams=recommendedTeamsForCharacter(detail.name);if(!teams.length)return[];
   return teams.map(team=>{
-    const reviewed=team.confidence==='Reviewed',roleLabel=reviewed?'Reviewed teammate':'Simulation-backed teammate';
+    const reviewed=team.confidence==='Reviewed',roleLabel=reviewed?'Reviewed teammate':team.confidence==='Community-sourced'?'Community-supported teammate':team.confidence==='Simulation-backed'?'Simulation-backed teammate':'Source-backed teammate';
     const members=(team.members||[]).map(name=>sameName(name,detail.name)?{...detail,role:'Core'}:(()=>{const found=available(catalog,name,detail.name);return found?{...found,role:roleLabel}:null})());
     if(members.length!==4||members.some(x=>!x))return null;
     return{name:team.name,members,reviewed,confidence:team.confidence||'Sourced',source:team.source,why:team.why,notes:team.notes||''};

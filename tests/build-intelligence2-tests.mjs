@@ -54,6 +54,36 @@ assert.equal(odette.artifactPriority[0],'Heart of the Furnace');
 assert.equal(odette.weaponPriority[0],'Whitelake Frostfeather');
 assert.ok(odette.sourceRefs.some(source=>/GameWith Odette/.test(source.label)),'Odette reviewed profile must expose a current build-guide source');
 
+
+const ainoFallback=inferBuildProfile({
+  name:'Aino',
+  element:'Hydro',
+  description:'ATK attack stat ATK attack stat direct damage',
+  skills:[{name:'Elemental Burst',description:'Burst damage based on ATK. Attack stat direct damage.'}]
+});
+assert.equal(ainoFallback.scaling,'ATK','fixture must prove generic inference can choose the wrong Aino build scaling');
+const aino=resolveBuildProfile({name:'Aino',element:'Hydro'},ainoFallback,{});
+assert.equal(aino.profileSource,'reviewed','Aino must resolve through reviewed build data');
+assert.equal(aino.role,'Off-field Hydro Support / Enabler');
+assert.equal(aino.scaling,'EM','Game8 default Aino support build must remain EM-focused');
+assert.equal(aino.artifactPriority[0],"Silken Moon's Serenade");
+assert.deepEqual(aino.mainStats.sands.slice(0,2),['Elemental Mastery','ER%'],'Game8 EM Sands must be the default with ER as reviewed contextual fallback');
+assert.deepEqual(aino.mainStats.goblet.slice(0,2),['Elemental Mastery','Hydro DMG%']);
+assert.deepEqual(aino.mainStats.circlet.slice(0,2),['CRIT Rate / CRIT DMG','Elemental Mastery']);
+assert.deepEqual(aino.substats,['Elemental Mastery','CRIT Rate','CRIT DMG','Energy Recharge'],'Aino substats must follow Game8 ordering');
+assert.equal(aino.weaponPriority[0],'Flame-Forged Insight');
+assert.equal(aino.weaponPriority[1],'Master Key');
+assert.equal(aino.weaponPriority[2],'Favonius Greatsword');
+assert.equal(aino.f2pWeapon,'Favonius Greatsword');
+assert.deepEqual(aino.talentPriority,['burst','skill','attack']);
+assert.equal(statTargets(aino,{sameElement:0,favonius:0}).er.good,165,'Game8 solo-Hydro default should center the 150–180% ER range');
+assert.equal(statTargets(aino,{sameElement:1,favonius:0}).er.good,120,'Game8 double-Hydro default should center the 110–130% ER range');
+assert.equal(statTargets(aino,{sameElement:0,favonius:0}).em.good,700);
+assert.equal(statTargets(aino,{sameElement:0,favonius:0}).em.great,800);
+assert.ok(aino.sourceRefs.some(source=>/Game8 Aino/.test(source.label)&&/537903/.test(source.url)),'Aino reviewed profile must expose the mandatory Game8 source');
+assert.ok(aino.sourceRefs.some(source=>/KQM Aino/.test(source.label)),'Aino reviewed profile must preserve current theorycraft cross-check');
+assert.ok(aino.sourceRefs.some(source=>/YouTube/.test(source.kind)),'Aino review must preserve a YouTube build cross-check');
+
 const signature=scoreWeapon({name:"Crimson Moon's Semblance",rarity:5,subStat:'CRIT Rate'},arle);
 const random=scoreWeapon({name:'Unreviewed Polearm',rarity:5,subStat:'CRIT Rate'},arle);
 assert.ok(signature.score>random.score,'reviewed weapon priority must influence deterministic fit score');
@@ -81,8 +111,12 @@ const sw=fs.readFileSync(new URL('../service-worker.js',import.meta.url),'utf8')
 assert.ok(sw.includes('hotaru-shell-v26'));
 assert.ok(sw.includes('build-profiles/columbina.js'));
 assert.ok(sw.includes('build-profiles/odette.js'),'Odette reviewed profile must be available in the offline shell');
+assert.ok(sw.includes('build-profiles/aino.js'),'Aino reviewed profile must be available in the offline shell');
 assert.ok(index.includes('staleBuildProfiles'),'v53 must clear cached reviewed-profile modules before app.js loads');
 assert.ok(index.indexOf('staleBuildProfiles')<index.indexOf('app.js?v=1.12.0'),'reviewed-profile cache refresh must run before app.js imports the profile index');
+assert.ok(index.includes("new URL('./js/data/team-profiles/index.js',location.href).href"),'Aino release must refresh cached team-profile data before Smart Team imports it');
+assert.ok(index.includes("new URL('./js/data/team-profiles/aino.js',location.href).href"),'Aino release must refresh its reviewed team module before Smart Team imports it');
+assert.ok(sw.includes('team-profiles/aino.js'),'Aino reviewed team module must be available in the offline shell');
 assert.ok(sw.includes('features/upgrade-priority.js'),'upgrade-priority module must be part of the offline app shell');
 const upgrade=fs.readFileSync(new URL('../js/features/upgrade-priority.js',import.meta.url),'utf8');
 assert.ok(upgrade.includes('farmCategory'),'upgrade-priority output must expose a Smart Farming handoff category');

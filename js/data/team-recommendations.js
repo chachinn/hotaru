@@ -2,7 +2,7 @@ import { allReviewedTeams, canonicalTeamCharacter, registerReviewedTeams, teamRe
 import { normalizeReactionId, teamReaction } from './team-reaction-tags.js';
 import { V45_REVIEWED_TEAM_BATCH } from './team-reviewed-v45-batch.js';
 
-export const TEAM_SOURCE_PLATFORMS=['Guide','HoYoLAB','YouTube','TikTok','GitHub'];
+export const TEAM_SOURCE_PLATFORMS=['Guide','HoYoLAB','YouTube','TikTok','Reddit','GitHub'];
 const reviewedSource=(label,url,platform='Guide',creator='')=>({label,url,type:'Reviewed theorycraft',platform,creator,reviewedAt:'2026-08-22'});
 const reviewedTeam=(id,name,members,why,source,notes='',reaction='')=>({id,name,members,why,notes,confidence:'Reviewed',reaction:normalizeReactionId(reaction)||teamReaction({name}),source});
 

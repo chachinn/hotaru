@@ -12,7 +12,7 @@ assert.equal(explicitReactionFromArchetype('Generic Pyro + Hydro'),'','elements 
 assert.equal(teamReaction({name:'Lunar-Charged · example'}),'lunar-charged');
 assert.equal(teamReaction({name:'Generic team',confidence:'Simulation-backed'}),'','unknown simulation team remains untagged');
 assert.equal(teamMatchesReaction({name:'Generic team'},'all'),true);
-assert.deepEqual(TEAM_SOURCE_PLATFORMS,['Guide','HoYoLAB','YouTube','TikTok','GitHub']);
+assert.deepEqual(TEAM_SOURCE_PLATFORMS,['Guide','HoYoLAB','YouTube','TikTok','Reddit','GitHub']);
 
 const all=allRecommendedTeams();
 assert.ok(all.length>0);

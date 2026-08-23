@@ -8,7 +8,8 @@ assert.ok(reviewedTeamsForCharacter('Bennett').length>=3,'reviewed teammate shou
 assert.equal(teamReviewStatus('Arlecchino').status,'anchor-reviewed');
 assert.equal(teamReviewStatus('Yelan').status,'teammate-reviewed');
 assert.equal(teamReviewStatus('Brand New Character').status,'pending');
-assert.ok(allReviewedTeams().every(team=>team.source?.url&&team.source?.type==='Reviewed theorycraft'));
+const curatedSourceTypes=new Set(['Reviewed theorycraft','Source-backed guide','Community-supported video','Community-supported discussion']);
+assert.ok(allReviewedTeams().every(team=>team.source?.url&&curatedSourceTypes.has(team.source?.type)),'curated teams must keep valid reviewed/source-backed provenance instead of flattening every source into theorycraft');
 
 const roster=[
   {name:'Arlecchino',status:'Finished',priority:'High',level:90},
