@@ -31,6 +31,18 @@
   <div id="app" class="app-shell" aria-live="polite"></div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <div id="modal-root"></div>
+  <script>
+    // Emergency v47 recovery runs inline so a v46 worker stuck in Cache Storage cannot block the updater script itself.
+    (()=>{
+      if(!('serviceWorker' in navigator))return;
+      const key='hotaru.pwa-reload.v47';
+      navigator.serviceWorker.addEventListener('controllerchange',()=>{
+        try{if(sessionStorage.getItem(key))return;sessionStorage.setItem(key,'1')}catch{}
+        location.reload();
+      });
+      navigator.serviceWorker.register('./service-worker.js',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});
+    })();
+  </script>
   <script src="js/pwa-update.js?v=1.1.1"></script>
   <script type="module">
     const settleWithin=(promise,ms=1800,fallback=null)=>{let timer;return Promise.race([Promise.resolve(promise).catch(()=>fallback),new Promise(resolve=>{timer=setTimeout(()=>resolve(fallback),ms)})]).finally(()=>clearTimeout(timer))};
