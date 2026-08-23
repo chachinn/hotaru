@@ -20,7 +20,7 @@ assert.match(ui,/data-hotaru-owned-page/,'owned and unowned results need their o
 assert.match(ui,/grid\.dataset\.hotaruOwnershipSignature!==signature/,'catalog DOM writes must be idempotent under MutationObserver');
 assert.match(index,/character-ownership-filter\.js\?v=1\.0\.0/);
 assert.match(sw,/character-ownership-filter\.js\?v=1\.0\.0/);
-assert.match(sw,/const CACHE = 'hotaru-shell-v46'/);
-assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v45'/);
+assert.match(sw,/const CACHE = 'hotaru-shell-v47'/);
+assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v46'/);
 
 console.log('Hotaru Characters owned/unowned filter QA passed.');
