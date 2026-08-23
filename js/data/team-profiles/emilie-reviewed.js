@@ -1,0 +1,58 @@
+const KQM='https://keqingmains.com/q/emilie-quickguide/';
+const GAME8='https://game8.co/games/Genshin-Impact/archives/422493';
+const IV='https://www.icy-veins.com/genshin-impact/emilie-team-guide';
+const source=(label,url,type='Reviewed theorycraft')=>({label,url,type,platform:'Guide',reviewedAt:'2026-08-23'});
+const kqm=()=>source('Emilie mechanics and teams',KQM);
+const game8=()=>source('Emilie builds and teams',GAME8,'Source-backed guide');
+const icy=()=>source('Emilie 7.0 teams',IV,'Source-backed guide');
+const confidenceFor=s=>s?.type==='Reviewed theorycraft'?'Reviewed':'Community-sourced';
+const team=(id,name,members,reaction,why,src,notes='',provenance='exact')=>({id,name,members,reaction,why,notes,provenance,confidence:confidenceFor(src),source:src,anchor:'Emilie',profileId:'emilie'});
+export const EMILIE_REVIEWED_TEAMS=[
+  team('emilie-kinich-bennett-mavuika','Burning · Kinich/Bennett/Mavuika',['Emilie','Kinich','Bennett','Mavuika'],'burning','High-damage Burning core: Kinich and Emilie both benefit from maintained Burning while Bennett and Mavuika supply Pyro, buffs, and energy support.',kqm()),
+  team('emilie-kinich-bennett-pyro-traveler','Burning · Kinich/Bennett/Pyro Traveler',['Emilie','Kinich','Bennett','Pyro Traveler'],'burning','Accessible Burning core with off-field Pyro support and Bennett amplification.',kqm()),
+  team('emilie-kinich-bennett-dehya','Burning · Kinich/Bennett/Dehya',['Emilie','Kinich','Bennett','Dehya'],'burning','Comfort-focused Burning core with interruption resistance and persistent Pyro application.',kqm()),
+  team('emilie-lyney-bennett-zhongli','Burning · Lyney/Bennett/Zhongli',['Emilie','Lyney','Bennett','Zhongli'],'burning','Single-target Pyro carry shell with Bennett buffs and Zhongli shielding/RES shred while Burning keeps Emilie empowered.',kqm()),
+  team('emilie-arlecchino-bennett-kazuha','Burning · Arlecchino/Bennett/Kazuha',['Emilie','Arlecchino','Bennett','Kaedehara Kazuha'],'burning','High-output Pyro carry team; Kazuha amplifies Arlecchino while Burning sustains Emilie personal damage.',kqm()),
+  team('emilie-arlecchino-bennett-xilonen','Burning · Arlecchino/Bennett/Xilonen',['Emilie','Arlecchino','Bennett','Xilonen'],'burning','High-output Pyro carry variant with Xilonen providing buffs and resistance reduction without disturbing Burning.',kqm()),
+  team('emilie-bennett-chiori-zhongli','Burning Quickswap · Bennett/Chiori/Zhongli',['Emilie','Bennett','Chiori','Zhongli'],'burning','Emilie can take brief field time inside Bennett Burst while Geo Resonance and Chiori add off-field damage.',kqm()),
+  team('emilie-yoimiya-bennett-kirara','Burning · Yoimiya/Bennett/Kirara',['Emilie','Yoimiya','Bennett','Kirara'],'burning','Shielded ranged Pyro carry shell; Kirara also supplies Dendro particles that lower Emilie ER pressure.',kqm()),
+  team('emilie-mualani-mavuika-zhongli','Burnvape · Mualani/Mavuika/Zhongli',['Emilie','Mualani','Mavuika','Zhongli'],'burnvape','Mualani’s slower Hydro application allows Burning to persist while setting up Forward Vaporize windows.',kqm()),
+  team('emilie-mualani-xiangling-zhongli','Burnvape · Mualani/Xiangling/Zhongli',['Emilie','Mualani','Xiangling','Zhongli'],'burnvape','Forward-Vape shell with sustained off-field Pyro and Zhongli comfort/RES shred.',kqm()),
+  team('emilie-furina-klee-bennett','Burnvape · Furina/Klee/Bennett',['Emilie','Furina','Klee','Bennett'],'burnvape','Fast Pyro application maintains Burning while Furina contributes off-field Hydro and teamwide damage buffs; Bennett supplies healing for Fanfare.',kqm()),
+  team('emilie-furina-xiangling-bennett','Quickswap Burnvape · Furina/Xiangling/Bennett',['Emilie','Furina','Xiangling','Bennett'],'burnvape','Quickswap shell where off-field Pyro lets Emilie spend more time inside Bennett Burst and reduce her ER burden.',kqm()),
+  team('emilie-neuvillette-xiangling-zhongli','Burnvape · Neuvillette/Xiangling/Zhongli',['Emilie','Neuvillette','Xiangling','Zhongli'],'burnvape','Burning plus Xiangling enables Neuvillette Vaporizes while Zhongli benefits both Emilie and Neuvillette through RES shred.',kqm()),
+  team('emilie-neuvillette-xiangling-citlali','Burnvape · Neuvillette/Xiangling/Citlali',['Emilie','Neuvillette','Xiangling','Citlali'],'burnvape','Burnvape variant with Citlali supporting Neuvillette; rotation must manage Dendro/Hydro aura carefully.',kqm()),
+  team('emilie-wriothesley-thoma-bennett','Burnmelt · Wriothesley/Thoma/Bennett',['Emilie','Wriothesley','Thoma','Bennett'],'burnmelt','Thoma maintains Pyro and defense while Wriothesley repeatedly Melts against Burning aura.',kqm()),
+  team('emilie-wriothesley-xiangling-bennett','Burnmelt · Wriothesley/Xiangling/Bennett',['Emilie','Wriothesley','Xiangling','Bennett'],'burnmelt','High-Pyro-application Burnmelt shell for reliable Wriothesley Melt windows.',kqm()),
+  team('emilie-wriothesley-mavuika-bennett','Burnmelt · Wriothesley/Mavuika/Bennett',['Emilie','Wriothesley','Mavuika','Bennett'],'burnmelt','Burnmelt variant with stronger off-field Pyro damage and team buffs.',kqm()),
+  team('emilie-ganyu-dehya-bennett','Burnmelt · Ganyu/Dehya/Bennett',['Emilie','Ganyu','Dehya','Bennett'],'burnmelt','Burning plus Dehya Pyro application supports repeated Ganyu Charged Attack Melts while adding interruption resistance.',kqm()),
+  team('emilie-rosaria-bennett-kazuha','Burnmelt · Rosaria/Bennett/Kazuha',['Emilie','Rosaria','Bennett','Kaedehara Kazuha'],'burnmelt','Rosaria Melt-focused shell with Kazuha Pyro absorption helping maintain Burning and amplify team damage.',kqm()),
+  team('emilie-cyno-thoma-nahida','Quickburn · Cyno/Thoma/Nahida',['Emilie','Cyno','Thoma','Nahida'],'quickburn','Long-duration Dendro support and Thoma Pyro allow Quicken and Burning to coexist during Cyno field time.',kqm()),
+  team('emilie-clorinde-xiangling-fischl','Quickburn · Clorinde/Xiangling/Fischl',['Emilie','Clorinde','Xiangling','Fischl'],'quickburn','Clorinde drives Aggravate/Overloaded damage while Xiangling maintains Burning and Fischl supplies off-field Electro.',kqm()),
+  team('emilie-clorinde-mavuika-fischl','Quickburn · Clorinde/Mavuika/Fischl',['Emilie','Clorinde','Mavuika','Fischl'],'quickburn','Modern Quickburn shell with Mavuika maintaining Pyro and contributing buffs/damage.',kqm()),
+  team('emilie-raiden-xiangling-bennett','Quickburn · Raiden/Xiangling/Bennett',['Emilie','Raiden Shogun','Xiangling','Bennett'],'quickburn','Raiden’s energy restoration helps Emilie Burst more often while Xiangling and Bennett sustain Pyro.',kqm()),
+  team('emilie-fischl-bennett-alhaitham','Quickburn · Fischl/Bennett/Alhaitham',['Emilie','Fischl','Bennett','Alhaitham'],'quickburn','Quicken shell with intermittent Burning from Bennett; Alhaitham and Fischl remain the primary reaction damage dealers.',kqm()),
+  team('emilie-nilou-nahida-kokomi','Bloom · Nilou/Nahida/Kokomi',['Emilie','Nilou','Nahida','Sangonomiya Kokomi'],'bloom','General Dendro flex route: Nahida remains the primary Dendro applier while Emilie adds persistent off-field Dendro and personal damage.',kqm()),
+  team('emilie-fischl-yae-zhongli','Quicken · Fischl/Yae/Zhongli',['Emilie','Fischl','Yae Miko','Zhongli'],'quicken','Low-input Quicken shell with automated off-field damage; Emilie can carry utility artifacts because her personal damage is reduced without Burning.',kqm()),
+  team('emilie-ganyu-xiangling-bennett','Burnmelt · Ganyu/Xiangling/Bennett',['Emilie','Ganyu','Xiangling','Bennett'],'burnmelt','Classic high-Pyro Burnmelt shell that lets Ganyu Melt Charged Attacks while Emilie contributes off-field Dendro damage.',game8()),
+  team('emilie-kinich-xiangling-bennett','Burning · Kinich/Xiangling/Bennett',['Emilie','Kinich','Xiangling','Bennett'],'burning','Straightforward Burning core with Kinich on field and Xiangling/Bennett maintaining Pyro.',game8()),
+  team('emilie-arlecchino-xiangling-bennett','Burning · Arlecchino/Xiangling/Bennett',['Emilie','Arlecchino','Xiangling','Bennett'],'burning','Pyro-heavy Burning shell with strong personal damage from both Arlecchino and Xiangling.',game8()),
+  team('emilie-nahida-kazuha-bennett','Air Fryer · Nahida/Kazuha/Bennett',['Emilie','Nahida','Kaedehara Kazuha','Bennett'],'burning','AoE-oriented Burning shell where Anemo spreading and grouping improve multi-target performance.',game8()),
+  team('emilie-cyno-fischl-baizhu','Quicken · Cyno/Fischl/Baizhu',['Emilie','Cyno','Fischl','Baizhu'],'quicken','Non-Burning flex route that uses Emilie as additional Dendro application and off-field damage around Cyno.',game8()),
+  team('emilie-clorinde-fischl-kazuha','Quicken · Clorinde/Fischl/Kazuha',['Emilie','Clorinde','Fischl','Kaedehara Kazuha'],'quicken','Non-Burning Clorinde Quicken shell with Fischl and Kazuha support.',game8()),
+  team('emilie-alhaitham-kuki-xingqiu','Hyperbloom · Alhaitham/Kuki/Xingqiu',['Emilie','Alhaitham','Kuki Shinobu','Xingqiu'],'hyperbloom','Deepwood-flex route where Emilie supplements Dendro while Alhaitham supplies stronger on-field application and Kuki triggers Hyperbloom.',game8()),
+  team('emilie-nahida-fischl-kokomi','Hyperbloom · Nahida/Fischl/Kokomi',['Emilie','Nahida','Fischl','Sangonomiya Kokomi'],'hyperbloom','General Dendro flex shell with Nahida as the primary application source and Kokomi providing Hydro and sustain.',game8()),
+  team('emilie-durin-nicole-kinich','Burning · Durin/Nicole/Kinich',['Emilie','Durin','Nicole','Kinich'],'burning','Current 7.0 Burning composition pairing Emilie with Kinich and the newer Durin/Nicole support core.',icy()),
+  team('emilie-bennett-iansan-kinich','Burning · Bennett/Iansan/Kinich',['Emilie','Bennett','Iansan','Kinich'],'burning','Current 7.0 Kinich Burning composition using Bennett and Iansan support.',icy()),
+  team('emilie-durin-nicole-klee','Burning · Durin/Nicole/Klee',['Emilie','Durin','Nicole','Klee'],'burning','Current 7.0 Pyro-carry Burning composition.',icy()),
+  team('emilie-durin-nicole-lyney','Burning · Durin/Nicole/Lyney',['Emilie','Durin','Nicole','Lyney'],'burning','Current 7.0 Lyney Burning composition.',icy()),
+  team('emilie-mualani-mavuika-nahida','Burnvape · Mualani/Mavuika/Nahida',['Emilie','Mualani','Mavuika','Nahida'],'burnvape','Current 7.0 Burnvape composition with extra Dendro support and Mavuika Pyro application.',icy()),
+  team('emilie-durin-neuvillette-furina','Burnvape · Durin/Neuvillette/Furina',['Emilie','Durin','Neuvillette','Furina'],'burnvape','Current 7.0 Hydro carry composition using Durin as the Pyro enabler.',icy()),
+  team('emilie-durin-wriothesley-nicole','Burnmelt · Durin/Wriothesley/Nicole',['Emilie','Durin','Wriothesley','Nicole'],'burnmelt','Current 7.0 Burnmelt composition centered on Wriothesley.',icy()),
+  team('emilie-mavuika-ganyu-xilonen','Burnmelt · Mavuika/Ganyu/Xilonen',['Emilie','Mavuika','Ganyu','Xilonen'],'burnmelt','Current 7.0 Ganyu Burnmelt composition with Mavuika and Xilonen.',icy()),
+  team('emilie-durin-ganyu-nicole','Burnmelt · Durin/Ganyu/Nicole',['Emilie','Durin','Ganyu','Nicole'],'burnmelt','Current 7.0 Ganyu Burnmelt composition using the Durin/Nicole core.',icy()),
+  team('emilie-durin-fischl-clorinde','Quickburn · Durin/Fischl/Clorinde',['Emilie','Durin','Fischl','Clorinde'],'quickburn','Current 7.0 Quickburn composition for Clorinde.',icy()),
+  team('emilie-durin-nicole-cyno','Quickburn · Durin/Nicole/Cyno',['Emilie','Durin','Nicole','Cyno'],'quickburn','Current 7.0 Quickburn composition centered on Cyno.',icy()),
+  team('emilie-durin-nicole-raiden','Quickburn · Durin/Nicole/Raiden',['Emilie','Durin','Nicole','Raiden Shogun'],'quickburn','Current 7.0 Quickburn composition centered on Raiden Shogun.',icy())
+];
+export default EMILIE_REVIEWED_TEAMS;
