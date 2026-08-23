@@ -18,7 +18,8 @@ export const ARTIFACT_FARM_INFO={
   'Gilded Dreams':{source:'Spire of Solitary Enlightenment, Gandha Hill, Sumeru; also Artifact Strongbox',region:'Sumeru',kind:'Artifact Domain / Artifact Strongbox',sourceUrl:'https://game8.co/games/Genshin-Impact/archives/385295'},
   'Deepwood Memories':{source:'Spire of Solitary Enlightenment, Gandha Hill, Sumeru; also Artifact Strongbox',region:'Sumeru',kind:'Artifact Domain / Artifact Strongbox',sourceUrl:'https://game8.co/games/Genshin-Impact/archives/385293'},
   'Golden Troupe':{source:'Denouement of Sin, Belleau Region, Fontaine; also Artifact Strongbox',region:'Fontaine',kind:'Artifact Domain / Artifact Strongbox',sourceUrl:'https://game8.co/games/Genshin-Impact/archives/408925'},
-  'Marechaussee Hunter':{source:'Denouement of Sin, Belleau Region, Fontaine; also Artifact Strongbox',region:'Fontaine',kind:'Artifact Domain / Artifact Strongbox',sourceUrl:'https://game8.co/games/Genshin-Impact/archives/421272'}
+  'Marechaussee Hunter':{source:'Denouement of Sin, Belleau Region, Fontaine; also Artifact Strongbox',region:'Fontaine',kind:'Artifact Domain / Artifact Strongbox',sourceUrl:'https://game8.co/games/Genshin-Impact/archives/421272'},
+  'Flower of Paradise Lost':{source:'City of Gold, Eye of the Sands, Sumeru',region:'Sumeru',kind:'Artifact Domain'}
 };
 
 export const WEAPON_FARM_INFO={
@@ -44,7 +45,16 @@ export const WEAPON_FARM_INFO={
   'Staff of the Scarlet Sands':{source:'Limited Weapon Event Wishes when featured',kind:'Limited 5-star gacha Polearm'},
   'Fractured Halo':{source:'Limited Weapon Event Wishes when featured',kind:'Limited 5-star gacha Polearm'},
   'Ballad of the Fjords':{source:'Battle Pass / Gnostic Hymn weapon selection',kind:'Battle Pass Polearm'},
-  'White Tassel':{source:'Exquisite-or-higher chests in Liyue and The Chasm; lock copies because it is not normally available from Wishes',kind:'3-star exploration/chest Polearm'}
+  'White Tassel':{source:'Exquisite-or-higher chests in Liyue and The Chasm; lock copies because it is not normally available from Wishes',kind:'3-star exploration/chest Polearm'},
+  "Nocturne's Curtain Call":{source:'Limited Weapon Event Wishes when featured',kind:'Limited 5-star signature Catalyst'},
+  'Reliquary of Truth':{source:'Limited Weapon Event Wishes when featured',kind:'Limited 5-star Catalyst'},
+  'Sacrificial Jade':{source:'Battle Pass / Gnostic Hymn weapon selection',kind:'Battle Pass Catalyst'},
+  'Prototype Amber':{source:'Forge at any blacksmith using a Catalyst Billet and required materials',kind:'Craftable Catalyst'},
+  'Favonius Codex':{source:'Wishes',kind:'Gacha Catalyst'},
+  "Surf's Up":{source:'Limited Weapon Event Wishes when featured',kind:'Limited 5-star Catalyst'},
+  'Tome of the Eternal Flow':{source:'Limited Weapon Event Wishes when featured',kind:'Limited 5-star Catalyst'},
+  'Waveriding Whirl':{source:'Wishes when available',kind:'4-star Catalyst'},
+  'Lost Prayer to the Sacred Winds':{source:'Standard Wish and Weapon Event Wishes',kind:'5-star Catalyst'}
 };
 
 export function artifactFarmInfo(name=''){
