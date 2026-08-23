@@ -2,8 +2,9 @@ const RESULT_CONTROL_IDS=new Set(['hotaru-team-result-filter','hotaru-team-resul
 const TOOLS_SELECTOR='.smart-team-card .hotaru-team-results-tools';
 let pendingAnchor=null;
 
+function customMenuManaged(target){return target?.dataset?.hotaruMobileResultMenu==='true'||target?.classList?.contains('hotaru-mobile-native-select-hidden')}
 function captureAnchor(target){
-  if(!RESULT_CONTROL_IDS.has(target?.id))return null;
+  if(!RESULT_CONTROL_IDS.has(target?.id)||customMenuManaged(target))return null;
   const tools=target.closest?.('.hotaru-team-results-tools');
   const top=tools?.getBoundingClientRect?.().top;
   if(!Number.isFinite(top))return null;
@@ -34,6 +35,7 @@ document.addEventListener('pointerdown',event=>{
 
 document.addEventListener('change',event=>{
   if(!RESULT_CONTROL_IDS.has(event.target?.id))return;
+  if(customMenuManaged(event.target)){pendingAnchor=null;return}
   const anchor=pendingAnchor||captureAnchor(event.target);
   pendingAnchor=null;
   scheduleRestore(anchor);
