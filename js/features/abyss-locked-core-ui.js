@@ -5,7 +5,7 @@ const MODE_KEY='hotaru.abyss-mode.v1';
 const app=document.getElementById('app');
 const esc=value=>String(value??'').replace(/[&<>'\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[c]));
 const cleanSide=value=>Array.from({length:4},(_,index)=>String(Array.isArray(value)?value[index]||'':'').trim());
-function loadLocks(){try{const raw=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');return{first:cleanSide(raw.first),second:cleanSide(raw.second)}}catch{return{first:cleanSide([]),second:cleanSide([])}}
+function loadLocks(){try{const raw=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');return{first:cleanSide(raw.first),second:cleanSide(raw.second)}}catch{return{first:cleanSide([]),second:cleanSide([])}}}
 function saveLocks(value){const clean={first:cleanSide(value.first),second:cleanSide(value.second)};try{localStorage.setItem(STORAGE_KEY,JSON.stringify(clean))}catch{}globalThis.__hotaruAbyssLockedCore=clean;return clean}
 function loadMode(){try{return localStorage.getItem(MODE_KEY)==='lunar'?'lunar':'normal'}catch{return'normal'}}
 function saveMode(value){const mode=value==='lunar'?'lunar':'normal';try{localStorage.setItem(MODE_KEY,mode)}catch{}globalThis.__hotaruAbyssMode=mode;return mode}
