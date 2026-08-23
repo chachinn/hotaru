@@ -3,7 +3,7 @@ import { RELEASED_AVATAR_AUDIT_V45 } from './fixtures/released-avatar-audit-v45.
 import { reviewedBuildProfile } from '../js/data/build-profiles/index.js';
 import { inferBuildProfile } from '../js/features/build-engine.js';
 import { resolveBuildProfile } from '../js/features/build-profiles.js';
-import { FLINS_REVIEWED_TEAMS } from '../js/data/team-profiles/flins-reviewed.js';
+import { FLINS_REVIEWED_TEAMS } from '../js/data/team-profiles/flins-reviewed-clean.js';
 import { registerReviewedTeams } from '../js/data/team-profiles/index.js';
 import { compositionKey, recommendedTeamsForCharacter, teamHasValidSource } from '../js/data/team-recommendations.js';
 import { FLINS_COMPATIBILITY_POLICY, flinsCompatibilityForCharacter, auditFlinsCompatibility } from '../js/data/character-compatibility/flins.js';
