@@ -34,6 +34,26 @@ assert.equal(statTargets(colOff,{burstCycle:'everyOther',sameElement:0,favonius:
 assert.equal(statTargets(colOn,{burstCycle:'every',sameElement:0,favonius:0}).er.good,200,'on-field Columbina should use the reviewed on-field ER baseline');
 assert.equal(statTargets(colOn,{burstCycle:'every',sameElement:1,favonius:0}).er.good,160,'double-Hydro on-field Columbina should use the reviewed lower ER baseline');
 
+
+const odetteFallback=inferBuildProfile({
+  name:'Odette',
+  element:'Cryo',
+  description:'Elemental Mastery reaction damage Stellar reaction Elemental Mastery reaction damage',
+  skills:[{name:'Elemental Skill',description:'Reaction damage and Elemental Mastery are mentioned repeatedly in Stellar mechanics.'}]
+});
+assert.equal(odetteFallback.scaling,'EM','fixture must prove generic keyword inference can misclassify Odette as EM-scaling');
+const odette=resolveBuildProfile({name:'Odette',element:'Cryo'},odetteFallback,{});
+assert.equal(odette.profileSource,'reviewed','Odette must resolve through reviewed build data');
+assert.equal(odette.scaling,'ATK','Odette is ATK-scaling, not EM-scaling');
+assert.deepEqual(odette.mainStats.sands,['ATK%'],'Odette Sands must prioritize ATK%');
+assert.deepEqual(odette.mainStats.goblet,['ATK%'],'Odette Goblet must prioritize ATK% for the reviewed Stellar build');
+assert.deepEqual(odette.mainStats.circlet,['CRIT Rate / CRIT DMG'],'Odette Circlet must prioritize CRIT');
+assert.deepEqual(odette.substats.slice(0,3),['CRIT Rate','CRIT DMG','ATK%'],'Odette substats must prioritize CRIT then ATK% before EM');
+assert.ok(odette.substats.indexOf('Elemental Mastery')>odette.substats.indexOf('ATK%'),'EM must remain secondary to ATK% for Odette');
+assert.equal(odette.artifactPriority[0],'Heart of the Furnace');
+assert.equal(odette.weaponPriority[0],'Whitelake Frostfeather');
+assert.ok(odette.sourceRefs.some(source=>/GameWith Odette/.test(source.label)),'Odette reviewed profile must expose a current build-guide source');
+
 const signature=scoreWeapon({name:"Crimson Moon's Semblance",rarity:5,subStat:'CRIT Rate'},arle);
 const random=scoreWeapon({name:'Unreviewed Polearm',rarity:5,subStat:'CRIT Rate'},arle);
 assert.ok(signature.score>random.score,'reviewed weapon priority must influence deterministic fit score');
@@ -48,6 +68,7 @@ assert.equal(buildUpgradeActions({profile:arle,checks:result.checks,targets:resu
 assert.match(result.nextActions[0].message,/Crimson Moon/);
 
 const app=fs.readFileSync(new URL('../app.js',import.meta.url),'utf8');
+const index=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
 assert.ok(app.includes('resolvedBuildProfile(characterDetail,form.context)'),'Build evaluation must resolve reviewed profile with selected context');
 assert.ok(app.includes('profileSourceLabel(profile)'),'Build UI must label reviewed vs inferred profile');
 assert.ok(app.includes('data-build-context="buildVariant"'),'Build variants must be selectable in Build Check');
@@ -59,6 +80,9 @@ assert.ok(app.includes('buildRuntime.weaponCandidates'),'Weapon candidates must 
 const sw=fs.readFileSync(new URL('../service-worker.js',import.meta.url),'utf8');
 assert.ok(sw.includes('hotaru-shell-v26'));
 assert.ok(sw.includes('build-profiles/columbina.js'));
+assert.ok(sw.includes('build-profiles/odette.js'),'Odette reviewed profile must be available in the offline shell');
+assert.ok(index.includes('staleBuildProfiles'),'v53 must clear cached reviewed-profile modules before app.js loads');
+assert.ok(index.indexOf('staleBuildProfiles')<index.indexOf('app.js?v=1.12.0'),'reviewed-profile cache refresh must run before app.js imports the profile index');
 assert.ok(sw.includes('features/upgrade-priority.js'),'upgrade-priority module must be part of the offline app shell');
 const upgrade=fs.readFileSync(new URL('../js/features/upgrade-priority.js',import.meta.url),'utf8');
 assert.ok(upgrade.includes('farmCategory'),'upgrade-priority output must expose a Smart Farming handoff category');
