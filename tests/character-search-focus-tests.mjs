@@ -9,7 +9,7 @@ assert.ok(app.includes('setTimeout(refreshCharacterSearchResults,70)'));
 assert.ok(!app.includes('window.__hotaruSearch=setTimeout(render'));
 assert.ok(app.includes("document.dispatchEvent(new CustomEvent('hotaru:character-search-updated'"));
 assert.ok(enhancements.includes("document.addEventListener('hotaru:character-search-updated'"));
-assert.ok(index.includes('app.js?v=1.12.0'));
+assert.ok(index.includes('app.js?v=1.12.1'));
 assert.ok(index.includes('js/enhancements.js?v=1.7.0'));
 assert.ok(sw.includes('hotaru-shell-v26'));
 console.log('Character search focus + mobile keyboard regression QA passed.');
