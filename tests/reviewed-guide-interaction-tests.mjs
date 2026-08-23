@@ -12,22 +12,18 @@ for(const file of ['js/features/game8-guide-ui.js','js/features/guide-ui.js','js
 
 const aino=reviewedBuildProfile('Aino');
 assert.deepEqual(aino.tierRatings,[{label:'Main DPS',rating:'—'},{label:'Sub-DPS',rating:'A'},{label:'Support',rating:'—'},{label:'Exploration',rating:'B'}]);
-assert.deepEqual(aino.mainStats.sands,['Elemental Mastery']);
-assert.deepEqual(aino.mainStats.goblet,['Elemental Mastery']);
-assert.deepEqual(aino.mainStats.circlet,['CRIT Rate / CRIT DMG','Elemental Mastery']);
-assert.deepEqual(aino.weaponPriority,['Flame-Forged Insight','Master Key','Favonius Greatsword','Makhaira Aquamarine']);
+assert.deepEqual(aino.mainStats.sands,['Energy Recharge','Elemental Mastery']);
+assert.deepEqual(aino.mainStats.goblet,['Elemental Mastery','Hydro DMG%']);
+assert.deepEqual(aino.mainStats.circlet,['Elemental Mastery','CRIT Rate','CRIT DMG']);
+assert.deepEqual(aino.weaponPriority,['Flame-Forged Insight','Master Key','Favonius Greatsword','Makhaira Aquamarine','Forest Regalia','Sacrificial Greatsword','Katsuragikiri Nagamasa']);
 assert.equal(aino.f2pWeapon,'Master Key');
-assert.deepEqual(aino.artifactPriority,["Silken Moon's Serenade",'Noblesse Oblige','Aubade of Morningstar and Moon','Instructor']);
+assert.deepEqual(aino.artifactPriority,["Silken Moon's Serenade",'Noblesse Oblige','Aubade of Morningstar and Moon','Instructor','Scroll of the Hero of Cinder City','Deepwood Memories']);
 assert.deepEqual(aino.buildSummaryTeams,[
   {name:'Flins Lunar Charge',members:['Aino','Flins','Ineffa','Sucrose']},
   {name:'Nilou Bloom',members:['Aino','Nahida','Nilou','Baizhu']}
 ]);
-assert.deepEqual(aino.goalStats,[
-  {label:'Elemental Mastery',value:'700–800'},
-  {label:'Energy Recharge',value:'150–180% (Solo Hydro) · 110–130% (Double Hydro)'},
-  {label:'CRIT Rate',value:'50–70%'},
-  {label:'CRIT DMG',value:'100–120%'}
-]);
+assert.ok(aino.goalStats.some(row=>row.label==='Energy Recharge'&&/190–250%/.test(row.value)&&/155–205%/.test(row.value)&&/100–140%/.test(row.value)),'Aino reviewed ER guidance must retain KQM baseline, Favonius, and Flame-Forged contexts');
+assert.ok(aino.goalStats.some(row=>row.label==='Main-stat context'&&/ER \/ EM Sands/.test(row.value)),'Aino reviewed build must expose ER/EM main-stat context');
 assert.ok(aino.variants?.length>=1,'Aino must use the global reviewed build-variant structure');
 const alhaitham=reviewedBuildProfile('Alhaitham');
 assert.ok(alhaitham.variants?.length>=2,'Alhaitham must expose separate reviewed build variants instead of a flattened build');
@@ -42,6 +38,7 @@ assert.match(weaponFarmInfo('White Tassel').source,/chests in Liyue/i);
 
 const game8=read('js/features/game8-guide-ui.js');
 for(const label of ['Best Weapon','Replacement Weapons','Best Artifacts','Artifact Main Stats','Artifact Sub Stats','Goal Stats','Sample Teams'])assert.ok(game8.includes(label),`global Game8-style table missing ${label}`);
+assert.match(game8,/Build Summary/,'reviewed build cards must retain the Build Summary contract');
 assert.match(game8,/data-hotaru-\$\{kind\}/,'summary equipment links must be generic rather than character-specific');
 assert.match(game8,/reviewedBuildCards\(profile,detail,catalog\)/,'build section must render every legitimate reviewed build variant');
 assert.match(game8,/mergeVariantProfile/,'each build summary must carry its own reviewed stats, weapons, artifacts and teams');
