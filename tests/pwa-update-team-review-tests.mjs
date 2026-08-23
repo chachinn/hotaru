@@ -15,6 +15,8 @@ const screenshotPair=matchReviewedTeams({roster:[{name:'Odette'},{name:'Flins'}]
 assert.deepEqual(screenshotPair.pendingLocks,[],'A reviewed Odette + Flins lock may have no exact shared team, but neither character is pending review');
 
 const index=read('index.html'),sw=read('service-worker.js'),updater=read('js/pwa-update.js');
+assert.ok(index.indexOf("navigator.serviceWorker.register('./service-worker.js',{updateViaCache:'none'})")<index.indexOf('js/pwa-update.js?v=1.1.1'),'inline v47 rescue must begin before any external updater request can be trapped by a broken v46 worker');
+assert.match(index,/hotaru\.pwa-reload\.v47/,'inline rescue and normal updater must share the same one-reload guard');
 assert.ok(index.indexOf('js/pwa-update.js?v=1.1.1')<index.indexOf('app.js?v=1.12.1'),'PWA updater must start before app modules so stale installed PWAs recover promptly');
 assert.match(index,/new URL\('\.\/js\/core\/cache\.js',location\.href\)\.href/,'fresh index must evict stale cache.js before app.js imports it');
 assert.match(index,/new URL\('\.\/js\/data\/game-data\.js',location\.href\)\.href/,'fresh index must evict stale game-data.js before app.js imports it');
