@@ -1,6 +1,6 @@
 import { canonicalTeamCharacter, teamReviewStatus } from '../data/team-profiles/index.js';
 import { queryRecommendedTeams, teamRecommendationStatus } from '../data/team-recommendations.js';
-import { scoreReviewedTeam, teamLevelReadiness } from './team-scoring.js';
+import { scoreReviewedTeam } from './team-scoring.js';
 function key(value=''){return String(value||'').trim().toLowerCase()}
 function unique(values=[]){return [...new Set(values.map(value=>String(value||'').trim()).filter(Boolean))]}
 function entryTeamName(entry={}){return canonicalTeamCharacter(entry.teamName||entry.name)}
@@ -19,9 +19,9 @@ export function matchReviewedTeams({roster=[],weapons=[],artifacts=[],lockedName
   const candidates=queryRecommendedTeams({lockedNames:locks,reaction,curatedOnly});
   const sourceResults=candidates.map(team=>{
     const members=(team.members||[]).map(canonicalTeamCharacter),missing=members.filter(name=>!owned.has(key(name))),ownedCount=members.length-missing.length;
-    const baseScore=scoreReviewedTeam({...team,members},{roster:scoringRoster,ownedNames,lockedNames:locks,artifacts}),levels=teamLevelReadiness(members,scoringRoster);
-    return{...team,members,missing,ownedCount,ownedComplete:missing.length===0,...levels,score:baseScore+sourceBonus(team)+referenceBonus(team)};
-  }).sort((a,b)=>b.level90Count-a.level90Count||a.below80Count-b.below80Count||b.level80PlusCount-a.level80PlusCount||b.score-a.score||a.name.localeCompare(b.name));
+    const baseScore=scoreReviewedTeam({...team,members},{roster:scoringRoster,ownedNames,lockedNames:locks,artifacts});
+    return{...team,members,missing,ownedCount,ownedComplete:missing.length===0,score:baseScore+sourceBonus(team)+referenceBonus(team)};
+  }).sort((a,b)=>b.score-a.score||a.name.localeCompare(b.name));
   const ownedTotal=sourceResults.filter(team=>team.ownedComplete).length,missingTotal=sourceResults.length-ownedTotal;
   const eligible=allowUnowned?sourceResults:sourceResults.filter(team=>team.ownedComplete);
   const allRequested=limit==='all'||limit===Infinity,numericLimit=Number(limit);

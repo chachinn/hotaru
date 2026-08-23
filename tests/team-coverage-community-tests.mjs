@@ -70,8 +70,8 @@ assert.ok(sampleTeams({name:'Mavuika',element:'Pyro',description:''},guideCatalo
 
 const index=read('index.html'),sw=read('service-worker.js'),bootstrap=read('js/features/team-community-bootstrap.js'),matcher=read('js/features/roster-team-matcher.js'),daily=read('js/features/daily-dashboard.js');
 assert.match(index,/team-community-bootstrap\.js\?v=1\.1\.1/);
-assert.match(sw,/hotaru-shell-v47/);
-assert.match(sw,/PREVIOUS_CACHE = 'hotaru-shell-v46'/);
+assert.match(sw,/hotaru-shell-v46/);
+assert.match(sw,/PREVIOUS_CACHE = 'hotaru-shell-v45'/);
 for(const asset of ['js/data/team-recommendations.js','js/data/team-reviewed-v45-batch.js','js/data/community-team-catalog.js','js/data/team-reaction-tags.js','js/features/team-community-bootstrap.js?v=1.1.1'])assert.ok(sw.includes(asset),`PWA shell must package ${asset}`);
 assert.match(sw,/raw\.githubusercontent\.com\/SenjeyB\/gi-rec/,'remote community data should bypass the service-worker app-shell cache');
 assert.match(bootstrap,/sourceGaps/,'community status must publish explicit 30-team source gaps');
