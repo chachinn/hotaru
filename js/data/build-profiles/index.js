@@ -17,8 +17,9 @@ import cyno from './cyno.js';
 import dehya from './dehya.js';
 import diluc from './diluc.js';
 import emilie from './emilie.js';
+import escoffier from './escoffier.js';
 
-export const REVIEWED_BUILD_PROFILES=[arlecchino,tartaglia,columbina,clorinde,odette,aino,alhaitham,albedo,aloy,amber,aratakiItto,baizhu,chasca,chiori,citlali,cyno,dehya,diluc,emilie];
+export const REVIEWED_BUILD_PROFILES=[arlecchino,tartaglia,columbina,clorinde,odette,aino,alhaitham,albedo,aloy,amber,aratakiItto,baizhu,chasca,chiori,citlali,cyno,dehya,diluc,emilie,escoffier];
 
 function key(value=''){return String(value||'').trim().toLowerCase()}
 const PROFILE_INDEX=new Map();
