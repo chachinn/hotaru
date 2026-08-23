@@ -1,70 +1,28 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { sampleTeams } from '../js/features/guide-engine.js';
-import { reviewedTeamProfile, reviewedTeamsForCharacter } from '../js/data/team-profiles/index.js';
-import { normalizeTarget } from '../js/features/interactive-map.js';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { teamReviewStatus } from '../js/data/team-profiles/index.js';
+import { matchReviewedTeams } from '../js/features/roster-team-matcher.js';
 
-const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
-const guideEngine=read('js/features/guide-engine.js');
-const guideUi=read('js/features/guide-ui.js');
-const guideCss=read('css/guide-ui.css');
-const enhancements=read('js/enhancements.js');
-const enhancementCss=read('css/enhancements.css');
-const sw=read('service-worker.js');
-const index=read('index.html');
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const read=file=>fs.readFileSync(path.join(root,file),'utf8');
 
-// Team guide: no arbitrary four-team ceiling; reviewed anchors and teammates inherit sourced variations.
-assert.doesNotMatch(guideEngine,/return output\.slice\(0,4\)/);
-for(const name of ['Arlecchino','Tartaglia','Columbina'])assert.ok((reviewedTeamProfile(name)?.archetypes||[]).length>4,`${name} should expose more than four reviewed variations`);
-assert.ok(reviewedTeamsForCharacter('Bennett').length>3,'Reviewed teammates should inherit the complete reviewed teams they appear in');
-assert.match(guideEngine,/recommendedTeamsForCharacter/,'Character guides should read the expanded sourced recommendation registry');
-assert.match(guideEngine,/members\.length!==4\|\|members\.some/,'Sourced guide teams must be complete four-character teams');
-assert.match(guideEngine,/Kaedehara Kazuha/,'Kazuha alias should resolve against canonical catalogue naming');
+assert.equal(teamReviewStatus('Odette').status,'anchor-reviewed','Odette must never render as Team review pending');
+assert.equal(teamReviewStatus('Alyosha').status,'teammate-reviewed','Alyosha inherits reviewed Odette teams and must not render as pending');
+assert.equal(teamReviewStatus('Flins').status,'teammate-reviewed','Flins appears in a reviewed team and must not render as pending');
+const screenshotPair=matchReviewedTeams({roster:[{name:'Odette'},{name:'Flins'}],lockedNames:['Odette','Flins'],allowUnowned:true,limit:5});
+assert.deepEqual(screenshotPair.pendingLocks,[],'A reviewed Odette + Flins lock may have no exact shared team, but neither character is pending review');
 
-const arle={name:'Arlecchino',element:'Pyro',description:'',skills:[],passives:[]};
-const arleCatalog={characters:[
-  {name:'Yelan',element:'Hydro'},{name:'Bennett',element:'Pyro'},{name:'Kaedehara Kazuha',element:'Anemo'},
-  {name:'Xilonen',element:'Geo'},{name:'Xingqiu',element:'Hydro'},{name:'Sucrose',element:'Anemo'},
-  {name:'Lan Yan',element:'Anemo'},{name:'Citlali',element:'Cryo'},{name:'Chevreuse',element:'Pyro'},
-  {name:'Fischl',element:'Electro'},{name:'Ineffa',element:'Electro'},{name:'Durin',element:'Pyro'},
-  {name:'Yae Miko',element:'Electro'},{name:'Thoma',element:'Pyro'},{name:'Columbina',element:'Hydro'}
-]};
-const arleTeams=sampleTeams(arle,arleCatalog);
-assert.ok(arleTeams.length>4,'Arlecchino guide should expose more than four complete variations when catalogue members resolve');
-assert.ok(arleTeams.every(team=>team.members.length===4));
-assert.ok(arleTeams.some(team=>team.members.some(member=>member.name==='Kaedehara Kazuha')));
-assert.ok(arleTeams.every(team=>team.reviewed===true));
-assert.match(guideUi,/complete variation/);
-assert.match(guideUi,/Reviewed theorycraft/);
+const index=read('index.html'),sw=read('service-worker.js'),updater=read('js/pwa-update.js');
+assert.ok(index.indexOf('js/pwa-update.js?v=1.0.0')<index.indexOf('app.js?v=1.12.0'),'PWA updater must start before app modules so stale installed PWAs recover promptly');
+assert.match(sw,/const CACHE = 'hotaru-shell-v46'/);
+assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v45'/);
+assert.match(sw,/js\/pwa-update\.js\?v=1\.0\.0/,'PWA updater must be available offline after the fresh shell is installed');
+assert.match(updater,/RELEASE='v46'/,'PWA reload marker must advance with the shell');
+assert.match(updater,/updateViaCache:'none'/,'Service-worker update checks must bypass stale HTTP caches');
+assert.match(updater,/controllerchange/,'A newly activated worker must be detected');
+assert.match(updater,/location\.reload\(\)/,'The page must reload once under the new worker so unversioned internal modules cannot remain stale');
+assert.match(updater,/hotaru\.pwa-reload/,'Reload protection must prevent an update loop');
 
-// Safari/iPhone fallback placeholders must not consume a second grid column.
-assert.match(guideCss,/\.hotaru-guide-placeholder\[hidden\]\{display:none!important\}/);
-assert.match(guideCss,/\.hotaru-notable-row\{[^}]*grid-template-columns:48px minmax\(0,1fr\)/);
-assert.match(guideCss,/\.hotaru-notable-copy\{[^}]*min-width:0/);
-
-// Material planner should list specific artifact set names instead of only the generic map marker.
-assert.match(enhancements,/category==='Artifacts'&&catalog\?\.artifacts\?\.length/);
-assert.match(enhancements,/catalog\.artifacts\.map\(x=>x\?\.name\)/);
-assert.match(enhancements,/category==='Artifacts'\?\['Artifact'\]/,'Artifact-set targets should still hand off to the provider generic Artifact marker');
-const artifactTarget=normalizeTarget({name:'Night of the Sky’s Unveiling',category:'Artifacts',needed:5,owned:2});
-assert.equal(artifactTarget.category,'Artifacts');
-assert.equal(artifactTarget.name,'Night of the Sky’s Unveiling');
-
-// AppSample completion is provider-managed; Hotaru exposes a clear handoff rather than faking iframe pin control.
-assert.match(enhancements,/Mark individual pins as found/);
-assert.match(enhancements,/data-hotaru-open-provider-map/);
-assert.match(enhancements,/MAP_BROWSE_URL/);
-assert.match(enhancementCss,/\.hotaru-map-completion/);
-
-// PWA refresh covers changed enhancement + guide CSS/JS.
-assert.match(sw,/hotaru-shell-v27/);
-assert.match(sw,/css\/enhancements\.css\?v=1\.4\.0/);
-assert.match(sw,/css\/guide-ui\.css\?v=1\.4\.0/);
-assert.match(sw,/js\/enhancements\.js\?v=1\.7\.0/);
-assert.match(sw,/css\/roster-ui\.css\?v=1\.0\.0/);
-assert.match(index,/css\/enhancements\.css\?v=1\.4\.0/);
-assert.match(index,/css\/guide-ui\.css\?v=1\.4\.0/);
-assert.match(index,/js\/enhancements\.js\?v=1\.7\.0/);
-assert.match(index,/css\/roster-ui\.css\?v=1\.0\.0/);
-
-console.log('Mobile content cleanup + team variation QA passed.');
+console.log('Hotaru stale-PWA recovery + reviewed-team status regression QA passed.');

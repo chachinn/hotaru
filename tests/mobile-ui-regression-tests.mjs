@@ -1,31 +1,32 @@
-export const ARTIFACT_FARM_INFO={
-  "Silken Moon's Serenade":{source:'Frostladen Machinery',region:'Nod-Krai',kind:'Artifact Domain',sourceUrl:'https://game8.co/games/Genshin-Impact/archives/402023'},
-  'Noblesse Oblige':{source:'Clear Pool and Mountain Cavern',region:'Liyue',kind:'Artifact Domain / Artifact Strongbox'},
-  'Aubade of Morningstar and Moon':{source:"Moonchild's Treasures",region:'Nod-Krai',kind:'Artifact Domain',sourceUrl:'https://game8.co/games/Genshin-Impact/archives/393918'},
-  'Instructor':{source:'World/elite/boss drops and reliquaries',region:'Teyvat',kind:'4-star world-drop set'},
-  'Fragment of Harmonic Whimsy':{source:'Faded Theater',region:'Fontaine',kind:'Artifact Domain'},
-  "Night of the Sky's Unveiling":{source:'Frostladen Machinery',region:'Nod-Krai',kind:'Artifact Domain'},
-  "Gladiator's Finale":{source:'Normal/Weekly Bosses and Artifact Strongbox',region:'Teyvat',kind:'Boss-drop set / Artifact Strongbox'},
-  "Nymph's Dream":{source:'Molten Iron Fortress',region:'Sumeru',kind:'Artifact Domain'},
-  'Heart of Depth':{source:'Peak of Vindagnyr',region:'Dragonspine',kind:'Artifact Domain / Artifact Strongbox'},
-  'Heart of the Furnace':{source:'Artifact Domain',region:'Snezhnaya',kind:'Artifact Domain'},
-  'Scarlet Proof':{source:'Artifact Domain',region:'Snezhnaya',kind:'Artifact Domain'},
-  'Disenchantment in Deep Shadow':{source:'Artifact Domain',region:'Snezhnaya',kind:'Artifact Domain'},
-  'Tenacity of the Millelith':{source:'Ridge Watch',region:'Liyue',kind:'Artifact Domain / Artifact Strongbox'}
-};
-
-export const WEAPON_FARM_INFO={
-  'Flame-Forged Insight':{source:'Sunspray Summer Resort event (Version 5.8); currently unavailable if missed',kind:'Limited event weapon',sourceUrl:'https://game8.co/games/Genshin-Impact/archives/538085'},
-  'Master Key':{source:'Forge after buying the Diagram from Lyulka in Nod-Krai',kind:'Craftable Claymore',sourceUrl:'https://genshin-impact.fandom.com/wiki/Master_Key'},
-  'Favonius Greatsword':{source:'Wishes',kind:'Gacha weapon'},
-  'Makhaira Aquamarine':{source:'Limited Weapon Event Wishes when featured',kind:'Limited gacha weapon'}
-};
-
-export function artifactFarmInfo(name=''){
-  const key=String(name||'').trim();
-  return ARTIFACT_FARM_INFO[key]||{source:'Open the Domain map to locate current artifact farming domains.',region:'Teyvat',kind:'Artifact source pending character review'};
-}
-export function weaponFarmInfo(name=''){
-  const key=String(name||'').trim();
-  return WEAPON_FARM_INFO[key]||{source:'See the weapon details and current acquisition source; availability can change by banner or event.',kind:'Acquisition source'};
-}
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { helpers, sameWeaponType } from '../js/data/game-data.js';
+import { safeCharacterRarity } from '../js/features/content-media.js';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+assert.equal(helpers.rarityValue('QUALITY_ORANGE',4),5);
+assert.equal(helpers.rarityValue(Number.NaN,4),4);
+assert.equal(safeCharacterRarity(Number.NaN,5),5);
+assert.equal(sameWeaponType({weapon:'Catalyst'},'Catalyst'),true);
+assert.equal(sameWeaponType({type:'Catalyst'},'Catalyst'),true);
+assert.equal(sameWeaponType({weapon:'Sword'},'Catalyst'),false);
+assert.equal(sameWeaponType({name:'Untyped weapon'},'Catalyst'),false);
+const app=fs.readFileSync(path.join(root,'app.js'),'utf8');
+assert.match(app,/safeCharacterRarity\(current\.rarity,4\)/);
+assert.match(app,/filter\(w=>sameWeaponType\(w,character\.weapon\)\)/);
+assert.match(app,/field-hint[^\n]*only/);
+const style=fs.readFileSync(path.join(root,'style.css'),'utf8');
+assert.match(style,/\.card-button>strong,\.card-button>span\{display:block\}/);
+assert.match(style,/-webkit-text-size-adjust:100%/);
+const guideCss=fs.readFileSync(path.join(root,'css/guide-ui.css'),'utf8');
+assert.match(guideCss,/@media\(max-width:560px\)[\s\S]*\.hotaru-guide-row\{display:flex;/);
+assert.match(guideCss,/\.hotaru-guide-copy\{min-width:0;width:100%;max-width:100%\}/);
+const rosterCss=fs.readFileSync(path.join(root,'css/roster-sections-team-filter.css'),'utf8');
+assert.match(rosterCss,/@media\(max-width:600px\)[\s\S]*\.smart-team-card \.team-controls\{grid-template-columns:1fr\}/);
+assert.match(rosterCss,/@media\(max-width:600px\)[\s\S]*\.hotaru-team-utility-field select\{width:100%\}/);
+const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
+assert.match(sw,/const CACHE = 'hotaru-shell-v46'/);assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v45'/);assert.match(sw,/style\.css\?v=1\.8\.1/);assert.match(sw,/css\/guide-ui\.css\?v=1\.3\.0/);assert.match(sw,/css\/roster-sections-team-filter\.css\?v=1\.3\.0/);assert.match(sw,/app\.js\?v=1\.12\.0/);assert.match(sw,/team-community-bootstrap\.js\?v=1\.1\.1/);assert.match(sw,/smart-team-mobile-controller\.js\?v=1\.0\.5/);
+const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
+assert.match(index,/style\.css\?v=1\.8\.1/);assert.match(index,/css\/guide-ui\.css\?v=1\.3\.0/);assert.match(index,/css\/roster-sections-team-filter\.css\?v=1\.3\.0/);assert.match(index,/app\.js\?v=1\.12\.0/);assert.match(index,/team-community-bootstrap\.js\?v=1\.1\.1/);assert.match(index,/smart-team-mobile-controller\.js\?v=1\.0\.5/);
+console.log('Hotaru mobile UI + Current Abyss capture path + direct Team Need + rarity + same-weapon-type regression QA passed.');
