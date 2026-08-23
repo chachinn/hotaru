@@ -8,7 +8,7 @@ const icy=()=>source('Icy Veins Aloy Team Guide',ICY,'Source-backed guide');
 const confidenceFor=s=>s?.type==='Reviewed theorycraft'?'Reviewed':s?.type==='Simulation-backed'?'Simulation-backed':'Community-sourced';
 const team=(id,name,members,reaction,why,src,notes='',provenance='exact')=>({id,name,members,reaction,why,notes,provenance,confidence:confidenceFor(src),source:src,anchor:'Aloy',profileId:'aloy'});
 export const ALOY_REVIEWED_TEAMS=[
-  team('aloy-kqm-melt-kazuha','Reverse Melt · Kazuha',['Aloy','Bennett','Kaedehara Kazuha','Xiangling'],'melt','KQM exact Reverse Melt example with Bennett, Kazuha and Xiangling.',kqm()),
+  team('aloy-kqm-melt-kazuha','Reverse Melt · Kazuha',['Aloy','Bennett','Kaedehara Kazuha','Xiangling'],'melt','KQM and current Icy Veins both independently list this exact Reverse Melt shell.',{...kqm(),links:[kqm(),icy()]},'Exact team independently supported by KQM and Icy Veins.'),
   team('aloy-kqm-melt-jean-rosaria','Reverse Melt · Jean/Rosaria',['Aloy','Bennett','Jean','Rosaria'],'melt','KQM exact Reverse Melt example using Jean to spread Pyro and Rosaria as the second Cryo damage dealer.',kqm()),
   team('aloy-kqm-melt-xiangling-shenhe','Reverse Melt · Shenhe',['Aloy','Bennett','Xiangling','Shenhe'],'melt','KQM exact Reverse Melt example with Shenhe as Cryo support.',kqm()),
   team('aloy-kqm-freeze-ayaka','Freeze · Ayaka/Kokomi/Kazuha',['Aloy','Kamisato Ayaka','Sangonomiya Kokomi','Kaedehara Kazuha'],'freeze','KQM exact Freeze example with Ayaka as primary Cryo DPS.',kqm()),
@@ -26,11 +26,9 @@ export const ALOY_REVIEWED_TEAMS=[
   team('aloy-icy-freeze-kokomi-shenhe','Freeze · Ganyu/Kokomi/Shenhe',['Aloy','Ganyu','Sangonomiya Kokomi','Shenhe'],'freeze','Icy Veins current Version 7.0 exact Freeze team.',icy()),
   team('aloy-icy-freeze-ganyu-xingqiu','Freeze · Ganyu/Shenhe/Xingqiu',['Aloy','Shenhe','Ganyu','Xingqiu'],'freeze','Icy Veins current Version 7.0 exact Freeze team.',icy()),
   team('aloy-icy-freeze-ayaka-yelan','Freeze · Ayaka/Yelan/Escoffier',['Aloy','Kamisato Ayaka','Yelan','Escoffier'],'freeze','Icy Veins current Version 7.0 exact Freeze team.',icy()),
-  team('aloy-icy-melt-kazuha','Melt · Xiangling/Bennett/Kazuha',['Aloy','Xiangling','Bennett','Kaedehara Kazuha'],'melt','Icy Veins current Version 7.0 exact Melt team, independently matching KQM.',icy()),
   team('aloy-icy-melt-sucrose','Melt · Xiangling/Bennett/Sucrose',['Aloy','Xiangling','Bennett','Sucrose'],'melt','Icy Veins current Version 7.0 exact Melt team.',icy()),
   team('aloy-icy-melt-venti','Melt · Xiangling/Bennett/Venti',['Aloy','Xiangling','Bennett','Venti'],'melt','Icy Veins current Version 7.0 exact Melt team.',icy()),
   team('aloy-icy-melt-nicole','Melt · Xiangling/Nicole/Kazuha',['Aloy','Xiangling','Nicole','Kaedehara Kazuha'],'melt','Icy Veins current Version 7.0 exact Melt team.',icy()),
-
   team('aloy-kqm-freeze-ayaka-mona-kazuha','Freeze · Ayaka/Mona/Kazuha',['Aloy','Kamisato Ayaka','Mona','Kaedehara Kazuha'],'freeze','KQM lists Ayaka as primary Cryo DPS, Mona as Hydro enabler, and Kazuha as preferred Anemo support.',kqm(),'Source-informed role combination.','adapted'),
   team('aloy-kqm-freeze-ayaka-furina-jean','Freeze · Ayaka/Furina/Jean',['Aloy','Kamisato Ayaka','Furina','Jean'],'freeze','KQM lists Ayaka, Furina and Jean as compatible Freeze roles and recommends a strong healer with Furina.',kqm(),'Source-informed role combination.','adapted'),
   team('aloy-kqm-freeze-wrio-furina-jean','Freeze · Wriothesley/Furina/Jean',['Aloy','Wriothesley','Furina','Jean'],'freeze','KQM specifically notes Aloy as a battery/buffer in Wriothesley teams and recommends healer-backed Furina shells.',kqm(),'Source-informed role combination.','adapted'),
