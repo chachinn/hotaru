@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import { RELEASED_AVATAR_AUDIT_V45 } from './fixtures/released-avatar-audit-v45.mjs';
+import { reviewedBuildProfile } from '../js/data/build-profiles/index.js';
+import { inferBuildProfile } from '../js/features/build-engine.js';
+import { resolveBuildProfile } from '../js/features/build-profiles.js';
+import { HU_TAO_REVIEWED_TEAMS } from '../js/data/team-profiles/hu-tao-reviewed-clean.js';
+import { registerReviewedTeams } from '../js/data/team-profiles/index.js';
+import { compositionKey, recommendedTeamsForCharacter, teamHasValidSource } from '../js/data/team-recommendations.js';
+import { HU_TAO_COMPATIBILITY_POLICY, huTaoCompatibilityForCharacter, auditHuTaoCompatibility } from '../js/data/character-compatibility/hu-tao.js';
+registerReviewedTeams(HU_TAO_REVIEWED_TEAMS);
+const fallback=inferBuildProfile({name:'Hu Tao',element:'Pyro',weapon:'Polearm',description:'On-field Pyro Charged Attack Vaporize DPS'}),profile=resolveBuildProfile({name:'Hu Tao',element:'Pyro'},fallback,{}),raw=reviewedBuildProfile('Hu Tao');
+assert.equal(profile.profileSource,'reviewed');assert.equal(profile.roleGroup,'Main DPS');assert.equal(raw.variants.length,2);assert.deepEqual(raw.variants.map(v=>v.id),['charged-vape','xianyun-plunge']);
+const charged=resolveBuildProfile({name:'Hu Tao'},fallback,{buildVariant:'charged-vape'});assert.equal(charged.artifactPriority[0],'Crimson Witch of Flames');assert.equal(charged.talentPriority[0],'attack');assert.ok(charged.goalStats.some(x=>/Reliable Hydro application/i.test(x.value)));assert.ok(charged.goalStats.some(x=>/C0 commonly uses jump cancels/i.test(x.value)));
+const plunge=resolveBuildProfile({name:'Hu Tao'},fallback,{buildVariant:'xianyun-plunge'});assert.equal(plunge.artifactPriority[0],'Marechaussee Hunter');assert.ok(plunge.goalStats.some(x=>/Xianyun is required/i.test(x.value)));assert.ok(plunge.goalStats.some(x=>/N2CJP/i.test(x.value)));
+const sourced=recommendedTeamsForCharacter('Hu Tao').filter(teamHasValidSource),unique=new Set(sourced.map(compositionKey)),reviewedUnique=new Set(HU_TAO_REVIEWED_TEAMS.map(compositionKey));assert.ok(unique.size>=30,`Hu Tao should expose at least 30 distinct sourced/source-informed teams; got ${unique.size}`);assert.equal(reviewedUnique.size,HU_TAO_REVIEWED_TEAMS.length,'Hu Tao reviewed teams must not inflate counts through duplicate member sets');assert.ok([...reviewedUnique].every(k=>unique.has(k)));assert.ok(HU_TAO_REVIEWED_TEAMS.every(t=>!/(game8|kqm|icy veins|hoyolab)/i.test(`${t.name} ${t.why} ${t.notes||''}`)));
+const audit=auditHuTaoCompatibility(RELEASED_AVATAR_AUDIT_V45);assert.equal(audit.total,148);assert.ok(audit.rows.every(row=>row.status!=='invalid'));assert.ok(audit.rows.every(row=>row.status!=='unverified'||(!row.smartTeamApproved&&!row.adaptationAllowed)));
+for(const name of ['Xingqiu','Yelan','Furina','Xianyun','Xilonen','Citlali','Zhongli','Kaedehara Kazuha','Sucrose','Bennett','Thoma','Albedo','Chiori','Fischl','Rosaria','Kaeya','Nahida'])assert.equal(huTaoCompatibilityForCharacter(name).smartTeamApproved,true,`${name} should be approved for Hu Tao`);assert.equal(huTaoCompatibilityForCharacter('Aether TPS').status,'not-applicable');assert.match(HU_TAO_COMPATIBILITY_POLICY.rule,/reliable Hydro application/i);assert.match(HU_TAO_COMPATIBILITY_POLICY.rule,/Xianyun is required/i);assert.match(HU_TAO_COMPATIBILITY_POLICY.rule,/Furina teams must include enough healing/i);
+console.log(`Hu Tao review QA passed · ${raw.variants.length} builds · ${unique.size} distinct sourced teams · ${audit.total}/148 compatibility records checked.`);

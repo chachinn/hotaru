@@ -1,0 +1,34 @@
+import { HU_TAO_REVIEWED_TEAMS } from '../team-profiles/hu-tao-reviewed-clean.js';
+const KQM='https://keqingmains.com/hu-tao/',KQMQ='https://keqingmains.com/q/hu-tao-quickguide/',XIANYUN='https://keqingmains.com/q/xianyun-quickguide/',IV='https://www.icy-veins.com/genshin-impact/hu-tao-guide-best-builds';
+const source=(label,url,type)=>({label,url,type,platform:'Guide',reviewedAt:'2026-08-23'}),SOURCES=[source('Hu Tao theorycraft',KQM,'Reviewed theorycraft'),source('Hu Tao quick guide',KQMQ,'Reviewed theorycraft'),source('Xianyun Hu Tao plunge reference',XIANYUN,'Reviewed theorycraft'),source('Current Hu Tao cross-check',IV,'Source-backed guide')];
+function key(v=''){return String(v||'').trim().toLowerCase()} function special(v=''){return /\bTPS\b|manekin/i.test(String(v||''))}
+function canonical(v=''){const n=String(v||'').trim();for(const e of ['Anemo','Geo','Electro','Dendro','Hydro','Pyro','Cryo'])if(new RegExp(`\\b(?:aether|lumine)\\s+${e}\\b`,'i').test(n))return`${e} Traveler`;return n}
+const evidence=new Map();for(const t of HU_TAO_REVIEWED_TEAMS)for(const m of t.members||[]){if(key(m)==='hu tao')continue;const k=key(m),r=evidence.get(k)||{teams:[],sources:[],reactions:[]};r.teams.push(t.id);if(t.reaction)r.reactions.push(t.reaction);for(const s of [t.source,...(t.source?.links||[])])if(s?.url&&!r.sources.some(x=>x.url===s.url))r.sources.push(s);evidence.set(k,r)}
+const caveat=new Map([
+[key('Xingqiu'),'Premier Hydro partner for classic Hu Tao because coordinated attacks, interruption resistance and high Hydro application strongly stabilize Vaporize.'],
+[key('Yelan'),'Premier Hydro damage partner; especially strong in Double Hydro and Furina/Xianyun teams. As solo Hydro, application is less forgiving than Xingqiu.'],
+[key('Furina'),'Modern high-value partner, but her HP drain changes Hu Tao’s old low-HP assumptions. Pair Furina with real healing and value total team damage over forcing sub-50% HP.'],
+[key('Xianyun'),'Required for the dedicated plunge build identity. Team healing rapidly builds Furina Fanfare and enables N2CJP-style strings.'],
+[key('Xilonen'),'High-value modern support with healing and RES shred; particularly useful in Furina teams.'],
+[key('Citlali'),'Shielding and offensive shred can support Hu Tao, but she does not replace the Hydro applicator in Vaporize teams.'],
+[key('Zhongli'),'Excellent interruption resistance and universal RES shred for classic Charged Attack play.'],
+[key('Kaedehara Kazuha'),'Can group and provide Viridescent/elemental support, but Pyro swirl setup is rotation-sensitive without a second Pyro source.'],
+[key('Sucrose'),'Strong EM sharing and VV support in classic VV Vape shells; needs deliberate Pyro setup.'],
+[key('Bennett'),'Healing and ATK are still useful in modern Furina or VV setups even though traditional Hu Tao guides often preferred staying below 50% HP.'],
+[key('Thoma'),'Shield/Pyro setup support; safer in Double Hydro or carefully managed VV Vape because his Pyro can compete with Vaporize aura.'],
+[key('Yanfei'),'Only a shielding support at C4+ in reviewed VV Vape contexts.'],
+[key('Albedo'),'Classic Double Geo off-field damage option, usually alongside Zhongli.'],
+[key('Chiori'),'Modern Double Geo off-field damage option; pairs naturally with Zhongli’s construct/shield utility.'],
+[key('Fischl'),'Overvape option with strong off-field damage, but Overload knockback can hurt Charged Attack uptime against light enemies.'],
+[key('Rosaria'),'Vapemelt/flex Cryo support; the underlying Hydro Vaporize core remains more important than incidental Melt.'],
+[key('Kaeya'),'Mobile Cryo application for Vapemelt/flex shells; preserve reliable Hydro.'],
+[key('Diona'),'Shielding/Cryo support; healing may conflict with deliberate low-HP play but can still improve practical survivability.'],
+[key('Nahida'),'Situational Burgeon/Vape partner. Burgeon self-damage is dangerous and should not outrank standard Vaporize teams.'],
+[key('Layla'),'Comfort shield in Double Hydro variants; Cryo reactions are secondary to Vaporize.'],
+[key('Kirara'),'Comfort shield in Double Hydro variants; Dendro interactions must not destabilize the intended Vaporize pattern.'],
+[key('Charlotte'),'Teamwide healer for Furina variants; Cryo is secondary to keeping Hydro and Fanfare stable.'],
+[key('Jean'),'Teamwide Furina healer with Viridescent utility; swirl setup is rotation-sensitive.']
+]);
+export function huTaoCompatibilityForCharacter(value=''){const raw=String(value||'').trim(),canon=canonical(raw),k=key(canon);if(!raw)return{character:raw,canonical:canon,status:'invalid',smartTeamApproved:false,adaptationAllowed:false,sources:[],reason:'Missing character name'};if(k==='hu tao'||k==='hutao')return{character:raw,canonical:'Hu Tao',status:'self',smartTeamApproved:false,adaptationAllowed:false,sources:SOURCES,reason:'Hu Tao cannot pair with herself.'};if(special(raw))return{character:raw,canonical:canon,status:'not-applicable',smartTeamApproved:false,adaptationAllowed:false,sources:[],reason:'Special/TPS avatar records are not Smart Team characters.'};const e=evidence.get(k);if(e)return{character:raw,canonical:canon,status:'source-backed-compatible',smartTeamApproved:true,adaptationAllowed:true,sources:e.sources.length?e.sources:SOURCES,teamIds:[...new Set(e.teams)],reactions:[...new Set(e.reactions)],caveat:caveat.get(k)||'',reason:'This character appears in an exact or explicitly source-informed reviewed Hu Tao team.'};return{character:raw,canonical:canon,status:'unverified',smartTeamApproved:false,adaptationAllowed:false,sources:SOURCES,caveat:caveat.get(k)||'',reason:'No Hu Tao-specific reviewed evidence authorizes Smart Team adaptation for this pairing.'}}
+export function auditHuTaoCompatibility(names=[]){const rows=(names||[]).map(huTaoCompatibilityForCharacter),counts={};for(const r of rows)counts[r.status]=(counts[r.status]||0)+1;return{character:'Hu Tao',reviewedAt:'2026-08-23',rows,total:rows.length,counts,smartTeamApproved:rows.filter(r=>r.smartTeamApproved).length,unverified:rows.filter(r=>r.status==='unverified').map(r=>r.character),sources:SOURCES}}
+export const HU_TAO_COMPATIBILITY_POLICY={character:'Hu Tao',reviewedAt:'2026-08-23',rule:'Every released avatar record receives an explicit Hu Tao compatibility status. Smart Team must preserve reliable Hydro application before account investment. Classic Charged-Attack Vaporize and Xianyun Plunge Vaporize are distinct build identities: Xianyun is required for the plunge route, while Furina teams must include enough healing to sustain Fanfare rather than blindly forcing old low-HP assumptions. Solo-Hydro Yelan, VV setups, Overvape, Vapemelt and Burgeon are treated as conditional contexts, not generic substitutions for a stable Vaporize core. Unverified pairings remain blocked.',sources:SOURCES};
