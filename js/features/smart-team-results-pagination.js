@@ -6,7 +6,7 @@ import { teamMatchesUtility } from '../data/team-utility-tags.js';
 import { reactionLabel, teamMatchesReaction, teamReaction } from '../data/team-reaction-tags.js';
 
 const app=document.getElementById('app');
-const PAGE_SIZE=12;
+const PAGE_SIZE=10;
 const WAIT_MS=6000;
 const RESULT_FILTER_KEY='hotaru.smart-team-result-filter.v1';
 const RESULT_SORT_KEY='hotaru.smart-team-result-sort.v1';
@@ -36,38 +36,38 @@ function filteredResults(){if(!session)return[];let results=contextFilter(sessio
 function option(value,label,current,{disabled=false}={}){return`<option value="${value}"${current===value?' selected':''}${disabled?' disabled':''}>${label}</option>`}
 function toolbarMarkup(){let filter=resultFilter();const sort=resultSort(),missingDisabled=!session?.allowUnowned;if(missingDisabled&&filter==='missing')filter='all';return`<div class="hotaru-team-results-tools" aria-label="Team result controls"><label>Show<select id="hotaru-team-result-filter">${option('all','All results',filter)}${option('owned','Fully owned',filter)}${option('missing',missingDisabled?'Needs unowned characters — turn on Allow unowned':'Needs unowned characters',filter,{disabled:missingDisabled})}${option('reviewed','Reviewed only',filter)}${option('simulated','Simulation-backed only',filter)}</select></label><label>Sort results<select id="hotaru-team-result-sort">${option('best','Best match',sort)}${option('owned','Most owned',sort)}${option('reviewed','Reviewed first',sort)}${option('name','Team name A–Z',sort)}</select></label></div>`}
 function coverageMarkup(){if(!session)return'';const contextual=contextFilter(session.sourceResults),owned=contextual.filter(team=>team.ownedComplete).length,missing=contextual.length-owned;if(!contextual.length)return`<div class="hotaru-team-coverage-summary"><strong>0 sourced teams</strong> match the current Team Need / Team Reaction context.</div>`;return`<div class="hotaru-team-coverage-summary"><strong>${owned} fully owned</strong>${missing?` · <strong>${missing} more sourced ${missing===1?'team requires':'teams require'} characters you do not own</strong>`:''}. ${missing&&!session.allowUnowned?'Turn on Allow unowned to preview those teams.':''}</div>`}
-function pagerMarkup(shown,total){const remaining=Math.max(0,total-shown),next=Math.min(PAGE_SIZE,remaining);return`<div class="hotaru-team-results-pager" aria-live="polite"><span>Showing <strong>${shown}</strong> of <strong>${total}</strong> matching sourced teams</span>${remaining?`<button type="button" class="secondary" data-hotaru-team-load-more>Load ${next} more</button>`:'<span class="muted small">All matches loaded</span>'}</div>`}
+function pagerMarkup(page,total,position='bottom'){const totalPages=Math.max(1,Math.ceil(total/PAGE_SIZE)),current=Math.max(1,Math.min(totalPages,page||1)),from=(current-1)*PAGE_SIZE+1,to=Math.min(total,current*PAGE_SIZE);return`<div class="hotaru-team-results-pager ${position==='top'?'is-top':''}" aria-live="polite"><span>Page <strong>${current}</strong> of <strong>${totalPages}</strong> · results <strong>${from}–${to}</strong> of <strong>${total}</strong></span><div class="hotaru-team-page-actions"><button type="button" class="secondary" data-hotaru-team-page="${current-1}" ${current<=1?'disabled':''}>Previous</button><button type="button" class="secondary" data-hotaru-team-page="${current+1}" ${current>=totalPages?'disabled':''}>Next</button></div></div>`}
 function renderSession(reset=false){
   if(!session?.host?.isConnected)return;
-  const results=filteredResults(),sort=resultSort();if(reset)session.shown=Math.min(PAGE_SIZE,results.length);else session.shown=Math.min(session.shown||PAGE_SIZE,results.length);
+  const results=filteredResults(),sort=resultSort(),totalPages=Math.max(1,Math.ceil(results.length/PAGE_SIZE));if(reset)session.page=1;else session.page=Math.max(1,Math.min(session.page||1,totalPages));
   const tools=toolbarMarkup(),coverage=coverageMarkup();
   if(!results.length){session.host.innerHTML=`${coverage}${tools}<div class="notice info hotaru-team-results-empty"><strong>No sourced teams match these filters.</strong><br>Try All results, a different Team Need or Team Reaction, or turn on Allow unowned. Hotaru will not invent a team just to fill a filter.</div>`;return}
-  session.host.innerHTML=`${coverage}${tools}<div class="team-results">${results.slice(0,session.shown).map((team,index)=>cardMarkup(team,index,sort)).join('')}</div>${pagerMarkup(session.shown,results.length)}`;
+  const start=(session.page-1)*PAGE_SIZE,end=Math.min(results.length,start+PAGE_SIZE),pageResults=results.slice(start,end);
+  session.host.innerHTML=`${coverage}${tools}${pagerMarkup(session.page,results.length,'top')}<div class="team-results">${pageResults.map((team,index)=>cardMarkup(team,start+index,sort)).join('')}</div>${pagerMarkup(session.page,results.length,'bottom')}`;
 }
-function appendNext(button){
-  if(!session?.host?.isConnected)return;
-  const results=filteredResults(),container=session.host.querySelector('.team-results'),sort=resultSort();if(!container){renderSession(true);return}
-  const start=Math.min(session.shown,results.length),end=Math.min(results.length,start+PAGE_SIZE);if(end<=start)return;
-  button.disabled=true;container.insertAdjacentHTML('beforeend',results.slice(start,end).map((team,index)=>cardMarkup(team,start+index,sort)).join(''));session.shown=end;
-  const pager=session.host.querySelector('.hotaru-team-results-pager');if(pager)pager.outerHTML=pagerMarkup(end,results.length);
-}
+function goToPage(page){if(!session?.host?.isConnected)return;const results=filteredResults(),totalPages=Math.max(1,Math.ceil(results.length/PAGE_SIZE)),target=Math.max(1,Math.min(totalPages,Number(page)||1));if(target===session.page)return;session.page=target;renderSession(false);requestAnimationFrame(()=>session.host.querySelector('.hotaru-team-results-pager.is-top')?.scrollIntoView({behavior:'smooth',block:'start'}));}
 async function buildSession(){
   const card=smartCard(),host=resultsHost(card);if(!card||!host)return false;
   const mode=card.querySelector('#team-mode')?.value||'roster';if(mode==='abyss')return false;
+  // The iPhone controller owns the tap first. Wait until its synchronous loading state has
+  // settled before rebuilding the visible result set with the full account-aware scorer.
+  // Otherwise pagination can win the race, then get overwritten by the older 12-card render.
+  const notice=host.querySelector('.notice.info');
+  if(notice?.textContent?.includes('Creating recommendations'))return false;
   if(host.querySelector('.team-adapted'))return false;
   const lock1=card.querySelector('#team-lock-1')?.value||'',lock2=card.querySelector('#team-lock-2')?.value||'',locks=[];if(mode==='lock1'||mode==='lock2')locks.push(lock1);if(mode==='lock2')locks.push(lock2);
   const cleanLocks=locks.filter(Boolean);if(mode!=='roster'&&!cleanLocks.length)return false;
   try{
-    const catalog=await getCatalog(),state=loadState(),roster=sortRoster(normalizeRoster(state?.roster||[],catalog?.characters||[])),allowUnowned=Boolean(card.querySelector('#team-allow-unowned')?.checked),full=matchReviewedTeams({roster,lockedNames:cleanLocks,allowUnowned,limit:'all'});
+    const catalog=await getCatalog(),state=loadState(),roster=sortRoster(normalizeRoster(state?.roster||[],catalog?.characters||[])),allowUnowned=Boolean(card.querySelector('#team-allow-unowned')?.checked),full=matchReviewedTeams({roster,weapons:state?.weapons||[],artifacts:state?.ownedArtifacts||[],lockedNames:cleanLocks,allowUnowned,limit:'all'});
     if(!full.sourceResults?.length)return false;
     if(!allowUnowned&&!full.results?.length)return false;
-    session={host,results:full.results,sourceResults:full.sourceResults,allowUnowned,shown:Math.min(PAGE_SIZE,full.results.length)};renderSession(true);return true;
+    session={host,results:full.results,sourceResults:full.sourceResults,allowUnowned,page:1};renderSession(true);return true;
   }catch{return false}
 }
 function queueScan(){if(scanQueued||!pendingUntil)return;scanQueued=true;requestAnimationFrame(async()=>{scanQueued=false;if(!pendingUntil)return;if(Date.now()>pendingUntil){pendingUntil=0;return}const ready=await buildSession();if(ready)pendingUntil=0})}
 function markPending(){session=null;pendingUntil=Date.now()+WAIT_MS;queueScan()}
 if(app)new MutationObserver(()=>{if(pendingUntil)queueScan()}).observe(app,{childList:true,subtree:true});
-document.addEventListener('click',event=>{const loadMore=event.target.closest?.('[data-hotaru-team-load-more]');if(loadMore){event.preventDefault();event.stopPropagation();appendNext(loadMore);return}if(event.target.closest?.('[data-action="generate-smart-team"]'))markPending()},{capture:true});
+document.addEventListener('click',event=>{const pageButton=event.target.closest?.('[data-hotaru-team-page]');if(pageButton){event.preventDefault();event.stopPropagation();if(!pageButton.disabled)goToPage(pageButton.dataset.hotaruTeamPage);return}if(event.target.closest?.('[data-action="generate-smart-team"]'))markPending()},{capture:true});
 document.addEventListener('change',event=>{
   if(event.target?.id==='hotaru-team-result-filter'&&session?.host?.isConnected){const value=RESULT_FILTERS.has(event.target.value)?event.target.value:'all';safeSet(RESULT_FILTER_KEY,value);renderSession(true);return}
   if(event.target?.id==='hotaru-team-result-sort'&&session?.host?.isConnected){const value=RESULT_SORTS.has(event.target.value)?event.target.value:'best';safeSet(RESULT_SORT_KEY,value);renderSession(true);return}

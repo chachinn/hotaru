@@ -22,6 +22,7 @@
   <link rel="stylesheet" href="css/roster-ui.css?v=1.0.0" />
   <link rel="stylesheet" href="css/navigation-refresh.css?v=1.1.0" />
   <link rel="stylesheet" href="css/roster-sections-team-filter.css?v=1.3.0" />
+  <link rel="stylesheet" href="css/smart-team-v48.css?v=1.0.0" />
   <style>.team-unowned{position:relative;z-index:2;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none}</style>
   <title>Hotaru — Character Build Companion</title>
 </head>
@@ -46,7 +47,11 @@
     if ('caches' in window) {
       const stale=[
         new URL('./js/features/roster-team-matcher.js',location.href).href,
-        new URL('./js/features/team-scoring.js',location.href).href
+        new URL('./js/features/team-scoring.js',location.href).href,
+        new URL('./js/features/abyss-team-planner.js',location.href).href,
+        new URL('./js/features/abyss-intelligence.js',location.href).href,
+        new URL('./js/features/smart-team-build-recommendations.js',location.href).href,
+        new URL('./js/features/smart-team-v48-enhancements.js',location.href).href
       ];
       await Promise.all((await caches.keys()).filter(name=>name.startsWith('hotaru-shell-')).map(async name=>{
         const cache=await caches.open(name);
@@ -55,6 +60,7 @@
     }
     await import('./js/features/smart-team-mobile-controller.js?v=1.0.5');
   </script>
-  <script type="module" src="js/features/smart-team-results-pagination.js?v=1.2.1"></script>
+  <script type="module" src="js/features/smart-team-results-pagination.js?v=1.2.1&hotfix=48"></script>
+  <script type="module" src="js/features/smart-team-v48-enhancements.js?v=1.0.0"></script>
 </body>
 </html>
