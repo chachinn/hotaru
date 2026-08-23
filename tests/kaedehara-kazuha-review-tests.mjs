@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import { RELEASED_AVATAR_AUDIT_V45 } from './fixtures/released-avatar-audit-v45.mjs';
+import { reviewedBuildProfile } from '../js/data/build-profiles/index.js';
+import { inferBuildProfile } from '../js/features/build-engine.js';
+import { resolveBuildProfile } from '../js/features/build-profiles.js';
+import { KAEDEHARA_KAZUHA_REVIEWED_TEAMS } from '../js/data/team-profiles/kaedehara-kazuha-reviewed.js';
+import { registerReviewedTeams } from '../js/data/team-profiles/index.js';
+import { compositionKey, recommendedTeamsForCharacter, teamHasValidSource } from '../js/data/team-recommendations.js';
+import { KAEDEHARA_KAZUHA_COMPATIBILITY_POLICY, kaedeharaKazuhaCompatibilityForCharacter, auditKaedeharaKazuhaCompatibility } from '../js/data/character-compatibility/kaedehara-kazuha.js';
+registerReviewedTeams(KAEDEHARA_KAZUHA_REVIEWED_TEAMS);
+const fallback=inferBuildProfile({name:'Kaedehara Kazuha',element:'Anemo',weapon:'Sword',description:'Anemo EM buffer and grouper'}),profile=resolveBuildProfile({name:'Kaedehara Kazuha',element:'Anemo'},fallback,{}),raw=reviewedBuildProfile('Kaedehara Kazuha');
+assert.equal(profile.profileSource,'reviewed');assert.equal(reviewedBuildProfile('Kazuha'),raw);assert.equal(raw.variants.length,2);assert.deepEqual(raw.variants.map(v=>v.id),['em-support','c6-onfield']);
+const em=resolveBuildProfile({name:'Kaedehara Kazuha'},fallback,{buildVariant:'em-support'});assert.equal(em.artifactPriority[0],'Viridescent Venerer');assert.equal(em.mainStats.goblet[0],'Elemental Mastery');assert.equal(em.mainStats.circlet[0],'Elemental Mastery');assert.ok(em.goalStats.some(x=>/1000 EM/i.test(x.value)));assert.ok(em.goalStats.some(x=>/Double-Swirl/i.test(`${x.label} ${x.value}`)));
+const c6=resolveBuildProfile({name:'Kaedehara Kazuha'},fallback,{buildVariant:'c6-onfield'});assert.ok(c6.mainStats.goblet.includes('Anemo DMG%'));assert.ok(c6.mainStats.circlet.includes('CRIT Rate'));assert.ok(c6.goalStats.some(x=>/C6-only/i.test(x.value)));
+const sourced=recommendedTeamsForCharacter('Kaedehara Kazuha').filter(teamHasValidSource),unique=new Set(sourced.map(compositionKey)),reviewedUnique=new Set(KAEDEHARA_KAZUHA_REVIEWED_TEAMS.map(compositionKey));assert.ok(unique.size>=25,`Kazuha should expose broad reviewed coverage; got ${unique.size}`);assert.equal(reviewedUnique.size,KAEDEHARA_KAZUHA_REVIEWED_TEAMS.length);assert.ok([...reviewedUnique].every(k=>unique.has(k)));assert.ok(KAEDEHARA_KAZUHA_REVIEWED_TEAMS.every(t=>!/(game8|kqm|keqingmains|icy veins|hoyolab|reddit|youtube|fandom)/i.test(`${t.name} ${t.why} ${t.notes||''}`)));
+const audit=auditKaedeharaKazuhaCompatibility(RELEASED_AVATAR_AUDIT_V45);assert.equal(audit.total,148);assert.ok(audit.rows.every(row=>row.status!=='invalid'));assert.ok(audit.rows.every(row=>row.status!=='unverified'||(!row.smartTeamApproved&&!row.adaptationAllowed)));
+for(const name of ['Neuvillette','Furina','Xilonen','Mavuika','Arlecchino','Bennett','Citlali','Kamisato Ayaka','Sangonomiya Kokomi','Shenhe','Keqing','Fischl','Nahida','Raiden Shogun','Tartaglia','Xiangling','Yae Miko','Wriothesley','Aloy','Faruzan'])assert.equal(kaedeharaKazuhaCompatibilityForCharacter(name).smartTeamApproved,true,`${name} should be approved for Kazuha`);assert.equal(kaedeharaKazuhaCompatibilityForCharacter('Aether TPS').status,'not-applicable');assert.match(KAEDEHARA_KAZUHA_COMPATIBILITY_POLICY.rule,/cannot directly Swirl or A4-buff Geo, Dendro or Anemo/i);assert.match(KAEDEHARA_KAZUHA_COMPATIBILITY_POLICY.rule,/C6 on-field Kazuha is constellation-gated/i);
+console.log(`Kazuha review QA passed · ${raw.variants.length} builds · ${unique.size} distinct sourced teams · ${audit.total}/148 compatibility records checked.`);
