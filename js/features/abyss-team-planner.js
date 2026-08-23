@@ -70,8 +70,8 @@ function candidateTeams(side,snapshots=[],roster=[],artifacts=[],allowUnowned=fa
   return rows.sort((a,b)=>b.score-a.score||a.id.localeCompare(b.id));
 }
 
-export function planReviewedAbyssTeams({roster=[],weapons=[],artifacts=[],allowUnowned=false,mode='normal',lockedCore=null,lockedSides=null,limit=5}={}){
-  const abyssMode=mode==='lunar'?'lunar':'normal',normalizedRoster=canonicalRoster(roster,weapons),locks=normalizeLockedCore(lockedCore||lockedSides||{}),lockErrors=validateLocks(locks,normalizedRoster),ownedNames=unique(normalizedRoster.map(entry=>entry.name));
+export function planReviewedAbyssTeams({roster=[],weapons=[],artifacts=[],allowUnowned=false,mode=null,lockedCore=null,lockedSides=null,limit=5}={}){
+  const effectiveMode=mode||globalThis.__hotaruAbyssMode||'normal',abyssMode=effectiveMode==='lunar'?'lunar':'normal',normalizedRoster=canonicalRoster(roster,weapons),locks=normalizeLockedCore(lockedCore||lockedSides||globalThis.__hotaruAbyssLockedCore||{}),lockErrors=validateLocks(locks,normalizedRoster),ownedNames=unique(normalizedRoster.map(entry=>entry.name));
   const base={kind:'abyss',mode:abyssMode,teamCount:ABYSS_TEAM_COUNT,teamSize:TEAM_SIZE,ownedNames,coverage:(roster||[]).map(entry=>({name:entry.name,...teamReviewStatus(entry.name)})),lockedCore:locks,lockedCoreSize:locks.totalLocked,previewFallback:false};
   if(lockErrors.length)return{...base,results:[],lockError:lockErrors.join(' ')};
   const snapshots=allReviewedTeams().map(team=>teamSnapshot(team,normalizedRoster,artifacts)),firstCandidates=candidateTeams(locks.first,snapshots,normalizedRoster,artifacts,allowUnowned),secondCandidates=candidateTeams(locks.second,snapshots,normalizedRoster,artifacts,allowUnowned),pairs=[];
