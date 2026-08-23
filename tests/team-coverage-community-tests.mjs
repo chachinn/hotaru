@@ -84,7 +84,7 @@ assert.equal(mavuika.results.length,mavuika.sourceTotal);
 assert.equal(matchReviewedTeams({roster,allowUnowned:true,limit:1}).results.length,1,'explicit single-best consumer stays bounded');
 assert.ok(matchReviewedTeams({roster,lockedNames:['Mavuika'],allowUnowned:true,limit:'all',curatedOnly:true}).results.every(team=>team.confidence==='Reviewed'),'curated-only consumers must never absorb simulation-backed teams');
 
-const guideCatalog={characters:[...new Set(allRecommendedTeams().flatMap(team=>team.members))].map(name=>({name,element:'Unknown',weapon:'Unknown',icon:'',slug:name.toLowerCase().replace(/[^a-z0-9]+/g,'-'}))};
+const guideCatalog={characters:[...new Set(allRecommendedTeams().flatMap(team=>team.members))].map(name=>({name,element:'Unknown',weapon:'Unknown',icon:'',slug:name.toLowerCase().replace(/[^a-z0-9]+/g,'-')}))};
 assert.ok(sampleTeams({name:'Nicole',element:'Pyro',description:''},guideCatalog).length>5,'character guides should expose broad sourced Nicole teams');
 assert.ok(sampleTeams({name:'Mavuika',element:'Pyro',description:''},guideCatalog).some(team=>team.confidence==='Simulation-backed'),'character guides should inherit simulation-backed community variants');
 
