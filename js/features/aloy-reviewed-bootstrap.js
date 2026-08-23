@@ -5,6 +5,7 @@ import { ARATAKI_ITTO_REVIEWED_TEAMS } from '../data/team-profiles/arataki-itto-
 import { BAIZHU_REVIEWED_TEAMS } from '../data/team-profiles/baizhu-reviewed.js';
 import { CHASCA_REVIEWED_TEAMS } from '../data/team-profiles/chasca-reviewed.js';
 import { CHIORI_REVIEWED_TEAMS } from '../data/team-profiles/chiori-reviewed.js';
+import { CITLALI_REVIEWED_TEAMS } from '../data/team-profiles/citlali-reviewed.js';
 
 registerReviewedTeams(ALOY_REVIEWED_TEAMS);
 registerReviewedTeams(AMBER_REVIEWED_TEAMS);
@@ -12,3 +13,4 @@ registerReviewedTeams(ARATAKI_ITTO_REVIEWED_TEAMS);
 registerReviewedTeams(BAIZHU_REVIEWED_TEAMS);
 registerReviewedTeams(CHASCA_REVIEWED_TEAMS);
 registerReviewedTeams(CHIORI_REVIEWED_TEAMS);
+registerReviewedTeams(CITLALI_REVIEWED_TEAMS);
