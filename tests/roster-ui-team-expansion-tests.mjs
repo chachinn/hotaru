@@ -27,7 +27,9 @@ const bennettReviewed=reviewedTeamsForCharacter('Bennett');
 assert.ok(bennettReviewed.length>3,'Existing reviewed anchor teams should also expand Bennett beyond the generic three');
 const bennettTeams=sampleTeams({name:'Bennett',element:'Pyro',description:''},makeCatalog(bennettReviewed));
 assert.ok(bennettTeams.length>3);
-assert.ok(bennettTeams.every(team=>team.reviewed===true));
+assert.ok(bennettTeams.some(team=>team.reviewed===true),'Bennett must retain reviewed team coverage');
+assert.ok(bennettTeams.every(team=>['Reviewed','Community-sourced','Simulation-backed'].includes(team.confidence)),'Bennett guide teams must preserve their actual evidence tier instead of relabeling community teams as reviewed');
+assert.ok(bennettTeams.some(team=>team.confidence==='Community-sourced'),'Aino community-source teams should remain visibly community-supported when inherited by Bennett');
 
 assert.equal(canonicalTeamCharacter('Kazuha'),'Kaedehara Kazuha');
 assert.equal(canonicalTeamCharacter('Mizuki'),'Yumemizuki Mizuki');

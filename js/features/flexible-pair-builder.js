@@ -2,6 +2,7 @@ import { canonicalTeamCharacter } from '../data/team-profiles/index.js';
 import { recommendedTeamsForCharacter, teamHasValidSource } from '../data/team-recommendations.js';
 import { teamMatchesReaction } from '../data/team-reaction-tags.js';
 import { utilityTagsForCharacter } from '../data/team-utility-tags.js';
+import { ainoCompatibilityForCharacter } from '../data/character-compatibility/aino.js';
 
 const KQM_FLINS='https://keqingmains.com/q/flins-quickguide/';
 const IV_ODETTE='https://www.icy-veins.com/genshin-impact/odette-team-guide';
@@ -151,6 +152,13 @@ export function buildFlexiblePairTeams({roster=[],catalogCharacters=[],lockedNam
   }).slice(0,2);
   if(locks.length!==2)return{kind:'flexible-pair',supported:false,results:[],previewResults:[],previewAvailable:false,lockedNames:locks};
   const requested=Math.max(1,Math.min(24,Number(limit)||12));
+  const ainoIndex=locks.findIndex(name=>key(name)==='aino');
+  if(ainoIndex>=0){
+    const other=locks[ainoIndex===0?1:0],compatibility=ainoCompatibilityForCharacter(other);
+    if(!compatibility.adaptationAllowed){
+      return{kind:'flexible-pair',supported:false,adapted:false,coverageGap:true,lockedNames:locks,results:[],previewResults:[],previewAvailable:false,exactPair:false,pairCompatibility:compatibility,rationale:`Aino + ${other} has been checked against the released roster, but Hotaru does not currently have enough Aino-specific source evidence to approve an adapted pair. The Smart Team Creator will not invent one.`};
+    }
+  }
   if(pairKey(locks)===pairKey(['Odette','Flins'])){
     const all=odetteFlinsCandidates(roster).filter(team=>teamMatchesReaction(team,reaction)),eligible=allowUnowned?all:all.filter(team=>team.ownedComplete);
     return{
@@ -160,9 +168,9 @@ export function buildFlexiblePairTeams({roster=[],catalogCharacters=[],lockedNam
       rationale:'No exact sourced Odette + Flins composition is currently in Hotaru. These options preserve Flins’s sourced Lunar-Charged requirements and use Odette only as the flexible off-field slot.'
     };
   }
-  const generic=genericPairCandidates(roster,locks,reaction,catalogCharacters),eligible=allowUnowned?generic.all:generic.all.filter(team=>team.ownedComplete);
+  const generic=genericPairCandidates(roster,locks,reaction,catalogCharacters),eligible=allowUnowned?generic.all:generic.all.filter(team=>team.ownedComplete),ainoLock=locks.find(name=>key(name)==='aino'),pairCompatibility=ainoLock?ainoCompatibilityForCharacter(locks.find(name=>key(name)!=='aino')):null;
   return{
-    kind:'flexible-pair',supported:!generic.coverageGap,adapted:true,generic:true,coverageGap:generic.coverageGap,lockedNames:locks,
+    kind:'flexible-pair',supported:!generic.coverageGap,adapted:true,generic:true,coverageGap:generic.coverageGap,lockedNames:locks,pairCompatibility,
     results:eligible.slice(0,requested),previewResults:generic.all.slice(0,requested),previewAvailable:generic.all.some(team=>!team.ownedComplete),exactPair:false,
     rationale:`No exact sourced four-person composition currently contains both ${locks[0]} and ${locks[1]}. Hotaru is showing a clearly labeled source-backed pair bridge instead of returning a dead end.`
   };

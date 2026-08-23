@@ -12,13 +12,33 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=file=>fs.readFileSync(path.join(root,file),'utf8');
 const staticReviewedCount=allReviewedTeams().length;
 
-for(const [name,min] of [['Odette',14],['Sandrone',8],['Nicole',20],['Cryo Traveler',10],['Alyosha',6],['Varka',8],['Prune',9],['Lohen',8],['Zibai',11],['Illuga',15],['Linnea',11]]){
+for(const [name,min] of [['Aino',30],['Odette',14],['Sandrone',8],['Nicole',20],['Cryo Traveler',10],['Alyosha',6],['Varka',8],['Prune',9],['Lohen',8],['Zibai',11],['Illuga',15],['Linnea',11]]){
   assert.ok(recommendedTeamsForCharacter(name).length>=min,`${name} should have broad reviewed coverage before the community catalog loads`);
   assert.notEqual(teamRecommendationStatus(name).status,'pending',`${name} must not be marked pending`);
 }
 assert.ok(CURRENT_REVIEWED_TEAM_SUPPLEMENT.every(team=>team.members.length===4&&teamHasValidSource(team)),'reviewed supplement must have four members and valid provenance');
-assert.deepEqual(TEAM_SOURCE_PLATFORMS,['Guide','HoYoLAB','YouTube','TikTok','GitHub']);
+assert.deepEqual(TEAM_SOURCE_PLATFORMS,['Guide','HoYoLAB','YouTube','TikTok','Reddit','GitHub']);
 assert.ok(recommendedTeamsForCharacter('Linnea').some(team=>(team.source?.links||[]).some(link=>link.platform==='HoYoLAB')),'verified Linnea/Zibai duplicate must preserve HoYoLAB provenance');
+
+const ainoTeams=recommendedTeamsForCharacter('Aino');
+assert.ok(ainoTeams.length>=30,'Aino must meet the per-character 30-source-team target without fabricated padding');
+assert.ok(ainoTeams.some(team=>team.members.includes('Flins')&&team.members.includes('Ineffa')&&team.members.includes('Sucrose')&&(team.source?.links||[]).some(link=>/game8\.co\/games\/Genshin-Impact\/archives\/537903/.test(link.url))),'Aino must include the primary Game8 Flins/Ineffa/Sucrose lineup');
+assert.ok(ainoTeams.some(team=>(team.source?.links||[]).some(link=>link.platform==='HoYoLAB')),'Aino must preserve HoYoLAB team provenance');
+assert.ok(ainoTeams.some(team=>(team.source?.links||[]).some(link=>link.platform==='YouTube')),'Aino primary team must preserve an independently verifiable YouTube cross-check without inflating composition count');
+assert.ok(ainoTeams.some(team=>(team.source?.links||[]).some(link=>link.platform==='Reddit')),'Aino must preserve clearly labeled Reddit community provenance without promoting it above reviewed sources');
+assert.ok(ainoTeams.every(team=>team.members.length===4&&teamHasValidSource(team)),'every Aino recommendation must remain a four-character source-backed lineup');
+assert.equal(new Set(ainoTeams.map(team=>team.members.map(member=>member.toLowerCase()).sort().join('|'))).size,ainoTeams.length,'Aino recommendation count must not be inflated by duplicate compositions');
+
+const ainoRosterNames=[...new Set(ainoTeams.flatMap(team=>team.members))];
+const ainoRoster=ainoRosterNames.map(name=>({name,status:'Usable',priority:'Medium',level:90}));
+const ainoLocked=matchReviewedTeams({roster:ainoRoster,lockedNames:['Aino'],allowUnowned:false,limit:'all'});
+assert.ok(ainoLocked.results.length>=30,'Smart Team locked-Aino mode must surface at least 30 fully owned source-backed options when the roster owns the reviewed pool');
+assert.ok(ainoLocked.results.every(team=>team.members.includes('Aino')&&team.ownedComplete),'locked Aino owned-only recommendations must never insert an unowned character');
+const ainoLunar=matchReviewedTeams({roster:ainoRoster,lockedNames:['Aino'],allowUnowned:false,limit:'all',reaction:'lunar-charged'});
+assert.ok(ainoLunar.results.length>=4,'Aino Lunar-Charged reaction filter must retain multiple reviewed lineups');
+assert.ok(ainoLunar.results.every(team=>team.members.includes('Aino')),'reaction-filtered Smart Team results must preserve the locked Aino');
+
+
 
 const fixtureNames=['Mavuika','Citlali','Bennett','Sucrose','Xilonen','Kaeya','Rosaria','Charlotte','Diona','Layla','Kaedehara Kazuha','Nicole','Fischl','Xingqiu','Xiangling','Venti','Zhongli','Jean','Mona','Albedo','Ganyu','Klee','Noelle'];
 const fixtureCharacters=fixtureNames.map(name=>({name}));
@@ -64,7 +84,7 @@ assert.equal(mavuika.results.length,mavuika.sourceTotal);
 assert.equal(matchReviewedTeams({roster,allowUnowned:true,limit:1}).results.length,1,'explicit single-best consumer stays bounded');
 assert.ok(matchReviewedTeams({roster,lockedNames:['Mavuika'],allowUnowned:true,limit:'all',curatedOnly:true}).results.every(team=>team.confidence==='Reviewed'),'curated-only consumers must never absorb simulation-backed teams');
 
-const guideCatalog={characters:[...new Set(allRecommendedTeams().flatMap(team=>team.members))].map(name=>({name,element:'Unknown',weapon:'Unknown',icon:'',slug:name.toLowerCase().replace(/[^a-z0-9]+/g,'-')}))};
+const guideCatalog={characters:[...new Set(allRecommendedTeams().flatMap(team=>team.members))].map(name=>({name,element:'Unknown',weapon:'Unknown',icon:'',slug:name.toLowerCase().replace(/[^a-z0-9]+/g,'-'}))};
 assert.ok(sampleTeams({name:'Nicole',element:'Pyro',description:''},guideCatalog).length>5,'character guides should expose broad sourced Nicole teams');
 assert.ok(sampleTeams({name:'Mavuika',element:'Pyro',description:''},guideCatalog).some(team=>team.confidence==='Simulation-backed'),'character guides should inherit simulation-backed community variants');
 

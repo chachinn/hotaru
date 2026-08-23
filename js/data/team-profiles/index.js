@@ -1,3 +1,5 @@
+import { AINO_REVIEWED_TEAMS } from './aino.js';
+
 const KQM_ARLECCHINO='https://keqingmains.com/q/arlecchino-quickguide/';
 const KQM_COLUMBINA='https://keqingmains.com/q/columbina-quickguide/';
 const KQM_TARTAGLIA='https://keqingmains.com/q/tartaglia-quickguide/';
@@ -78,7 +80,7 @@ function key(value=''){return String(value||'').trim().toLowerCase()}
 const aliasToCanonical=new Map([['kazuha','Kaedehara Kazuha'],['mizuki','Yumemizuki Mizuki']]);
 const anchorIndex=new Map();
 const memberIndex=new Map();
-let registeredReviewedTeams=[];
+let registeredReviewedTeams=[...AINO_REVIEWED_TEAMS];
 let reviewedCatalog=[];
 
 for(const profile of REVIEWED_TEAM_PROFILES){
@@ -89,7 +91,7 @@ for(const profile of REVIEWED_TEAM_PROFILES){
 export function canonicalTeamCharacter(name=''){return aliasToCanonical.get(key(name))||String(name||'').trim()}
 function baseReviewedTeams(){return REVIEWED_TEAM_PROFILES.flatMap(profile=>(profile.archetypes||[]).map(archetype=>({...archetype,anchor:profile.character,profileId:profile.id})))}
 function compositionKey(team={}){return [...new Set((team.members||[]).map(canonicalTeamCharacter).map(key))].sort().join('|')}
-function normalizeRegisteredTeam(team={}){return{...team,confidence:'Reviewed',profileId:team.profileId||'reviewed-supplement'}}
+function normalizeRegisteredTeam(team={}){return{...team,confidence:team.confidence||'Reviewed',profileId:team.profileId||'reviewed-supplement'}}
 function sourceLinks(source={}){const items=[...(Array.isArray(source?.links)?source.links:[]),source],seen=new Set(),out=[];for(const item of items){if(!item?.url)continue;const sig=`${item.type||''}|${item.label||''}|${item.url}`;if(seen.has(sig))continue;seen.add(sig);out.push({...item,links:undefined})}return out}
 function buildReviewedCatalog(){const map=new Map();for(const team of [...baseReviewedTeams(),...registeredReviewedTeams]){const comp=compositionKey(team);if(!comp)continue;const prior=map.get(comp);if(!prior){map.set(comp,{...team,source:{...(team.source||{}),links:sourceLinks(team.source)}});continue}const links=sourceLinks({...(prior.source||{}),links:[...sourceLinks(prior.source),...sourceLinks(team.source)]});map.set(comp,{...prior,source:{...(prior.source||{}),links}})}return [...map.values()]}
 function rebuildReviewedIndexes(){
