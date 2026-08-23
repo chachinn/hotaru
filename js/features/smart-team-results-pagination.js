@@ -37,13 +37,22 @@ function option(value,label,current,{disabled=false}={}){return`<option value="$
 function toolbarMarkup(){let filter=resultFilter();const sort=resultSort(),missingDisabled=!session?.allowUnowned;if(missingDisabled&&filter==='missing')filter='all';return`<div class="hotaru-team-results-tools" aria-label="Team result controls"><label>Show<select id="hotaru-team-result-filter">${option('all','All results',filter)}${option('owned','Fully owned',filter)}${option('missing',missingDisabled?'Needs unowned characters — turn on Allow unowned':'Needs unowned characters',filter,{disabled:missingDisabled})}${option('reviewed','Reviewed only',filter)}${option('simulated','Simulation-backed only',filter)}</select></label><label>Sort results<select id="hotaru-team-result-sort">${option('best','Best match',sort)}${option('owned','Most owned',sort)}${option('reviewed','Reviewed first',sort)}${option('name','Team name A–Z',sort)}</select></label></div>`}
 function coverageMarkup(){if(!session)return'';const contextual=contextFilter(session.sourceResults),owned=contextual.filter(team=>team.ownedComplete).length,missing=contextual.length-owned;if(!contextual.length)return`<div class="hotaru-team-coverage-summary"><strong>0 sourced teams</strong> match the current Team Need / Team Reaction context.</div>`;return`<div class="hotaru-team-coverage-summary"><strong>${owned} fully owned</strong>${missing?` · <strong>${missing} more sourced ${missing===1?'team requires':'teams require'} characters you do not own</strong>`:''}. ${missing&&!session.allowUnowned?'Turn on Allow unowned to preview those teams.':''}</div>`}
 function pagerMarkup(page,total,position='bottom'){const totalPages=Math.max(1,Math.ceil(total/PAGE_SIZE)),current=Math.max(1,Math.min(totalPages,page||1)),from=(current-1)*PAGE_SIZE+1,to=Math.min(total,current*PAGE_SIZE);return`<div class="hotaru-team-results-pager ${position==='top'?'is-top':''}" aria-live="polite"><span>Page <strong>${current}</strong> of <strong>${totalPages}</strong> · results <strong>${from}–${to}</strong> of <strong>${total}</strong></span><div class="hotaru-team-page-actions"><button type="button" class="secondary" data-hotaru-team-page="${current-1}" ${current<=1?'disabled':''}>Previous</button><button type="button" class="secondary" data-hotaru-team-page="${current+1}" ${current>=totalPages?'disabled':''}>Next</button></div></div>`}
-function renderSession(reset=false){
+function resultsBodyMarkup(results,sort){
+  if(!results.length)return`<div class="notice info hotaru-team-results-empty"><strong>No sourced teams match these filters.</strong><br>Try All results, a different Team Need or Team Reaction, or turn on Allow unowned. Hotaru will not invent a team just to fill a filter.</div>`;
+  const start=(session.page-1)*PAGE_SIZE,end=Math.min(results.length,start+PAGE_SIZE),pageResults=results.slice(start,end);
+  return`${pagerMarkup(session.page,results.length,'top')}<div class="team-results">${pageResults.map((team,index)=>cardMarkup(team,start+index,sort)).join('')}</div>${pagerMarkup(session.page,results.length,'bottom')}`;
+}
+function renderSession(reset=false,preserveControls=false){
   if(!session?.host?.isConnected)return;
   const results=filteredResults(),sort=resultSort(),totalPages=Math.max(1,Math.ceil(results.length/PAGE_SIZE));if(reset)session.page=1;else session.page=Math.max(1,Math.min(session.page||1,totalPages));
-  const tools=toolbarMarkup(),coverage=coverageMarkup();
-  if(!results.length){session.host.innerHTML=`${coverage}${tools}<div class="notice info hotaru-team-results-empty"><strong>No sourced teams match these filters.</strong><br>Try All results, a different Team Need or Team Reaction, or turn on Allow unowned. Hotaru will not invent a team just to fill a filter.</div>`;return}
-  const start=(session.page-1)*PAGE_SIZE,end=Math.min(results.length,start+PAGE_SIZE),pageResults=results.slice(start,end);
-  session.host.innerHTML=`${coverage}${tools}${pagerMarkup(session.page,results.length,'top')}<div class="team-results">${pageResults.map((team,index)=>cardMarkup(team,start+index,sort)).join('')}</div>${pagerMarkup(session.page,results.length,'bottom')}`;
+  const existingTools=session.host.querySelector('.hotaru-team-results-tools'),existingBody=session.host.querySelector('.hotaru-team-results-body');
+  if(preserveControls&&existingTools&&existingBody){
+    // Never remove the native Show/Sort selects while Mobile Safari is closing its picker.
+    // Replacing an active <select> makes iOS restore focus/scroll to the Smart Team card top.
+    existingBody.innerHTML=resultsBodyMarkup(results,sort);
+    return;
+  }
+  session.host.innerHTML=`${coverageMarkup()}${toolbarMarkup()}<div class="hotaru-team-results-body">${resultsBodyMarkup(results,sort)}</div>`;
 }
 function goToPage(page){if(!session?.host?.isConnected)return;const results=filteredResults(),totalPages=Math.max(1,Math.ceil(results.length/PAGE_SIZE)),target=Math.max(1,Math.min(totalPages,Number(page)||1));if(target===session.page)return;session.page=target;renderSession(false);requestAnimationFrame(()=>session.host.querySelector('.hotaru-team-results-pager.is-top')?.scrollIntoView({behavior:'smooth',block:'start'}));}
 async function buildSession(){
@@ -69,8 +78,8 @@ function markPending(){session=null;pendingUntil=Date.now()+WAIT_MS;queueScan()}
 if(app)new MutationObserver(()=>{if(pendingUntil)queueScan()}).observe(app,{childList:true,subtree:true});
 document.addEventListener('click',event=>{const pageButton=event.target.closest?.('[data-hotaru-team-page]');if(pageButton){event.preventDefault();event.stopPropagation();if(!pageButton.disabled)goToPage(pageButton.dataset.hotaruTeamPage);return}if(event.target.closest?.('[data-action="generate-smart-team"]'))markPending()},{capture:true});
 document.addEventListener('change',event=>{
-  if(event.target?.id==='hotaru-team-result-filter'&&session?.host?.isConnected){const value=RESULT_FILTERS.has(event.target.value)?event.target.value:'all';safeSet(RESULT_FILTER_KEY,value);renderSession(true);return}
-  if(event.target?.id==='hotaru-team-result-sort'&&session?.host?.isConnected){const value=RESULT_SORTS.has(event.target.value)?event.target.value:'best';safeSet(RESULT_SORT_KEY,value);renderSession(true);return}
+  if(event.target?.id==='hotaru-team-result-filter'&&session?.host?.isConnected){const value=RESULT_FILTERS.has(event.target.value)?event.target.value:'all';safeSet(RESULT_FILTER_KEY,value);renderSession(true,true);return}
+  if(event.target?.id==='hotaru-team-result-sort'&&session?.host?.isConnected){const value=RESULT_SORTS.has(event.target.value)?event.target.value:'best';safeSet(RESULT_SORT_KEY,value);renderSession(true,true);return}
   if(['hotaru-team-utility','hotaru-team-reaction'].includes(event.target?.id)&&session?.host?.isConnected){renderSession(true);return}
   if(['team-mode','team-lock-1','team-lock-2','team-allow-unowned','hotaru-team-picker-ownership'].includes(event.target?.id)){session=null;pendingUntil=0}
 });
