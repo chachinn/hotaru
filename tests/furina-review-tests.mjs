@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import { RELEASED_AVATAR_AUDIT_V45 } from './fixtures/released-avatar-audit-v45.mjs';
+import { reviewedBuildProfile } from '../js/data/build-profiles/index.js';
+import { inferBuildProfile } from '../js/features/build-engine.js';
+import { resolveBuildProfile } from '../js/features/build-profiles.js';
+import { FURINA_REVIEWED_TEAMS } from '../js/data/team-profiles/furina-reviewed.js';
+import { registerReviewedTeams } from '../js/data/team-profiles/index.js';
+import { compositionKey, recommendedTeamsForCharacter, teamHasValidSource } from '../js/data/team-recommendations.js';
+import { FURINA_COMPATIBILITY_POLICY, furinaCompatibilityForCharacter, auditFurinaCompatibility } from '../js/data/character-compatibility/furina.js';
+registerReviewedTeams(FURINA_REVIEWED_TEAMS);
+const fallback=inferBuildProfile({name:'Furina',element:'Hydro',weapon:'Sword',description:'Off-field Hydro damage and teamwide Fanfare buff'}),profile=resolveBuildProfile({name:'Furina',element:'Hydro'},fallback,{}),raw=reviewedBuildProfile('Furina');
+assert.equal(profile.profileSource,'reviewed');assert.equal(profile.roleGroup,'Support');assert.equal(raw.variants.length,2);assert.deepEqual(raw.variants.map(v=>v.id),['off-field-support','c6-on-field']);
+const standard=resolveBuildProfile({name:'Furina'},fallback,{buildVariant:'off-field-support'});assert.equal(standard.artifactPriority[0],'Golden Troupe');assert.equal(standard.talentPriority[0],'burst');assert.ok(standard.goalStats.some(x=>/200%\+ ER/i.test(x.value)));assert.ok(standard.goalStats.some(x=>/healing|HP manipulation/i.test(x.value)));
+const c6=resolveBuildProfile({name:'Furina'},fallback,{buildVariant:'c6-on-field'});assert.equal(c6.artifactPriority[0],'Marechaussee Hunter');assert.ok(c6.goalStats.some(x=>/only at C6/i.test(x.value)));assert.ok(c6.goalStats.some(x=>/six infused/i.test(x.value)));
+const sourced=recommendedTeamsForCharacter('Furina').filter(teamHasValidSource),unique=new Set(sourced.map(compositionKey)),reviewedUnique=new Set(FURINA_REVIEWED_TEAMS.map(compositionKey));assert.ok(unique.size>=30,`Furina should expose at least 30 distinct sourced/source-informed teams; got ${unique.size}`);assert.equal(reviewedUnique.size,FURINA_REVIEWED_TEAMS.length,'Furina reviewed teams must not inflate counts through duplicate member sets');assert.ok([...reviewedUnique].every(k=>unique.has(k)));assert.ok(FURINA_REVIEWED_TEAMS.every(t=>!/(game8|kqm|icy veins|hoyolab)/i.test(`${t.name} ${t.why} ${t.notes||''}`)));
+const audit=auditFurinaCompatibility(RELEASED_AVATAR_AUDIT_V45);assert.equal(audit.total,148);assert.ok(audit.rows.every(row=>row.status!=='invalid'));assert.ok(audit.rows.every(row=>row.status!=='unverified'||(!row.smartTeamApproved&&!row.adaptationAllowed)));
+for(const name of ['Neuvillette','Jean','Xianyun','Baizhu','Charlotte','Xilonen','Yelan','Xingqiu','Sangonomiya Kokomi','Cyno','Alhaitham','Clorinde','Eula','Kamisato Ayaka','Ganyu','Skirk'])assert.equal(furinaCompatibilityForCharacter(name).smartTeamApproved,true,`${name} should be approved for Furina`);assert.match(furinaCompatibilityForCharacter('Arlecchino').caveat,/cannot receive outside healing/i);assert.equal(furinaCompatibilityForCharacter('Aether TPS').status,'not-applicable');assert.match(FURINA_COMPATIBILITY_POLICY.rule,/preserve Fanfare generation/i);assert.match(FURINA_COMPATIBILITY_POLICY.rule,/C6 on-field build is constellation-locked/i);
+console.log(`Furina review QA passed · ${raw.variants.length} builds · ${unique.size} distinct sourced teams · ${audit.total}/148 compatibility records checked.`);
