@@ -15,10 +15,10 @@ const screenshotPair=matchReviewedTeams({roster:[{name:'Odette'},{name:'Flins'}]
 assert.deepEqual(screenshotPair.pendingLocks,[],'A reviewed Odette + Flins lock may have no exact shared team, but neither character is pending review');
 
 const index=read('index.html'),sw=read('service-worker.js'),updater=read('js/pwa-update.js');
-assert.ok(index.indexOf('js/pwa-update.js?v=1.0.0')<index.indexOf('app.js?v=1.12.0'),'PWA updater must start before app modules so stale installed PWAs recover promptly');
+assert.ok(index.indexOf('js/pwa-update.js?v=1.1.0')<index.indexOf('app.js?v=1.12.0'),'PWA updater must start before app modules so stale installed PWAs recover promptly');
 assert.match(sw,/const CACHE = 'hotaru-shell-v46'/);
 assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v45'/);
-assert.match(sw,/js\/pwa-update\.js\?v=1\.0\.0/,'PWA updater must be available offline after the fresh shell is installed');
+assert.match(sw,/js\/pwa-update\.js\?v=1\.1\.0/,'PWA updater must be available offline after the fresh shell is installed');
 assert.match(updater,/RELEASE='v46'/,'PWA reload marker must advance with the shell');
 assert.match(updater,/updateViaCache:'none'/,'Service-worker update checks must bypass stale HTTP caches');
 assert.match(updater,/controllerchange/,'A newly activated worker must be detected');

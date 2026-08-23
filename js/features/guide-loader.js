@@ -5,6 +5,7 @@ import { enhanceReferenceGuide } from './guide-ui.js';
 import { enhanceExplorationGuide } from './exploration-ui.js';
 import { enhanceGuideTaxonomy } from './guide-taxonomy.js';
 import { enhanceGame8Guide } from './game8-guide-ui.js';
+import './guide-item-details.js';
 
 const app=document.getElementById('app');
 let queued=false,catalogPromise=null,detailPromise=null,lastName='';

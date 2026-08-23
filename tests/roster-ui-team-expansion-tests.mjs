@@ -21,7 +21,8 @@ const yaeReviewed=reviewedTeamsForCharacter('Yae Miko');
 assert.ok(yaeReviewed.length>=6,'Reviewed teammate inheritance should give Yae Miko more than three sourced teams');
 const yaeTeams=sampleTeams({name:'Yae Miko',element:'Electro',description:''},makeCatalog(yaeReviewed));
 assert.ok(yaeTeams.length>=6);
-assert.ok(yaeTeams.every(team=>team.reviewed===true));
+assert.ok(yaeTeams.some(team=>team.reviewed===true),'Yae Miko must retain reviewed theorycraft coverage');
+assert.ok(yaeTeams.every(team=>['Reviewed','Community-sourced','Simulation-backed'].includes(team.confidence)),'Yae guide teams must preserve their actual evidence tier instead of relabeling source-backed/community teams as reviewed');
 
 const bennettReviewed=reviewedTeamsForCharacter('Bennett');
 assert.ok(bennettReviewed.length>3,'Existing reviewed anchor teams should also expand Bennett beyond the generic three');

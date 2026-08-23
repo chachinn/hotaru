@@ -1,4 +1,5 @@
 import { AINO_REVIEWED_TEAMS } from './aino.js';
+import { ALHAITHAM_REVIEWED_TEAMS } from './alhaitham.js';
 
 const KQM_ARLECCHINO='https://keqingmains.com/q/arlecchino-quickguide/';
 const KQM_COLUMBINA='https://keqingmains.com/q/columbina-quickguide/';
@@ -73,6 +74,11 @@ export const REVIEWED_TEAM_PROFILES=[
       team('odette-swirl-varka-prune-escoffier','Stellar-Swirl · Varka + Escoffier',['Odette','Varka','Prune','Escoffier'],'Odette supports the reviewed Stellar-Swirl shell around Varka, with Prune and Escoffier filling the reaction-support slots.',source('Icy Veins Odette Team Guide',ICY_ODETTE)),
       team('odette-swirl-varka-prune-qiqi','Stellar-Swirl · Varka + Qiqi',['Odette','Varka','Prune','Qiqi'],'A reviewed Varka Stellar-Swirl variation that uses Qiqi for sustain alongside Odette and Prune.',source('Icy Veins Odette Team Guide',ICY_ODETTE))
     ]
+  },
+  {
+    id:'alhaitham',character:'Alhaitham',aliases:[],
+    source:{label:'Game8 Alhaitham Rating and Best Builds',url:'https://game8.co/games/Genshin-Impact/archives/383712',type:'Reviewed theorycraft',platform:'Guide',reviewedAt:'2026-08-23'},
+    archetypes:ALHAITHAM_REVIEWED_TEAMS
   }
 ];
 

@@ -34,7 +34,6 @@ assert.equal(statTargets(colOff,{burstCycle:'everyOther',sameElement:0,favonius:
 assert.equal(statTargets(colOn,{burstCycle:'every',sameElement:0,favonius:0}).er.good,200,'on-field Columbina should use the reviewed on-field ER baseline');
 assert.equal(statTargets(colOn,{burstCycle:'every',sameElement:1,favonius:0}).er.good,160,'double-Hydro on-field Columbina should use the reviewed lower ER baseline');
 
-
 const odetteFallback=inferBuildProfile({
   name:'Odette',
   element:'Cryo',
@@ -54,7 +53,6 @@ assert.equal(odette.artifactPriority[0],'Heart of the Furnace');
 assert.equal(odette.weaponPriority[0],'Whitelake Frostfeather');
 assert.ok(odette.sourceRefs.some(source=>/GameWith Odette/.test(source.label)),'Odette reviewed profile must expose a current build-guide source');
 
-
 const ainoFallback=inferBuildProfile({
   name:'Aino',
   element:'Hydro',
@@ -67,19 +65,23 @@ assert.equal(aino.profileSource,'reviewed','Aino must resolve through reviewed b
 assert.equal(aino.role,'Off-field Hydro Support / Enabler');
 assert.equal(aino.scaling,'EM','Game8 default Aino support build must remain EM-focused');
 assert.equal(aino.artifactPriority[0],"Silken Moon's Serenade");
-assert.deepEqual(aino.mainStats.sands.slice(0,2),['Elemental Mastery','ER%'],'Game8 EM Sands must be the default with ER as reviewed contextual fallback');
-assert.deepEqual(aino.mainStats.goblet.slice(0,2),['Elemental Mastery','Hydro DMG%']);
+assert.deepEqual(aino.mainStats.sands,['Elemental Mastery'],'Game8 default Aino summary uses Elemental Mastery Sands');
+assert.deepEqual(aino.mainStats.goblet,['Elemental Mastery'],'Game8 default Aino summary uses Elemental Mastery Goblet');
 assert.deepEqual(aino.mainStats.circlet.slice(0,2),['CRIT Rate / CRIT DMG','Elemental Mastery']);
 assert.deepEqual(aino.substats,['Elemental Mastery','CRIT Rate','CRIT DMG','Energy Recharge'],'Aino substats must follow Game8 ordering');
 assert.equal(aino.weaponPriority[0],'Flame-Forged Insight');
 assert.equal(aino.weaponPriority[1],'Master Key');
 assert.equal(aino.weaponPriority[2],'Favonius Greatsword');
-assert.equal(aino.f2pWeapon,'Favonius Greatsword');
+assert.equal(aino.f2pWeapon,'Master Key','Master Key is the craftable replacement listed first by Game8');
 assert.deepEqual(aino.talentPriority,['burst','skill','attack']);
 assert.equal(statTargets(aino,{sameElement:0,favonius:0}).er.good,165,'Game8 solo-Hydro default should center the 150–180% ER range');
 assert.equal(statTargets(aino,{sameElement:1,favonius:0}).er.good,120,'Game8 double-Hydro default should center the 110–130% ER range');
-assert.equal(statTargets(aino,{sameElement:0,favonius:0}).em.good,700);
+assert.equal(statTargets(aino,{sameElement:0,favonius:0}).em.min,700);
+assert.equal(statTargets(aino,{sameElement:0,favonius:0}).em.good,750);
 assert.equal(statTargets(aino,{sameElement:0,favonius:0}).em.great,800);
+assert.deepEqual(aino.tierRatings,[{label:'Main DPS',rating:'—'},{label:'Sub-DPS',rating:'A'},{label:'Support',rating:'—'},{label:'Exploration',rating:'B'}],'Aino tier table must match the current Game8 page');
+assert.deepEqual(aino.weaponPriority,['Flame-Forged Insight','Master Key','Favonius Greatsword','Makhaira Aquamarine'],'Aino visible weapon order must match Game8');
+assert.deepEqual(aino.artifactPriority,["Silken Moon's Serenade",'Noblesse Oblige','Aubade of Morningstar and Moon','Instructor'],'Aino artifact order must match Game8');
 assert.ok(aino.sourceRefs.some(source=>/Game8 Aino/.test(source.label)&&/537903/.test(source.url)),'Aino reviewed profile must expose the mandatory Game8 source');
 assert.ok(aino.sourceRefs.some(source=>/KQM Aino/.test(source.label)),'Aino reviewed profile must preserve current theorycraft cross-check');
 assert.ok(aino.sourceRefs.some(source=>/YouTube/.test(source.kind)),'Aino review must preserve a YouTube build cross-check');

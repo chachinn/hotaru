@@ -12,6 +12,19 @@ export default {
     {label:'Support',rating:'Primary'},
     {label:'Exploration',rating:'Utility'}
   ],
+  tierRatings:[
+    {label:'Main DPS',rating:'—'},
+    {label:'Sub-DPS',rating:'A'},
+    {label:'Support',rating:'—'},
+    {label:'Exploration',rating:'B'}
+  ],
+  tierSource:'Game8 Aino Best Builds and Teams — tier list table',
+  voiceActors:[
+    {label:'EN',name:'Annabel Brook'},
+    {label:'JP',name:'Takamori Natsumi (高森奈津美)'},
+    {label:'CN',name:'Ge Zirui (葛子瑞)'},
+    {label:'KR',name:'Jo Kyeong-i (조경이)'}
+  ],
   roleReason:'Aino is primarily a swap-in Hydro support whose Burst provides off-field Hydro application, raises the team’s Moonsign level, and enables reaction-focused teams. Game8’s default support build prioritizes Elemental Mastery while her personal Talent damage remains low.',
   scaling:'EM',
   focus:'Elemental Burst',
@@ -20,7 +33,7 @@ export default {
     cr:{min:50,good:60,great:70,unit:'%'},
     cd:{min:100,good:110,great:120,unit:'%'},
     er:{min:150,good:165,great:180,unit:'%'},
-    em:{min:600,good:700,great:800,unit:''}
+    em:{min:700,good:750,great:800,unit:''}
   },
   targetOverrides:{
     er:{
@@ -36,8 +49,8 @@ export default {
     }
   },
   mainStats:{
-    sands:['Elemental Mastery','ER%'],
-    goblet:['Elemental Mastery','Hydro DMG%'],
+    sands:['Elemental Mastery'],
+    goblet:['Elemental Mastery'],
     circlet:['CRIT Rate / CRIT DMG','Elemental Mastery']
   },
   substats:['Elemental Mastery','CRIT Rate','CRIT DMG','Energy Recharge'],
@@ -46,22 +59,24 @@ export default {
     'Flame-Forged Insight',
     'Master Key',
     'Favonius Greatsword',
-    'Makhaira Aquamarine',
-    'Skyward Pride',
-    'Sacrificial Greatsword'
+    'Makhaira Aquamarine'
   ],
-  f2pWeapon:'Favonius Greatsword',
+  f2pWeapon:'Master Key',
   artifactPriority:[
     "Silken Moon's Serenade",
     'Noblesse Oblige',
     'Aubade of Morningstar and Moon',
     'Instructor'
   ],
+  buildSummaryTeams:[
+    {name:'Flins Lunar Charge',members:['Aino','Flins','Ineffa','Sucrose']},
+    {name:'Nilou Bloom',members:['Aino','Nahida','Nilou','Baizhu']}
+  ],
   goalStats:[
-    {label:'Elemental Mastery',value:'Game8 target: about 700–800 EM for the default reaction-support build.'},
-    {label:'Energy Recharge',value:'Game8 target: about 150–180% as solo Hydro or 110–130% with a second Hydro. KQM calculates higher needs in some one-Skill-per-Burst rotations, so raise ER when your actual rotation cannot Burst consistently.'},
-    {label:'CRIT Rate',value:'Game8 target: about 50–70%; prioritize enough CRIT Rate to trigger Favonius Greatsword reliably when using it.'},
-    {label:'CRIT DMG',value:'Game8 target: about 100–120% after EM/ER needs are satisfied.'}
+    {label:'Elemental Mastery',value:'700–800'},
+    {label:'Energy Recharge',value:'150–180% (Solo Hydro) · 110–130% (Double Hydro)'},
+    {label:'CRIT Rate',value:'50–70%'},
+    {label:'CRIT DMG',value:'100–120%'}
   ],
   strengths:[
     'Provides consistent off-field Hydro through her Burst with very short field time.',
@@ -85,6 +100,7 @@ export default {
     {label:'KQM Aino Quick Guide',kind:'Current theorycraft cross-check',url:'https://keqingmains.com/q/aino-quickguide/'},
     {label:'GameWith Aino Best Build Guide',kind:'Current build cross-check',url:'https://gamewith.net/genshin-impact/article/show/69272'},
     {label:'La Gazette de Teyvat · Flins/Aino/Kuki/Sucrose Rotation',kind:'YouTube team/rotation cross-check',url:'https://www.youtube.com/watch?v=ZccXtlpp9bY'},
-    {label:'HoYoLAB Aino Complete Guide',kind:'Community guide cross-check',url:'https://www.hoyolab.com/article/41509819'}
+    {label:'HoYoLAB Aino Complete Guide',kind:'Community guide cross-check',url:'https://www.hoyolab.com/article/41509819'},
+    {label:'HoYoLAB Aino Voice Actors',kind:'Voice actor cross-check',url:'https://www.hoyolab.com/article/42150481'}
   ]
 };
