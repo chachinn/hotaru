@@ -1,4 +1,7 @@
 import './character-section-shortcuts.js';
+import './abyss-locked-core-ui.js';
+import './visible-source-cleanup.js';
+import './build-artifact-autofill.js';
 
 if(!document.querySelector('link[data-character-section-shortcuts]')){
   const link=document.createElement('link');
