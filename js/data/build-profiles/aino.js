@@ -47,7 +47,7 @@ export default {
     'Flame-Forged Insight','Master Key','Favonius Greatsword','Makhaira Aquamarine','Forest Regalia','Sacrificial Greatsword','Katsuragikiri Nagamasa'
   ],
   f2pWeapon:'Master Key',
-  artifactPriority:["Silken Moon's Serenade",'Noblesse Oblige','Aubade of Morningstar and Moon','Instructor','Scroll of the Hero of Cinder City','Deepwood Memories','Flower of Paradise Lost','Gilded Dreams'],
+  artifactPriority:["Silken Moon's Serenade",'Noblesse Oblige','Aubade of Morningstar and Moon','Instructor','Scroll of the Hero of Cinder City','Deepwood Memories'],
   buildSummaryTeams:[
     {name:'Flins Lunar-Charged',members:['Aino','Flins','Ineffa','Sucrose']},
     {name:'Nilou Bloom',members:['Aino','Nahida','Nilou','Baizhu']}
@@ -63,7 +63,7 @@ export default {
         mainStats:{sands:['Energy Recharge','Elemental Mastery'],goblet:['Elemental Mastery','Hydro DMG%'],circlet:['Elemental Mastery','CRIT Rate','CRIT DMG']},
         substats:['Energy Recharge','CRIT Rate (Favonius)','Elemental Mastery','CRIT Rate','CRIT DMG','ATK%'],
         weaponPriority:['Flame-Forged Insight','Master Key','Favonius Greatsword','Makhaira Aquamarine','Forest Regalia','Sacrificial Greatsword','Katsuragikiri Nagamasa'],
-        artifactPriority:["Silken Moon's Serenade",'Noblesse Oblige','Instructor','Scroll of the Hero of Cinder City','Deepwood Memories'],
+        artifactPriority:["Silken Moon's Serenade",'Noblesse Oblige','Aubade of Morningstar and Moon','Instructor','Scroll of the Hero of Cinder City','Deepwood Memories'],
         goalStats:[
           {label:'Energy Recharge',value:'190–250%+ baseline · 155–205% with Favonius · 100–140% with Flame-Forged Insight; C4 lowers requirements further'},
           {label:'Favonius CRIT Rate',value:'Build enough CRIT Rate to trigger Favonius consistently when using it'},
