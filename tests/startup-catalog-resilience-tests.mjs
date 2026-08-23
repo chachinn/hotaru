@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const cache=fs.readFileSync(new URL('../js/core/cache.js',import.meta.url),'utf8');
+const game=fs.readFileSync(new URL('../js/data/game-data.js',import.meta.url),'utf8');
+assert.match(cache,/const DB_OPEN_TIMEOUT_MS=/,'IndexedDB open must have a hard timeout');
+assert.match(cache,/req\.onblocked=/,'blocked IndexedDB opens must settle instead of hanging startup');
+assert.match(cache,/Promise\.race/,'cache operations must be time-bounded');
+assert.match(game,/if\(validCatalog\(cachedCurrent\?\.catalog\)\)\{runtimeCatalog=cachedCurrent\.catalog;/,'valid cached catalog must become usable before release supplementation');
+assert.match(game,/scheduleCatalogSupplement\(runtimeCatalog\)/,'release supplementation must run off the critical startup path');
+assert.doesNotMatch(game,/runtimeCatalog=await supplementCachedCatalog\(cachedCurrent\.catalog\)/,'startup must not await release supplementation before returning cached data');
+console.log('Startup catalog resilience QA passed.');
