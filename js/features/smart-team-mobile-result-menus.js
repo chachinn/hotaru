@@ -42,6 +42,7 @@ function syncControl(control,select){
 }
 function closePicker(){
   if(active?.toggle?.isConnected)active.toggle.setAttribute('aria-expanded','false');
+  const focused=document.activeElement;if(picker?.root?.contains(focused)&&typeof focused?.blur==='function')focused.blur();
   if(picker?.root){picker.root.hidden=true;picker.root.setAttribute('aria-hidden','true');picker.list.replaceChildren()}
   active=null;
 }
