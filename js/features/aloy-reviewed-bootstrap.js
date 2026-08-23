@@ -12,6 +12,7 @@ import { DILUC_REVIEWED_TEAMS } from '../data/team-profiles/diluc-reviewed.js';
 import { EMILIE_REVIEWED_TEAMS } from '../data/team-profiles/emilie-reviewed.js';
 import { ESCOFFIER_REVIEWED_TEAMS } from '../data/team-profiles/escoffier-reviewed.js';
 import { EULA_REVIEWED_TEAMS } from '../data/team-profiles/eula-reviewed.js';
+import { FLINS_REVIEWED_TEAMS } from '../data/team-profiles/flins-reviewed-clean.js';
 
 registerReviewedTeams(ALOY_REVIEWED_TEAMS);
 registerReviewedTeams(AMBER_REVIEWED_TEAMS);
@@ -26,3 +27,4 @@ registerReviewedTeams(DILUC_REVIEWED_TEAMS);
 registerReviewedTeams(EMILIE_REVIEWED_TEAMS);
 registerReviewedTeams(ESCOFFIER_REVIEWED_TEAMS);
 registerReviewedTeams(EULA_REVIEWED_TEAMS);
+registerReviewedTeams(FLINS_REVIEWED_TEAMS);

@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import { RELEASED_AVATAR_AUDIT_V45 } from './fixtures/released-avatar-audit-v45.mjs';
+import { reviewedBuildProfile } from '../js/data/build-profiles/index.js';
+import { inferBuildProfile } from '../js/features/build-engine.js';
+import { resolveBuildProfile } from '../js/features/build-profiles.js';
+import { FLINS_REVIEWED_TEAMS } from '../js/data/team-profiles/flins-reviewed-clean.js';
+import { registerReviewedTeams } from '../js/data/team-profiles/index.js';
+import { compositionKey, recommendedTeamsForCharacter, teamHasValidSource } from '../js/data/team-recommendations.js';
+import { FLINS_COMPATIBILITY_POLICY, flinsCompatibilityForCharacter, auditFlinsCompatibility } from '../js/data/character-compatibility/flins.js';
+registerReviewedTeams(FLINS_REVIEWED_TEAMS);
+const fallback=inferBuildProfile({name:'Flins',element:'Electro',weapon:'Polearm',description:'Lunar-Charged on-field Burst damage dealer'}),profile=resolveBuildProfile({name:'Flins',element:'Electro'},fallback,{}),raw=reviewedBuildProfile('Flins');
+assert.equal(profile.profileSource,'reviewed');assert.equal(profile.roleGroup,'Main DPS');assert.equal(raw.variants.length,2);assert.deepEqual(raw.variants.map(v=>v.id),['standard-lunar','tf-short-rotation']);
+const standard=resolveBuildProfile({name:'Flins'},fallback,{buildVariant:'standard-lunar'});assert.equal(standard.artifactPriority[0],"Night of the Sky's Unveiling");assert.ok(standard.goalStats.some(x=>/another Nod-Krai/i.test(x.value)));assert.ok(standard.goalStats.some(x=>/Hydro/i.test(x.value)));
+const tf=resolveBuildProfile({name:'Flins'},fallback,{buildVariant:'tf-short-rotation'});assert.equal(tf.artifactPriority[0],'Thundering Fury');assert.ok(tf.goalStats.some(x=>/C0 only/i.test(x.value)));assert.ok(tf.goalStats.some(x=>/Lunar-Charged/i.test(x.value)));
+const sourced=recommendedTeamsForCharacter('Flins').filter(teamHasValidSource),unique=new Set(sourced.map(compositionKey)),reviewedUnique=new Set(FLINS_REVIEWED_TEAMS.map(compositionKey));assert.ok(unique.size>=35,`Flins should expose broad Lunar-Charged team coverage; got ${unique.size}`);assert.equal(reviewedUnique.size,FLINS_REVIEWED_TEAMS.length,'Flins reviewed teams must not inflate counts through duplicate member sets');assert.ok([...reviewedUnique].every(k=>unique.has(k)));assert.ok(FLINS_REVIEWED_TEAMS.every(t=>!/(game8|kqm|icy veins|hoyolab)/i.test(`${t.name} ${t.why} ${t.notes||''}`)));
+const audit=auditFlinsCompatibility(RELEASED_AVATAR_AUDIT_V45);assert.equal(audit.total,148);assert.ok(audit.rows.every(row=>row.status!=='invalid'));assert.ok(audit.rows.every(row=>row.status!=='unverified'||(!row.smartTeamApproved&&!row.adaptationAllowed)));
+for(const name of ['Ineffa','Columbina','Aino','Jahoda','Fischl','Ororon','Kuki Shinobu','Sucrose','Xilonen','Durin','Furina','Yelan','Xingqiu','Mona'])assert.equal(flinsCompatibilityForCharacter(name).smartTeamApproved,true,`${name} should be approved for Flins`);assert.equal(flinsCompatibilityForCharacter('Aether TPS').status,'not-applicable');assert.match(FLINS_COMPATIBILITY_POLICY.rule,/reliable Hydro plus another Nod-Krai/i);assert.match(FLINS_COMPATIBILITY_POLICY.rule,/C0 Thundering Fury/i);
+console.log(`Flins review QA passed · ${raw.variants.length} builds · ${unique.size} distinct sourced teams · ${audit.total}/148 compatibility records checked.`);
