@@ -44,36 +44,19 @@ export default {
     }
   },
   mainStats:{
-    sands:['Elemental Mastery'],
+    sands:['Elemental Mastery','ATK%'],
     goblet:['Dendro DMG%'],
     circlet:['CRIT Rate','CRIT DMG']
   },
   substats:['Elemental Mastery','Energy Recharge','CRIT Rate','CRIT DMG','ATK%'],
   talentPriority:['skill','attack','burst'],
   weaponPriority:[
-    'Light of Foliar Incision',
-    'Uraku Misugiri',
-    'Primordial Jade Cutter',
-    'Wolf-Fang',
-    'Iron Sting',
-    'Mistsplitter Reforged',
-    'Haran Geppaku Futsu',
-    'Toukabou Shigure',
-    "Xiphos' Moonlight",
-    'Harbinger of Dawn'
+    'Light of Foliar Incision','Uraku Misugiri','Primordial Jade Cutter','Wolf-Fang','Iron Sting','Mistsplitter Reforged','Haran Geppaku Futsu','Toukabou Shigure',"Xiphos' Moonlight",'Harbinger of Dawn'
   ],
   f2pWeapon:'Iron Sting',
-  artifactPriority:[
-    'Gilded Dreams',
-    'Deepwood Memories',
-    'Golden Troupe',
-    'Marechaussee Hunter'
-  ],
+  artifactPriority:['Gilded Dreams','Deepwood Memories','Golden Troupe','Marechaussee Hunter'],
   artifactAlternatives:[
-    '2pc Elemental Mastery + 2pc Elemental Mastery',
-    '2pc Elemental Mastery + 2pc Deepwood Memories',
-    '2pc Elemental Mastery + 2pc Golden Troupe',
-    '2pc Emblem of Severed Fate + 2pc Elemental Mastery'
+    '2pc Elemental Mastery + 2pc Elemental Mastery','2pc Elemental Mastery + 2pc Deepwood Memories','2pc Elemental Mastery + 2pc Golden Troupe','2pc Emblem of Severed Fate + 2pc Elemental Mastery'
   ],
   buildSummaryTeams:[
     {name:'Quickbloom',members:['Alhaitham','Nahida','Yelan','Kuki Shinobu']},
@@ -82,16 +65,15 @@ export default {
   defaultVariant:'dendro-main-dps',
   variants:[
     {
-      id:'dendro-main-dps',
-      name:'Dendro Main DPS',
+      id:'dendro-main-dps',name:'Dendro Main DPS',
       note:'Game8 default build when another teammate can hold Deepwood Memories.',
       overrides:{
-        mainStats:{sands:['Elemental Mastery'],goblet:['Dendro DMG%'],circlet:['CRIT Rate','CRIT DMG']},
+        mainStats:{sands:['Elemental Mastery','ATK%'],goblet:['Dendro DMG%'],circlet:['CRIT Rate','CRIT DMG']},
         substats:['Elemental Mastery','Energy Recharge','CRIT Rate','CRIT DMG','ATK%'],
         artifactPriority:['Gilded Dreams','Deepwood Memories','Golden Troupe','Marechaussee Hunter'],
         weaponPriority:['Light of Foliar Incision','Uraku Misugiri','Primordial Jade Cutter','Wolf-Fang','Iron Sting','Mistsplitter Reforged','Haran Geppaku Futsu','Toukabou Shigure',"Xiphos' Moonlight",'Harbinger of Dawn'],
         goalStats:[
-          {label:'Energy Recharge',value:'±130% Total Energy Recharge (Game8 default)'},
+          {label:'Energy Recharge',value:'~130% default (Game8); KQM solo-Dendro rotations can reach 175–220% when particles/Burst frequency are less favorable'},
           {label:'Elemental Mastery',value:'200–300 including buffs before prioritizing CRIT in Quicken (KQM)'},
           {label:'CRIT',value:'Prioritize after ER and the practical EM threshold'}
         ],
@@ -102,22 +84,16 @@ export default {
       }
     },
     {
-      id:'solo-dendro-dps',
-      name:'Solo Dendro DPS',
+      id:'solo-dendro-dps',name:'Solo Dendro DPS',
       note:'Game8 alternative when no teammate can carry Deepwood Memories; Alhaitham uses Deepwood himself and needs substantially more ER.',
       overrides:{
-        mainStats:{sands:['Elemental Mastery'],goblet:['Dendro DMG%'],circlet:['CRIT Rate','CRIT DMG']},
+        mainStats:{sands:['Elemental Mastery','ATK%'],goblet:['Dendro DMG%'],circlet:['CRIT Rate','CRIT DMG']},
         substats:['Elemental Mastery','Energy Recharge','CRIT Rate','CRIT DMG','ATK%'],
         artifactPriority:['Deepwood Memories','Gilded Dreams','Golden Troupe','Marechaussee Hunter'],
         weaponPriority:['Light of Foliar Incision','Uraku Misugiri','Primordial Jade Cutter','Wolf-Fang','Iron Sting','Mistsplitter Reforged','Haran Geppaku Futsu','Toukabou Shigure',"Xiphos' Moonlight",'Harbinger of Dawn'],
-        targets:{
-          cr:{min:60,good:70,great:80,unit:'%'},
-          cd:{min:120,good:150,great:180,unit:'%'},
-          er:{min:150,good:160,great:180,unit:'%'},
-          em:{min:200,good:250,great:300,unit:''}
-        },
+        targets:{cr:{min:60,good:70,great:80,unit:'%'},cd:{min:120,good:150,great:180,unit:'%'},er:{min:150,good:160,great:180,unit:'%'},em:{min:200,good:250,great:300,unit:''}},
         goalStats:[
-          {label:'Energy Recharge',value:'±160% Total Energy Recharge (Game8 solo-Dendro default)'},
+          {label:'Energy Recharge',value:'~160% solo Dendro (Game8 default for this setup)'},
           {label:'Elemental Mastery',value:'200–300 including buffs before prioritizing CRIT in Quicken (KQM)'},
           {label:'Advanced ER context',value:'KQM solo-Dendro rotations can reach roughly 175–220% depending on particles and Burst frequency'}
         ],
@@ -149,7 +125,7 @@ export default {
   playstyleTips:[
     'Set up off-field teammates first, then enter Alhaitham’s field window with three Chisel-Light Mirrors whenever possible.',
     'Prioritize keeping three-Mirror Projection Attacks active; refresh Mirrors with Skill/Charged Attack at the correct timing rather than spending them immediately.',
-    'Use EM Sands by default for both Game8 builds.',
+    'Use EM Sands by default; ATK% remains a legitimate alternative when substats/team conditions make it competitive.',
     'If another teammate can hold Deepwood Memories, use Gilded Dreams for Alhaitham; otherwise switch to the Solo Dendro DPS build and use Deepwood himself.',
     'Level 90 is especially valuable because Spread and Bloom-family reaction damage scales strongly with character level.'
   ],
