@@ -8,6 +8,7 @@ import { CHIORI_REVIEWED_TEAMS } from '../data/team-profiles/chiori-reviewed.js'
 import { CITLALI_REVIEWED_TEAMS } from '../data/team-profiles/citlali-reviewed.js';
 import { CYNO_REVIEWED_TEAMS } from '../data/team-profiles/cyno-reviewed.js';
 import { DEHYA_REVIEWED_TEAMS } from '../data/team-profiles/dehya-reviewed.js';
+import { DILUC_REVIEWED_TEAMS } from '../data/team-profiles/diluc-reviewed.js';
 
 registerReviewedTeams(ALOY_REVIEWED_TEAMS);
 registerReviewedTeams(AMBER_REVIEWED_TEAMS);
@@ -18,3 +19,4 @@ registerReviewedTeams(CHIORI_REVIEWED_TEAMS);
 registerReviewedTeams(CITLALI_REVIEWED_TEAMS);
 registerReviewedTeams(CYNO_REVIEWED_TEAMS);
 registerReviewedTeams(DEHYA_REVIEWED_TEAMS);
+registerReviewedTeams(DILUC_REVIEWED_TEAMS);
