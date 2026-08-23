@@ -72,6 +72,30 @@ export default {
     {name:'Flins Lunar Charge',members:['Aino','Flins','Ineffa','Sucrose']},
     {name:'Nilou Bloom',members:['Aino','Nahida','Nilou','Baizhu']}
   ],
+  defaultVariant:'offfield-hydro-support',
+  variants:[
+    {
+      id:'offfield-hydro-support',
+      name:'Off-field Hydro Support',
+      note:'Game8 default build: stack EM while meeting team-dependent ER so Aino can maintain Burst uptime.',
+      overrides:{
+        mainStats:{sands:['Elemental Mastery'],goblet:['Elemental Mastery'],circlet:['CRIT Rate / CRIT DMG','Elemental Mastery']},
+        substats:['Elemental Mastery','CRIT Rate','CRIT DMG','Energy Recharge'],
+        weaponPriority:['Flame-Forged Insight','Master Key','Favonius Greatsword','Makhaira Aquamarine'],
+        artifactPriority:["Silken Moon's Serenade",'Noblesse Oblige','Aubade of Morningstar and Moon','Instructor'],
+        goalStats:[
+          {label:'Elemental Mastery',value:'700–800'},
+          {label:'Energy Recharge',value:'150–180% (Solo Hydro) · 110–130% (Double Hydro)'},
+          {label:'CRIT Rate',value:'50–70%'},
+          {label:'CRIT DMG',value:'100–120%'}
+        ],
+        buildSummaryTeams:[
+          {name:'Flins Lunar Charge',members:['Aino','Flins','Ineffa','Sucrose']},
+          {name:'Nilou Bloom',members:['Aino','Nahida','Nilou','Baizhu']}
+        ]
+      }
+    }
+  ],
   goalStats:[
     {label:'Elemental Mastery',value:'700–800'},
     {label:'Energy Recharge',value:'150–180% (Solo Hydro) · 110–130% (Double Hydro)'},
