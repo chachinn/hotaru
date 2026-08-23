@@ -4,7 +4,7 @@ export default {
   aliases:['Damselette','Columbina Hyposelenia'],
   reviewed:true,
   reviewedAt:'2026-08-23',
-  role:'Lunar Reactions Buffer / Off-field DPS',
+  role:'Off-field Support / DPS',
   roleGroup:'Support',
   tierRatings:[
     {label:'Main DPS',rating:'—'},
@@ -23,7 +23,7 @@ export default {
   scalingDetail:'Her personal Lunar damage and buffing value scale strongly with HP, with Game8 placing the practical buff cap around 35,000 HP. ER is rotation-dependent and can be substantially higher than generic guide targets when Bursting every rotation.',
   focus:'Elemental Skill',
   reactionDriven:true,
-  defaultVariant:'lunar-buffer-support',
+  defaultVariant:'offfield',
   targets:{
     cr:{min:60,good:70,great:80,unit:'%'},
     cd:{min:160,good:180,great:200,unit:'%'},
@@ -73,11 +73,11 @@ export default {
   ],
   variants:[
     {
-      id:'lunar-buffer-support',
+      id:'offfield',
       name:'Lunar Reactions Buffer / Support',
       note:'Default off-field build. Prioritize the HP needed for her buff cap, then the ER required by your actual team and Burst frequency, then CRIT for personal Lunar damage.',
       overrides:{
-        role:'Lunar Reactions Buffer / Off-field DPS',roleGroup:'Support',focus:'Elemental Skill',
+        role:'Off-field Support / DPS',roleGroup:'Support',focus:'Elemental Skill',
         mainStats:{sands:['HP%','Energy Recharge'],goblet:['HP%'],circlet:['CRIT Rate','CRIT DMG','HP%']},
         substats:['HP%','Energy Recharge','CRIT Rate','CRIT DMG','Elemental Mastery'],
         talentPriority:['skill','burst','attack'],
@@ -96,11 +96,11 @@ export default {
       }
     },
     {
-      id:'reaction-dps',
+      id:'onfield',
       name:'Lunar-Bloom / Reaction DPS',
       note:'For teams where Columbina contributes more on-field reaction damage. Hydro DMG Goblet becomes a real option; Night of the Sky’s Unveiling is strongest when she can remain on-field or swap in frequently.',
       overrides:{
-        role:'On-field Lunar-Bloom / Reaction DPS',roleGroup:'DPS',focus:'Charged Attack',
+        role:'On-field Lunar-Bloom DPS',roleGroup:'DPS',focus:'Charged Attack',
         targets:{cr:{min:60,good:70,great:80,unit:'%'},cd:{min:160,good:180,great:200,unit:'%'},er:{min:150,good:200,great:210,unit:'%'},em:{min:0,good:0,great:0,unit:''}},
         targetOverrides:{er:{cases:[{when:{burstCycle:'every'},bySameElement:{'0':{min:195,good:200,great:210,unit:'%'},'1':{min:150,good:160,great:175,unit:'%'},'2':{min:150,good:160,great:175,unit:'%'},'3':{min:150,good:160,great:175,unit:'%'}}},{when:{burstCycle:'everyOther'},bySameElement:{'0':{min:100,good:100,great:105,unit:'%'},'1':{min:100,good:100,great:100,unit:'%'},'2':{min:100,good:100,great:100,unit:'%'},'3':{min:100,good:100,great:100,unit:'%'}}}],favoniusReductionPerProc:12,favoniusReductionMax:36,floor:100}},
         mainStats:{sands:['HP%','Energy Recharge'],goblet:['Hydro DMG%','HP%'],circlet:['CRIT Rate','CRIT DMG']},
