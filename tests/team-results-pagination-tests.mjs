@@ -49,7 +49,7 @@ assert.match(css,/\.hotaru-team-results-pager/,'paged results must have stable c
 assert.match(css,/\.hotaru-team-page-actions/,'Previous/Next controls must have a dedicated layout');
 assert.match(css,/@media\(max-width:600px\)[\s\S]*\.hotaru-team-results-pager\{align-items:stretch;flex-direction:column\}/,'pager controls must remain phone-friendly');
 assert.match(index,/smart-team-results-pagination\.js\?v=1\.2\.2&hotfix=52/,'v52 pagination fix must use a fresh cache key');
-assert.match(sw,/smart-team-results-pagination\.js\?v=1\.2\.1/,'stable v46 shell remains intentionally unchanged while index requests the fresh pagination module');
+assert.match(sw,/smart-team-results-pagination\.js\?v=1\.2\.2&hotfix=52/,'v47 shell must cache the active no-jump pagination module');
 assert.match(index,/css\/smart-team-v48\.css\?v=1\.0\.2/,'fixed picker styles must use a fresh cache-busted URL');
 assert.match(index,/smart-team-mobile-result-menus\.js\?v=1\.1\.0/,'fixed mobile Show/Sort picker must load after pagination with a fresh URL');
 assert.match(index,/smart-team-filter-scroll-fix\.js\?v=1\.0\.1/,'legacy native-select scroll guard changes must be cache-busted');

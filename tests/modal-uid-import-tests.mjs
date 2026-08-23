@@ -73,6 +73,6 @@ const samePreview=parseShowcase({playerInfo:{showAvatarInfoList:[{avatarId:10000
 const preservedPreview=mergeUIDShowcase([{...refreshed,constellation:4}],samePreview.roster,catalog);
 assert.equal(preservedPreview.roster[0].constellation,4,'Minimal showcase previews must not erase detailed constellation data collected earlier');
 
-assert.match(sw,/hotaru-shell-v26/);assert.match(sw,/js\/features\/uid-import\.js/);assert.match(sw,/app\.js\?v=1\.12\.0/);
-assert.match(index,/app\.js\?v=1\.12\.0/);
+assert.match(sw,/hotaru-shell-v26/);assert.match(sw,/js\/features\/uid-import\.js/);assert.match(sw,/app\.js\?v=1\.12\.1/);
+assert.match(index,/app\.js\?v=1\.12\.1/);
 console.log('Hotaru modal interaction + Smart UID accumulation regression QA passed.');

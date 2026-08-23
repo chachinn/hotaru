@@ -1,5 +1,6 @@
-const RELEASE='v46';
+const RELEASE='v47';
 const RELOAD_KEY=`hotaru.pwa-reload.${RELEASE}`;
+const OP_TIMEOUT_MS=2200;
 let registration=null;
 let updating=false;
 let refreshing=false;
@@ -7,6 +8,7 @@ let refreshing=false;
 function safeSessionGet(key){try{return sessionStorage.getItem(key)}catch{return null}}
 function safeSessionSet(key,value){try{sessionStorage.setItem(key,value)}catch{}}
 function shouldReload(){return !safeSessionGet(RELOAD_KEY)}
+function settleWithin(promise,ms=OP_TIMEOUT_MS,fallback=null){let timer;return Promise.race([Promise.resolve(promise).catch(()=>fallback),new Promise(resolve=>{timer=setTimeout(()=>resolve(fallback),ms)})]).finally(()=>clearTimeout(timer))}
 function reloadIntoFreshShell(){
   if(!shouldReload())return;
   safeSessionSet(RELOAD_KEY,'1');
@@ -15,7 +17,7 @@ function reloadIntoFreshShell(){
 async function requestUpdate(){
   if(!registration||updating)return;
   updating=true;
-  try{await registration.update()}catch{}finally{updating=false}
+  try{await settleWithin(registration.update(),OP_TIMEOUT_MS)}catch{}finally{updating=false}
 }
 function refreshButton(){return document.getElementById('hotaru-app-refresh')}
 function ensureRefreshButton(){
@@ -29,8 +31,8 @@ async function forceFreshRefresh(){
     await requestUpdate();
     if(registration?.waiting)registration.waiting.postMessage({type:'SKIP_WAITING'});
     if('caches'in window&&navigator.onLine){
-      const probe=await fetch(new URL('./index.html',location.href),{cache:'reload'});if(!probe.ok)throw new Error('Latest Hotaru shell is not reachable.');
-      const keys=await caches.keys();await Promise.all(keys.filter(name=>name.startsWith('hotaru-shell-')).map(name=>caches.delete(name)));
+      const probe=await settleWithin(fetch(new URL('./index.html',location.href),{cache:'reload'}),OP_TIMEOUT_MS);if(!probe?.ok)throw new Error('Latest Hotaru shell is not reachable.');
+      const keys=await settleWithin(caches.keys(),OP_TIMEOUT_MS,[]);await settleWithin(Promise.allSettled((keys||[]).filter(name=>name.startsWith('hotaru-shell-')).map(name=>caches.delete(name))),OP_TIMEOUT_MS);
     }
     location.reload();
   }catch{
@@ -40,7 +42,7 @@ async function forceFreshRefresh(){
 async function registerFreshShell(){
   if(!('serviceWorker'in navigator))return;
   navigator.serviceWorker.addEventListener('controllerchange',reloadIntoFreshShell);
-  try{registration=await navigator.serviceWorker.register('./service-worker.js',{updateViaCache:'none'});await requestUpdate()}catch{}
+  try{registration=await settleWithin(navigator.serviceWorker.register('./service-worker.js',{updateViaCache:'none'}),OP_TIMEOUT_MS);if(registration)await requestUpdate()}catch{}
 }
 
 document.addEventListener('click',event=>{if(event.target.closest('#hotaru-app-refresh')){event.preventDefault();forceFreshRefresh()}},false);

@@ -40,6 +40,6 @@ assert.match(index,/character-compatibility\/albedo\.js/);
 assert.match(sw,/build-profiles\/albedo\.js/);
 assert.match(sw,/team-profiles\/albedo-reviewed\.js/);
 assert.match(sw,/character-compatibility\/albedo\.js/);
-assert.match(sw,/const CACHE = 'hotaru-shell-v46'/);
-assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v45'/);
+assert.match(sw,/const CACHE = 'hotaru-shell-v47'/);
+assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v46'/);
 console.log(`Albedo review QA passed · ${profile.variants.length} builds · ${unique.size} reviewed teams · ${audit.total}/148 compatibility records checked.`);
