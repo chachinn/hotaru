@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import { RELEASED_AVATAR_AUDIT_V45 } from './fixtures/released-avatar-audit-v45.mjs';
+import { reviewedBuildProfile } from '../js/data/build-profiles/index.js';
+import { inferBuildProfile } from '../js/features/build-engine.js';
+import { resolveBuildProfile } from '../js/features/build-profiles.js';
+import { JEAN_REVIEWED_TEAMS } from '../js/data/team-profiles/jean-reviewed.js';
+import { registerReviewedTeams } from '../js/data/team-profiles/index.js';
+import { compositionKey, recommendedTeamsForCharacter, teamHasValidSource } from '../js/data/team-recommendations.js';
+import { JEAN_COMPATIBILITY_POLICY, jeanCompatibilityForCharacter, auditJeanCompatibility } from '../js/data/character-compatibility/jean.js';
+registerReviewedTeams(JEAN_REVIEWED_TEAMS);
+const fallback=inferBuildProfile({name:'Jean',element:'Anemo',weapon:'Sword',description:'Teamwide Anemo healer'}),profile=resolveBuildProfile({name:'Jean',element:'Anemo'},fallback,{}),raw=reviewedBuildProfile('Jean');
+assert.equal(profile.profileSource,'reviewed');assert.equal(raw.variants.length,2);assert.deepEqual(raw.variants.map(v=>v.id),['general-support','sunfire']);
+const general=resolveBuildProfile({name:'Jean'},fallback,{buildVariant:'general-support'});assert.equal(general.artifactPriority[0],'Viridescent Venerer');assert.ok(general.mainStats.sands.includes('Energy Recharge'));assert.ok(general.mainStats.circlet.includes('Healing Bonus'));assert.ok(general.goalStats.some(x=>/Furina/i.test(`${x.label} ${x.value}`)));
+const sunfire=resolveBuildProfile({name:'Jean'},fallback,{buildVariant:'sunfire'});assert.equal(sunfire.mainStats.goblet[0],'Elemental Mastery');assert.equal(sunfire.mainStats.circlet[0],'Elemental Mastery');assert.ok(sunfire.mainStats.sands.includes('Elemental Mastery'));assert.ok(sunfire.goalStats.some(x=>/Bennett is required/i.test(x.value)));
+const sourced=recommendedTeamsForCharacter('Jean').filter(teamHasValidSource),unique=new Set(sourced.map(compositionKey)),reviewedUnique=new Set(JEAN_REVIEWED_TEAMS.map(compositionKey));assert.ok(unique.size>=24,`Jean should expose broad reviewed coverage; got ${unique.size}`);assert.equal(reviewedUnique.size,JEAN_REVIEWED_TEAMS.length,'Jean reviewed teams must not inflate counts through duplicate member sets');assert.ok([...reviewedUnique].every(k=>unique.has(k)));assert.ok(JEAN_REVIEWED_TEAMS.every(t=>!/(game8|kqm|keqingmains|icy veins|hoyolab|reddit|youtube|fandom)/i.test(`${t.name} ${t.why} ${t.notes||''}`)));
+const audit=auditJeanCompatibility(RELEASED_AVATAR_AUDIT_V45);assert.equal(audit.total,148);assert.ok(audit.rows.every(row=>row.status!=='invalid'));assert.ok(audit.rows.every(row=>row.status!=='unverified'||(!row.smartTeamApproved&&!row.adaptationAllowed)));
+for(const name of ['Furina','Bennett','Xiao','Wanderer','Faruzan','Raiden Shogun','Ganyu','Kamisato Ayaka','Neuvillette','Fischl','Nahida','Yelan','Xingqiu'])assert.equal(jeanCompatibilityForCharacter(name).smartTeamApproved,true,`${name} should be approved for Jean`);assert.equal(jeanCompatibilityForCharacter('Aether TPS').status,'not-applicable');assert.equal(jeanCompatibilityForCharacter('Manekin').status,'not-applicable');assert.match(JEAN_COMPATIBILITY_POLICY.rule,/Sunfire is only valid when Bennett and Jean Bursts overlap/i);assert.match(JEAN_COMPATIBILITY_POLICY.rule,/does not replace dedicated structural buffers such as Faruzan/i);
+console.log(`Jean review QA passed · ${raw.variants.length} builds · ${unique.size} distinct sourced teams · ${audit.total}/148 compatibility records checked.`);
