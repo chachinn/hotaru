@@ -1,3 +1,13 @@
+import './character-section-shortcuts.js';
+
+if(!document.querySelector('link[data-character-section-shortcuts]')){
+  const link=document.createElement('link');
+  link.rel='stylesheet';
+  link.href='css/character-section-shortcuts.css?v=1.0.0';
+  link.dataset.characterSectionShortcuts='1';
+  document.head.appendChild(link);
+}
+
 function syncCharacterSearchClear(){
   const input=document.getElementById('character-search');
   if(!input)return;
