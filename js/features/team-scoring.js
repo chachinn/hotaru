@@ -58,6 +58,11 @@ export function readinessScore(teamMembers=[],roster=[]){
   for(const name of teamMembers){const entry=map.get(key(name));if(!entry)continue;const level=clamp(entry?.level,1,90,1);total+=(level>=90?24:level>=80?16:level>=70?4:-20)+(STATUS_SCORE[entry.status]??0)+(PRIORITY_SCORE[entry.priority]??0)}
   return Math.round(total);
 }
+export function teamLevelReadiness(teamMembers=[],roster=[]){
+  const map=rosterMap(roster),levels=(teamMembers||[]).map(name=>{const entry=map.get(key(name));return entry?clamp(entry?.level,1,90,1):0});
+  const level90Count=levels.filter(level=>level>=90).length,level80PlusCount=levels.filter(level=>level>=80).length,below80Count=levels.filter(level=>level<80).length;
+  return{levels,level90Count,level80PlusCount,below80Count,allLevel90:levels.length>0&&level90Count===levels.length,averageLevel:levels.length?Math.round(levels.reduce((sum,level)=>sum+level,0)/levels.length):0};
+}
 export function rosterInvestmentScore(teamMembers=[],roster=[],{artifacts=[],weaponDataAvailable=false,artifactDataAvailable=false}={}){
   const map=rosterMap(roster),byLocation=artifactMap(artifacts),scores=(teamMembers||[]).map(name=>{
     const entry=map.get(key(name));if(!entry)return-400;
@@ -73,6 +78,7 @@ export function scoreReviewedTeam(team,{roster=[],ownedNames=[],lockedNames=[],a
   const owned=new Set((ownedNames||[]).map(key)),members=(team.members||[]).map(key),locked=(lockedNames||[]).filter(Boolean).map(key);
   if(locked.some(name=>!members.includes(name)))return Number.NEGATIVE_INFINITY;
   const ownedCount=members.filter(name=>owned.has(name)).length,missingCount=Math.max(0,members.length-ownedCount);
-  const weaponDataAvailable=(roster||[]).some(entry=>entry?.equippedWeapon),artifactDataAvailable=Array.isArray(artifacts)&&artifacts.length>0;
-  return ownedCount*100-missingCount*120+readinessScore(team.members,roster)+rosterInvestmentScore(team.members,roster,{artifacts,weaponDataAvailable,artifactDataAvailable})+(locked.length*40);
+  const weaponDataAvailable=(roster||[]).some(entry=>entry?.equippedWeapon),artifactDataAvailable=Array.isArray(artifacts)&&artifacts.length>0,levels=teamLevelReadiness(team.members,roster);
+  const levelPriority=(levels.level90Count*180)+(levels.allLevel90?520:0)-(levels.below80Count*220);
+  return ownedCount*100-missingCount*120+readinessScore(team.members,roster)+rosterInvestmentScore(team.members,roster,{artifacts,weaponDataAvailable,artifactDataAvailable})+levelPriority+(locked.length*40);
 }
