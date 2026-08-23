@@ -6,12 +6,11 @@ const game8=()=>source('Game8 Citlali Best Builds and Teams',GAME8,'Source-backe
 const confidenceFor=s=>s?.type==='Reviewed theorycraft'?'Reviewed':'Community-sourced';
 const team=(id,name,members,reaction,why,src,notes='',provenance='exact')=>({id,name,members,reaction,why,notes,provenance,confidence:confidenceFor(src),source:src,anchor:'Citlali',profileId:'citlali'});
 export const CITLALI_REVIEWED_TEAMS=[
-  team('citlali-game8-mavuika-xilonen-bennett','Melt · Mavuika/Xilonen/Bennett',['Citlali','Mavuika','Xilonen','Bennett'],'melt','Game8 exact Standard Pyro Melt team.',game8()),
+  team('citlali-game8-mavuika-xilonen-bennett','Melt · Mavuika/Xilonen/Bennett',['Citlali','Mavuika','Xilonen','Bennett'],'melt','Game8 and KQM exact Mavuika Melt team.',{...game8(),links:[game8(),kqm()]}),
   team('citlali-game8-mavuika-rosaria-xilonen','Melt · Mavuika/Rosaria/Xilonen',['Citlali','Mavuika','Rosaria','Xilonen'],'melt','Game8 exact Melt team.',game8()),
   team('citlali-game8-arlecchino-rosaria-bennett','Melt · Arlecchino/Rosaria/Bennett',['Citlali','Arlecchino','Rosaria','Bennett'],'melt','Game8 exact Arlecchino Melt team.',game8()),
   team('citlali-kqm-mavuika-bennett-kazuha','Melt · Mavuika/Bennett/Kazuha',['Citlali','Mavuika','Bennett','Kaedehara Kazuha'],'melt','KQM exact Mavuika Melt shell.',kqm()),
   team('citlali-kqm-mavuika-bennett-sucrose','Melt · Mavuika/Bennett/Sucrose',['Citlali','Mavuika','Bennett','Sucrose'],'melt','KQM exact Mavuika Melt shell.',kqm()),
-  team('citlali-kqm-mavuika-bennett-xilonen','Melt · Mavuika/Bennett/Xilonen',['Citlali','Mavuika','Bennett','Xilonen'],'melt','KQM exact Mavuika Melt shell.',kqm()),
   team('citlali-kqm-arlecchino-bennett-kazuha','Melt · Arlecchino/Bennett/Kazuha',['Citlali','Arlecchino','Bennett','Kaedehara Kazuha'],'melt','KQM exact Arlecchino Melt shell.',kqm()),
   team('citlali-kqm-arlecchino-bennett-xilonen','Melt · Arlecchino/Bennett/Xilonen',['Citlali','Arlecchino','Bennett','Xilonen'],'melt','KQM exact Arlecchino Melt shell.',kqm()),
   team('citlali-kqm-chasca-bennett-mavuika','Melt · Chasca/Bennett/Mavuika',['Citlali','Chasca','Bennett','Mavuika'],'melt','KQM exact Chasca Melt example.',kqm()),
