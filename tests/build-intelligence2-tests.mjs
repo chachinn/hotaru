@@ -118,7 +118,7 @@ assert.ok(sw.includes('build-profiles/columbina.js'));
 assert.ok(sw.includes('build-profiles/odette.js'),'Odette reviewed profile must be available in the offline shell');
 assert.ok(sw.includes('build-profiles/aino.js'),'Aino reviewed profile must be available in the offline shell');
 assert.ok(index.includes('staleBuildProfiles'),'character review releases must clear cached reviewed-profile modules before app.js loads');
-assert.ok(index.indexOf('staleBuildProfiles')<index.indexOf('app.js?v=1.12.0'),'reviewed-profile cache refresh must run before app.js imports the profile index');
+assert.ok(index.indexOf('staleBuildProfiles')<index.indexOf('app.js?v=1.12.1'),'reviewed-profile cache refresh must run before app.js imports the profile index');
 assert.ok(index.includes("new URL('./js/data/team-profiles/index.js',location.href).href"),'reviewed releases must refresh cached team-profile data before Smart Team imports it');
 assert.ok(index.includes("new URL('./js/data/team-profiles/aino.js',location.href).href"),'Aino release must refresh its reviewed team module before Smart Team imports it');
 assert.ok(sw.includes('team-profiles/aino.js'),'Aino reviewed team module must be available in the offline shell');
