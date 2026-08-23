@@ -6,9 +6,12 @@ const css=fs.readFileSync(new URL('../css/character-section-shortcuts.css',impor
 for(const label of ['Overview','Build','Stats','Artifacts','Weapons','Talents','Teams','Materials','Farming'])assert.match(shortcuts,new RegExp(`label:'${label}'`),`Missing ${label} character shortcut`);
 assert.match(shortcuts,/data-char-section/,'Shortcuts must reuse the existing global character section controls');
 assert.match(shortcuts,/requestAnimationFrame\(\(\)=>requestAnimationFrame\(settle\)\)/,'Deep links must wait for the newly rendered character section before scrolling');
+assert.match(shortcuts,/function waitForHeading\(item,attempt=0\)/,'Deep shortcuts must wait for their exact requested subsection');
+assert.match(shortcuts,/if\(attempt<12\)/,'Deep shortcuts must tolerate asynchronous character-guide rendering');
+assert.doesNotMatch(shortcuts,/headingTarget\(item\.headings\)\|\|characterPage\(\)\?\.nextElementSibling/,'Deep shortcuts must never fall back to an unrelated section when the requested heading is missing');
 assert.match(shortcuts,/scrollTo\(\{top,behavior\}\)/,'Shortcuts must scroll in-page rather than navigate away');
 assert.match(mobile,/import '\.\/character-section-shortcuts\.js'/,'Character mobile UX must load shortcuts for every character page');
 assert.match(mobile,/character-section-shortcuts\.css/,'Character shortcut styles must load globally with character mobile UX');
 assert.match(css,/position:sticky/,'Shortcut strip must remain reachable while scrolling');
 assert.match(css,/overflow-x:auto/,'Shortcut strip must stay usable on narrow iPhone screens without hiding options');
-console.log('Global character section shortcut QA passed · overview/build/deep-build/material navigation covered.');
+console.log('Global character section shortcut QA passed · exact deep-link routing covered.');

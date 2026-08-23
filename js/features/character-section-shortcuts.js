@@ -36,7 +36,22 @@ function scrollTarget(target,behavior='smooth'){
   window.setTimeout(()=>target.classList.remove('character-shortcut-flash'),700);
 }
 
-function activateShortcut(item,button){
+function waitForHeading(item,attempt=0){
+  const target=headingTarget(item.headings);
+  if(target){
+    scrollTarget(target);
+    return;
+  }
+  if(attempt<12){
+    requestAnimationFrame(()=>waitForHeading(item,attempt+1));
+    return;
+  }
+  // Never misroute a deep shortcut to the top of another section.
+  // If the requested subsection is unavailable, keep the correct tab active
+  // and leave the user's scroll position alone.
+}
+
+function activateShortcut(item){
   const segmented=characterPage();
   if(!segmented)return;
   const current=segmented.querySelector('[data-char-section].active')?.dataset.charSection;
@@ -45,14 +60,14 @@ function activateShortcut(item,button){
   const settle=()=>{
     ensureShortcuts();
     document.querySelectorAll('[data-character-shortcut]').forEach(node=>node.classList.toggle('active',node.dataset.characterShortcut===item.id));
-    if(!item.headings.length){
-      const activeTab=characterPage();
-      if(item.id==='build')scrollTarget(activeTab?.nextElementSibling||activeTab);
-      else if(item.id==='overview')scrollTarget(document.querySelector('main .detail-head'));
-      else scrollTarget(activeTab?.nextElementSibling||activeTab);
+    if(item.headings.length){
+      waitForHeading(item);
       return;
     }
-    scrollTarget(headingTarget(item.headings)||characterPage()?.nextElementSibling||characterPage());
+    const activeTab=characterPage();
+    if(item.id==='build')scrollTarget(activeTab?.nextElementSibling||activeTab);
+    else if(item.id==='overview')scrollTarget(document.querySelector('main .detail-head'));
+    else scrollTarget(activeTab?.nextElementSibling||activeTab);
   };
   requestAnimationFrame(()=>requestAnimationFrame(settle));
 }
@@ -72,7 +87,7 @@ function ensureShortcuts(){
     const button=event.target.closest('[data-character-shortcut]');
     if(!button)return;
     const item=SHORTCUTS.find(entry=>entry.id===button.dataset.characterShortcut);
-    if(item)activateShortcut(item,button);
+    if(item)activateShortcut(item);
   });
 }
 
