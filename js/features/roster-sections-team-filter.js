@@ -117,7 +117,7 @@ function schedulePatch(){if(patchQueued)return;patchQueued=true;requestAnimation
 if(app)new MutationObserver(schedulePatch).observe(app,{childList:true,subtree:true});
 
 document.addEventListener('click',event=>{
-  const rosterSection=event.target.closest('[data-hotaru-roster-section]');if(rosterSection){event.preventDefault();event.stopPropagation();chooseRosterSection(rosterSection.dataset.hotaruRosterSection);return}
+  const rosterSection=event.target.closest('button[data-hotaru-roster-section],a[data-hotaru-roster-section]');if(rosterSection){event.preventDefault();event.stopPropagation();chooseRosterSection(rosterSection.dataset.hotaruRosterSection);return}
   if(event.target.closest('[data-action="open-team-creator"]'))safeSet(SECTION_KEY,'teams');
   if(event.target.closest('[data-action="open-farm-planner"]'))safeSet(SECTION_KEY,'farming');
   const menuJump=event.target.closest('[data-hotaru-nav-jump]');if(menuJump)safeSet(SECTION_KEY,menuJump.dataset.hotaruNavJump==='teams'?'teams':'farming');

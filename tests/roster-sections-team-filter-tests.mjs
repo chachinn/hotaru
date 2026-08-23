@@ -43,6 +43,8 @@ const sw=read('service-worker.js');
 const updater=read('js/pwa-update.js');
 
 assert.match(ui,/hotaru\.roster-section\.v1/); assert.match(ui,/hotaru\.team-utility\.v1/);
+assert.match(ui,/closest\('button\[data-hotaru-roster-section\],a\[data-hotaru-roster-section\]'\)/,'section navigation capture must only match actual menu controls');
+assert.doesNotMatch(ui,/closest\('\[data-hotaru-roster-section\]'\)/,'ordinary taps inside a roster section must never be captured as section navigation');
 assert.match(ui,/hotaru\.team-utility-category\.v1/,'legacy key remains for migration');
 assert.match(ui,/section\.hidden=id!==resolved/); assert.match(ui,/function openRosterTab\(\)/);
 assert.match(ui,/new MutationObserver\(schedulePatch\)\.observe\(app,\{childList:true,subtree:true\}\)/);
@@ -56,10 +58,10 @@ for(const section of ['characters','teams','farming','weapons']) assert.ok(nav.i
 assert.match(css,/section\[hidden\]/); assert.match(css,/\.hotaru-team-picker-ownership-field/);
 assert.match(css,/@media\(max-width:600px\)[\s\S]*\.smart-team-card \.team-controls\{grid-template-columns:1fr\}/);
 assert.match(css,/\.hotaru-team-results-tools/); assert.match(css,/@media\(max-width:600px\)[\s\S]*\.hotaru-team-results-tools\{grid-template-columns:1fr\}/);
-assert.match(index,/roster-sections-team-filter\.css\?v=1\.3\.0/); assert.match(index,/roster-sections-team-filter\.js\?v=1\.3\.1/);
+assert.match(index,/roster-sections-team-filter\.css\?v=1\.3\.0/); assert.match(index,/roster-sections-team-filter\.js\?v=1\.3\.2/);
 assert.match(index,/smart-team-mobile-controller\.js\?v=1\.0\.5/); assert.match(index,/smart-team-results-pagination\.js\?v=1\.2\.2&hotfix=52/);
 assert.match(sw,/const CACHE = 'hotaru-shell-v46'/); assert.match(sw,/PREVIOUS_CACHE = 'hotaru-shell-v45'/);
-assert.match(sw,/smart-team-results-pagination\.js\?v=1\.2\.1/); assert.match(sw,/roster-sections-team-filter\.css\?v=1\.3\.0/);
+assert.match(sw,/smart-team-results-pagination\.js\?v=1\.2\.1/); assert.match(sw,/roster-sections-team-filter\.css\?v=1\.3\.0/); assert.match(sw,/roster-sections-team-filter\.js\?v=1\.3\.2/);
 assert.match(updater,/RELEASE='v46'/);
 
 console.log('Hotaru clean Roster + Team Need + result-tools mobile layout QA passed.');
