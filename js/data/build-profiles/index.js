@@ -8,8 +8,9 @@ import alhaitham from './alhaitham.js';
 import albedo from './albedo.js';
 import aloy from './aloy.js';
 import amber from './amber.js';
+import aratakiItto from './arataki-itto.js';
 
-export const REVIEWED_BUILD_PROFILES=[arlecchino,tartaglia,columbina,clorinde,odette,aino,alhaitham,albedo,aloy,amber];
+export const REVIEWED_BUILD_PROFILES=[arlecchino,tartaglia,columbina,clorinde,odette,aino,alhaitham,albedo,aloy,amber,aratakiItto];
 
 function key(value=''){return String(value||'').trim().toLowerCase()}
 const PROFILE_INDEX=new Map();
