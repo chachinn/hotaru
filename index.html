@@ -33,9 +33,11 @@
   <div id="modal-root"></div>
   <script src="js/pwa-update.js?v=1.1.0"></script>
   <script type="module">
-    // Character-review delivery: refresh reviewed profile/team/compatibility and guide modules before app.js imports them.
+    // Character-review + startup delivery: refresh modules that must never remain stale in an installed PWA.
     if ('caches' in window) {
       const staleBuildProfiles=[
+        new URL('./js/core/cache.js',location.href).href,
+        new URL('./js/data/game-data.js',location.href).href,
         new URL('./js/features/build-profiles.js',location.href).href,
         new URL('./js/data/build-profiles/index.js',location.href).href,
         new URL('./js/data/build-profiles/aino.js',location.href).href,
