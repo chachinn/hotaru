@@ -30,5 +30,7 @@ function sync(){
 function scheduleSync(){if(syncQueued)return;syncQueued=true;requestAnimationFrame(()=>{syncQueued=false;sync()})}
 document.addEventListener('click',event=>{const button=event.target?.closest?.('[data-hotaru-abyss-preference-mode]');if(!button)return;const preferences=loadPreferences();preferences.mode=button.dataset.hotaruAbyssPreferenceMode==='sides'?'sides':'auto';savePreferences(preferences);scheduleSync()});
 document.addEventListener('change',event=>{if(event.target?.id==='hotaru-abyss-rules-mode'){saveMode(event.target.value);scheduleSync();return}if(!event.target?.matches?.('[data-hotaru-abyss-preference-group]'))return;const preferences=loadPreferences(),group=event.target.dataset.hotaruAbyssPreferenceGroup,index=Number(event.target.dataset.hotaruAbyssPreferenceIndex);if(!['any','first','second'].includes(group)||!Number.isInteger(index))return;preferences[group][index]=event.target.value||'';savePreferences(preferences);scheduleSync()});
-if(app)new MutationObserver(scheduleSync).observe(app,{childList:true,subtree:true});
+// Only observe top-level Hotaru rerenders. The preference UI explicitly schedules its own updates,
+// so watching the subtree would make its own innerHTML writes observable again.
+if(app)new MutationObserver(scheduleSync).observe(app,{childList:true});
 savePreferences(loadPreferences());saveMode(loadMode());if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',scheduleSync,{once:true});else scheduleSync();
