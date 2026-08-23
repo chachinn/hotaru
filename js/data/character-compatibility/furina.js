@@ -1,0 +1,31 @@
+import { FURINA_REVIEWED_TEAMS } from '../team-profiles/furina-reviewed.js';
+const KQM='https://keqingmains.com/q/furina-quickguide/',IV='https://www.icy-veins.com/genshin-impact/furina-guide-best-builds';
+const source=(label,url,type)=>({label,url,type,platform:'Guide',reviewedAt:'2026-08-23'}),SOURCES=[source('Current Furina theorycraft',KQM,'Reviewed theorycraft'),source('Current Furina build cross-check',IV,'Source-backed guide')];
+function key(v=''){return String(v||'').trim().toLowerCase()} function special(v=''){return /\bTPS\b|manekin/i.test(String(v||''))}
+function canonical(v=''){const n=String(v||'').trim();for(const e of ['Anemo','Geo','Electro','Dendro','Hydro','Pyro','Cryo'])if(new RegExp(`\\b(?:aether|lumine)\\s+${e}\\b`,'i').test(n))return`${e} Traveler`;return n}
+const evidence=new Map();for(const t of FURINA_REVIEWED_TEAMS)for(const m of t.members||[]){if(key(m)==='furina')continue;const k=key(m),r=evidence.get(k)||{teams:[],sources:[],reactions:[]};r.teams.push(t.id);if(t.reaction)r.reactions.push(t.reaction);for(const s of [t.source,...(t.source?.links||[])])if(s?.url&&!r.sources.some(x=>x.url===s.url))r.sources.push(s);evidence.set(k,r)}
+const caveat=new Map([
+[key('Neuvillette'),'Excellent Furina partner because his self-HP drain/healing stacks Fanfare quickly and Double Hydro lowers Furina ER.'],
+[key('Jean'),'High-value teamwide healer plus Viridescent shred; one of Furina’s cleanest generic sustain partners.'],
+[key('Xianyun'),'Teamwide healing stacks Fanfare while plunge buffs create dedicated Xiao/Gaming/Hu Tao/Diluc shells.'],
+[key('Baizhu'),'Strong teamwide sustain for Fanfare and especially useful in Quickbloom/Dendro teams.'],
+[key('Charlotte'),'Teamwide Cryo healing makes her especially effective in Furina Freeze teams.'],
+[key('Xilonen'),'Healing plus RES shred gives Furina teams strong sustain and offensive utility.'],
+[key('Bennett'),'Single-target healing stacks Fanfare less efficiently than teamwide healing but his ATK buff can justify the slot for ATK scalers.'],
+[key('Kuki Shinobu'),'Healing supports Fanfare while her Electro can trigger Hyperbloom; Furina’s DMG Bonus does not directly buff Hyperbloom damage.'],
+[key('Arlecchino'),'Arlecchino cannot receive outside healing in combat, so Furina teams with her stack Fanfare less comfortably than teams with healable/self-healing carries.'],
+[key('Yelan'),'Excellent Double Hydro partner with strong off-field direct damage; Hydro Resonance and extra particles lower Furina ER pressure.'],
+[key('Xingqiu'),'Reliable Double Hydro partner with damage reduction and application; Furina benefits from the extra Hydro particles.'],
+[key('Sangonomiya Kokomi'),'On-field or off-field Hydro healer who can sustain Fanfare extremely well and enables comfortable Mono/Double Hydro teams.'],
+[key('Cyno'),'Quickbloom works because Furina’s slower Hydro preserves more Quicken uptime, but Cyno ER can remain high as solo Electro.'],
+[key('Alhaitham'),'Strong Quickbloom partner; Furina buffs his direct Spread damage while Kuki/Baizhu-style sustain covers Fanfare.'],
+[key('Clorinde'),'Her self-healing naturally contributes Fanfare, making her a comfortable Electro-Charged carry with Furina.'],
+[key('Eula'),'Furina buffs both Physical and Cryo portions of Eula’s damage; keep healing and Superconduct structure intact.'],
+[key('Freminet'),'Furina enables Shatter and buffs Freminet’s direct Physical/Cryo damage.'],
+[key('Kamisato Ayaka'),'Freeze works well when paired with a real healer such as Charlotte or Escoffier; Furina alone is not sufficient sustain.'],
+[key('Ganyu'),'Freeze and Cryo hypercarry shells work when another teammate supplies reliable healing for Fanfare.'],
+[key('Skirk'),'Furina works in modern Freeze shells when Escoffier or another strong healer sustains Fanfare.']
+]);
+export function furinaCompatibilityForCharacter(value=''){const raw=String(value||'').trim(),canon=canonical(raw),k=key(canon);if(!raw)return{character:raw,canonical:canon,status:'invalid',smartTeamApproved:false,adaptationAllowed:false,sources:[],reason:'Missing character name'};if(k==='furina')return{character:raw,canonical:'Furina',status:'self',smartTeamApproved:false,adaptationAllowed:false,sources:SOURCES,reason:'Furina cannot pair with herself.'};if(special(raw))return{character:raw,canonical:canon,status:'not-applicable',smartTeamApproved:false,adaptationAllowed:false,sources:[],reason:'Special/TPS avatar records are not Smart Team characters.'};const e=evidence.get(k);if(e)return{character:raw,canonical:canon,status:'source-backed-compatible',smartTeamApproved:true,adaptationAllowed:true,sources:e.sources.length?e.sources:SOURCES,teamIds:[...new Set(e.teams)],reactions:[...new Set(e.reactions)],caveat:caveat.get(k)||'',reason:'This character appears in an exact or explicitly source-informed reviewed Furina team.'};return{character:raw,canonical:canon,status:'unverified',smartTeamApproved:false,adaptationAllowed:false,sources:SOURCES,caveat:caveat.get(k)||'',reason:'No Furina-specific reviewed evidence authorizes Smart Team adaptation for this pairing.'}}
+export function auditFurinaCompatibility(names=[]){const rows=(names||[]).map(furinaCompatibilityForCharacter),counts={};for(const r of rows)counts[r.status]=(counts[r.status]||0)+1;return{character:'Furina',reviewedAt:'2026-08-23',rows,total:rows.length,counts,smartTeamApproved:rows.filter(r=>r.smartTeamApproved).length,unverified:rows.filter(r=>r.status==='unverified').map(r=>r.character),sources:SOURCES}}
+export const FURINA_COMPATIBILITY_POLICY={character:'Furina',reviewedAt:'2026-08-23',rule:'Every released avatar record receives an explicit Furina compatibility status. Smart Team must preserve Fanfare generation: reliable team healing, valuable single-target healing, or strong self-HP manipulation must be present before investment is used as a tiebreaker. Furina’s common DMG Bonus must not be treated as a direct buff to transformative reactions such as Hyperbloom, Electro-Charged, or Lunar-Charged. The C6 on-field build is constellation-locked and must not be recommended below C6. Unverified pairings remain blocked.',sources:SOURCES};
