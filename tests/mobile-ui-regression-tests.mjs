@@ -26,7 +26,9 @@ const rosterCss=fs.readFileSync(path.join(root,'css/roster-sections-team-filter.
 assert.match(rosterCss,/@media\(max-width:600px\)[\s\S]*\.smart-team-card \.team-controls\{grid-template-columns:1fr\}/);
 assert.match(rosterCss,/@media\(max-width:600px\)[\s\S]*\.hotaru-team-utility-field select\{width:100%\}/);
 const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
-assert.match(sw,/const CACHE = 'hotaru-shell-v46'/);assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v45'/);assert.match(sw,/style\.css\?v=1\.8\.1/);assert.match(sw,/css\/guide-ui\.css\?v=1\.4\.0/);assert.match(sw,/css\/roster-sections-team-filter\.css\?v=1\.3\.0/);assert.match(sw,/app\.js\?v=1\.12\.0/);assert.match(sw,/team-community-bootstrap\.js\?v=1\.1\.1/);assert.match(sw,/smart-team-mobile-controller\.js\?v=1\.0\.5/);
+assert.match(sw,/const CACHE = 'hotaru-shell-v47'/);assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v46'/);assert.match(sw,/style\.css\?v=1\.8\.1/);assert.match(sw,/css\/guide-ui\.css\?v=1\.4\.0/);assert.match(sw,/css\/roster-sections-team-filter\.css\?v=1\.3\.0/);assert.match(sw,/app\.js\?v=1\.12\.1/);assert.match(sw,/team-community-bootstrap\.js\?v=1\.1\.1/);assert.match(sw,/smart-team-mobile-controller\.js\?v=1\.0\.5/);
 const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
-assert.match(index,/style\.css\?v=1\.8\.1/);assert.match(index,/css\/guide-ui\.css\?v=1\.4\.0/);assert.match(index,/css\/roster-sections-team-filter\.css\?v=1\.3\.0/);assert.match(index,/app\.js\?v=1\.12\.0/);assert.match(index,/team-community-bootstrap\.js\?v=1\.1\.1/);assert.match(index,/smart-team-mobile-controller\.js\?v=1\.0\.5/);
-console.log('Hotaru mobile UI + Current Abyss capture path + direct Team Need + rarity + same-weapon-type regression QA passed.');
+assert.match(index,/style\.css\?v=1\.8\.1/);assert.match(index,/css\/guide-ui\.css\?v=1\.4\.0/);assert.match(index,/css\/roster-sections-team-filter\.css\?v=1\.3\.0/);assert.match(index,/app\.js\?v=1\.12\.1/);assert.match(index,/team-community-bootstrap\.js\?v=1\.1\.1/);assert.match(index,/smart-team-mobile-controller\.js\?v=1\.0\.5/);
+const cache=fs.readFileSync(path.join(root,'js/core/cache.js'),'utf8');
+assert.match(cache,/OPEN_TIMEOUT_MS=1800/,'Safari IndexedDB open must have a hard timeout');assert.match(cache,/req\.onblocked=/,'Blocked IndexedDB opens must fail fast');assert.match(cache,/TX_TIMEOUT_MS=1800/,'IndexedDB transactions must not strand app startup');
+console.log('Hotaru mobile UI + Current Abyss + v47 Safari startup recovery QA passed.');
