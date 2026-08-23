@@ -23,6 +23,7 @@
   <link rel="stylesheet" href="css/navigation-refresh.css?v=1.1.0" />
   <link rel="stylesheet" href="css/roster-sections-team-filter.css?v=1.3.0" />
   <link rel="stylesheet" href="css/smart-team-v48.css?v=1.0.2" />
+  <link rel="stylesheet" href="css/character-mobile-ux.css?v=1.0.0" />
   <style>.team-unowned{position:relative;z-index:2;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none}</style>
   <title>Hotaru — Character Build Companion</title>
 </head>
@@ -49,7 +50,9 @@
         new URL('./js/features/guide-ui.js',location.href).href,
         new URL('./js/features/game8-guide-ui.js',location.href).href,
         new URL('./js/features/guide-item-details.js',location.href).href,
-        new URL('./js/features/flexible-pair-builder.js',location.href).href
+        new URL('./js/features/flexible-pair-builder.js',location.href).href,
+        new URL('./css/character-mobile-ux.css?v=1.0.0',location.href).href,
+        new URL('./js/features/character-mobile-ux.js?v=1.0.0',location.href).href
       ];
       await Promise.all((await caches.keys()).filter(name=>name.startsWith('hotaru-shell-')).map(async name=>{
         const cache=await caches.open(name);
@@ -64,6 +67,7 @@
   <script type="module" src="js/features/progression-calculator-ui.js?v=1.0.0"></script>
   <script type="module" src="js/features/navigation-refresh.js?v=1.2.0"></script>
   <script type="module" src="js/features/mobile-sync-ui.js?v=1.1.0"></script>
+  <script type="module" src="js/features/character-mobile-ux.js?v=1.0.0"></script>
   <script type="module" src="js/features/team-community-bootstrap.js?v=1.1.1"></script>
   <script type="module" src="js/features/flexible-pair-ui.js?v=1.0.4"></script>
   <script type="module" src="js/features/roster-sections-team-filter.js?v=1.3.2"></script>
