@@ -19,12 +19,12 @@ assert.deepEqual(aino.weaponPriority,['Flame-Forged Insight','Master Key','Favon
 assert.equal(aino.f2pWeapon,'Master Key');
 assert.deepEqual(aino.artifactPriority,["Silken Moon's Serenade",'Noblesse Oblige','Aubade of Morningstar and Moon','Instructor','Scroll of the Hero of Cinder City','Deepwood Memories']);
 assert.deepEqual(aino.buildSummaryTeams,[
-  {name:'Flins Lunar Charge',members:['Aino','Flins','Ineffa','Sucrose']},
+  {name:'Flins Lunar-Charged',members:['Aino','Flins','Ineffa','Sucrose']},
   {name:'Nilou Bloom',members:['Aino','Nahida','Nilou','Baizhu']}
 ]);
-assert.ok(aino.goalStats.some(row=>row.label==='Energy Recharge'&&/190–250%/.test(row.value)&&/155–205%/.test(row.value)&&/100–140%/.test(row.value)),'Aino reviewed ER guidance must retain KQM baseline, Favonius, and Flame-Forged contexts');
-assert.ok(aino.goalStats.some(row=>row.label==='Main-stat context'&&/ER \/ EM Sands/.test(row.value)),'Aino reviewed build must expose ER/EM main-stat context');
-assert.ok(aino.variants?.length>=1,'Aino must use the global reviewed build-variant structure');
+assert.ok(aino.goalStats.some(row=>row.label==='Energy Recharge'&&/190–250%/.test(row.value)&&/155–205%/.test(row.value)&&/100–140%/.test(row.value)),'Aino reviewed ER guidance must retain baseline, Favonius, and Flame-Forged contexts');
+assert.ok(aino.goalStats.some(row=>row.label==='Reaction ownership'&&/Full EM/.test(row.value)&&/Lunar-Charged/.test(row.value)),'Aino reviewed build must expose reaction-specific stat context');
+assert.equal(aino.variants?.length,3,'Aino must retain all three meaningful reviewed variants after the global re-audit');
 const alhaitham=reviewedBuildProfile('Alhaitham');
 assert.ok(alhaitham.variants?.length>=2,'Alhaitham must expose separate reviewed build variants instead of a flattened build');
 
@@ -44,6 +44,9 @@ assert.match(game8,/reviewedBuildCards\(profile,detail,catalog\)/,'build section
 assert.match(game8,/mergeVariantProfile/,'each build summary must carry its own reviewed stats, weapons, artifacts and teams');
 assert.match(game8,/data-reviewed-build-variant/,'separate build cards must remain identifiable and testable');
 assert.match(game8,/profile\?\.buildSummaryTeams/,'reviewed profiles can pin the exact source sample teams shown in their summary');
+assert.match(game8,/cleanBuildText/,'source-name notes must be stripped from the visible Build section');
+assert.doesNotMatch(game8,/buildSummaryTeams\.slice\(/,'Build Summary teams must not be arbitrarily capped');
+assert.doesNotMatch(game8,/weapons\.slice\(1,5\)/,'replacement weapons must not be arbitrarily capped');
 const guide=read('js/features/guide-ui.js');
 assert.match(guide,/profile\.tierRatings/,'reviewed tier ratings must override generic kit-based inference when available');
 assert.match(guide,/data-hotaru-weapon/,'full ranked weapon rows must be clickable');
@@ -51,7 +54,9 @@ assert.match(guide,/data-hotaru-artifact/,'full ranked artifact rows must be cli
 assert.match(guide,/profile\.goalStats/,'reviewed exact goal-stat values must be rendered instead of generic thresholds');
 assert.match(guide,/Reviewed source order/,'reviewed weapon ordering must not fall back to heuristic scores');
 assert.match(guide,/Reviewed order/,'reviewed artifact ordering must not fall back to heuristic scores');
-assert.match(guide,/priority\.map\(name=>lookup/,'reviewed gear lists must inject every source-ranked item even if the heuristic top list omitted it');
+assert.match(guide,/priority\.map\(name=>lookup/,'reviewed gear lists must inject every source-ranked item even if heuristic ranking omitted it');
+assert.doesNotMatch(guide,/ranked=scored\.slice\(0,8\)/,'reviewed weapon lists must not be arbitrarily capped');
+assert.doesNotMatch(guide,/ranked=scored\.slice\(0,6\)/,'reviewed artifact lists must not be arbitrarily capped');
 const details=read('js/features/guide-item-details.js');
 assert.match(details,/getWeaponDetail/);
 assert.match(details,/Base ATK/);
@@ -72,6 +77,7 @@ assert.match(index,/guide-loader\.js\?v=1\.2\.0/);
 assert.match(sw,/equipment-farm-registry\.js/);
 assert.match(sw,/guide-item-details\.js/);
 assert.match(sw,/SKIP_WAITING/);
-assert.match(sw,/const CACHE = 'hotaru-shell-v46'/,'stable v46 PWA shell must remain unchanged');
+assert.match(sw,/const CACHE = 'hotaru-shell-v47'/,'Clorinde release must use the v47 PWA shell');
+assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v46'/,'v47 must preserve exact v46 lineage');
 
-console.log('Reviewed multi-build table + exact reviewed data + global clickable equipment + manual refresh QA passed.');
+console.log('Reviewed multi-build table + exact reviewed data + global clickable equipment + no-cap reviewed UI + manual refresh QA passed.');
