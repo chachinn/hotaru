@@ -5,7 +5,7 @@ import { inferBuildProfile } from '../js/features/build-engine.js';
 import { resolveBuildProfile } from '../js/features/build-profiles.js';
 import { CITLALI_REVIEWED_TEAMS } from '../js/data/team-profiles/citlali-reviewed.js';
 import { registerReviewedTeams } from '../js/data/team-profiles/index.js';
-import { recommendedTeamsForCharacter, teamHasValidSource } from '../js/data/team-recommendations.js';
+import { compositionKey, recommendedTeamsForCharacter, teamHasValidSource } from '../js/data/team-recommendations.js';
 import { CITLALI_COMPATIBILITY_POLICY, citlaliCompatibilityForCharacter, auditCitlaliCompatibility } from '../js/data/character-compatibility/citlali.js';
 
 registerReviewedTeams(CITLALI_REVIEWED_TEAMS);
@@ -27,11 +27,11 @@ const hybrid=resolveBuildProfile({name:'Citlali'},fallback,{buildVariant:'hybrid
 assert.ok(hybrid.mainStats.goblet.includes('Cryo DMG%'));
 assert.ok(hybrid.mainStats.circlet.includes('CRIT Rate'));
 const sourced=recommendedTeamsForCharacter('Citlali').filter(teamHasValidSource);
-const unique=new Set(sourced.map(team=>[...new Set((team.members||[]).map(name=>String(name).toLowerCase()))].sort().join('|')));
-const reviewedUnique=new Set(CITLALI_REVIEWED_TEAMS.map(team=>[...new Set((team.members||[]).map(name=>String(name).toLowerCase()))].sort().join('|')));
+const unique=new Set(sourced.map(compositionKey));
+const reviewedUnique=new Set(CITLALI_REVIEWED_TEAMS.map(compositionKey));
 assert.ok(unique.size>=30,`Citlali should expose at least 30 distinct sourced/source-informed teams when evidence supports them; got ${unique.size}`);
 assert.equal(reviewedUnique.size,CITLALI_REVIEWED_TEAMS.length,'Citlali reviewed teams must not inflate counts through duplicate member sets');
-assert.ok([...reviewedUnique].every(key=>unique.has(key)));
+assert.ok([...reviewedUnique].every(key=>unique.has(key)),'Every canonical Citlali reviewed composition must survive the shared recommendation registry');
 const audit=auditCitlaliCompatibility(RELEASED_AVATAR_AUDIT_V45);
 assert.equal(audit.total,148);
 assert.ok(audit.rows.every(row=>row.status!=='invalid'));
