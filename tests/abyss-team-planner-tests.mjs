@@ -42,6 +42,10 @@ const controller=fs.readFileSync(new URL('../js/features/smart-team-mobile-contr
 assert.ok(controller.includes("if(mode==='abyss')"),'mobile controller must execute Current Abyss itself');assert.ok(controller.includes('planReviewedAbyssTeams({roster:normalized,allowUnowned,limit:5})'),'existing controller stays the execution path');
 assert.ok(ux.includes("import './abyss-locked-core-ui.js'"));assert.ok(ux.includes("import './visible-source-cleanup.js'"));assert.ok(ux.includes("import './build-artifact-autofill.js'"));
 assert.ok(lockUi.includes('Slot ${index+1}'));assert.ok(lockUi.includes("value=\"lunar\""));assert.ok(lockUi.includes('__hotaruAbyssLockedCore'));
+assert.ok(lockUi.includes('let syncQueued=false'),'Abyss UI must coalesce mutation-driven renders instead of synchronously rebuilding on every mutation');
+assert.ok(lockUi.includes('requestAnimationFrame(()=>{syncQueued=false;sync()})'),'Abyss UI mutation handling must be frame-queued');
+assert.ok(lockUi.includes('if(box.dataset.hotaruMarkup===markup)return'),'Abyss UI must skip identical DOM rewrites to prevent self-triggered mutation loops');
+assert.ok(!lockUi.includes("new MutationObserver(()=>queueMicrotask(sync))"),'Regression: unguarded self-triggered mutation observer can freeze all taps');
 assert.ok(sourceCleanup.includes('.team-source,.hotaru-source-card,.abyss-cycle-sources'));assert.ok(sourceCleanup.includes('Game8|KQM|KeqingMains'));
 assert.ok(artifactAutofill.includes('ownedArtifacts'));assert.ok(artifactAutofill.includes('Imported equipped set'));assert.ok(artifactAutofill.includes('Imported equipped mix'));
-console.log('Smart Team Creator strict owned-only + positional locked-core + pending UX fixes QA passed.');
+console.log('Smart Team Creator strict owned-only + positional locked-core + interaction-loop regression QA passed.');
