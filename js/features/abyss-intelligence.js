@@ -45,8 +45,8 @@ export function applyAbyssCycleIntelligence(plan,{characters=[],cycle=CURRENT_AB
   const results=(plan?.results||[]).map(pair=>{const a=orientation(pair,0,characters),b=orientation(pair,1,characters),best=b.cycleScore>a.cycleScore?b:a;const first=best.teams[0].cycleFit,second=best.teams[1].cycleFit,cycleGaps=[];
     if(!best.teams[0].cycleFit.elements.includes('Cryo')||!best.teams[0].cycleFit.elements.includes('Electro'))cycleGaps.push('First half does not fully match the Cryo + Electro Superconduct lane.');
     if(!best.teams[1].cycleFit.elements.includes('Pyro'))cycleGaps.push('Second half has no Pyro character for its strongest matchup checks.');
-    return{...pair,teams:best.teams,cycleScore:best.cycleScore,cycleRankScore:pair.score+(best.cycleScore*4),cycleGaps,sideSummary:{first,second}};
+    return{...pair,teams:best.teams,cycleScore:best.cycleScore,cycleRankScore:pair.score+(best.cycleScore*2),cycleGaps,sideSummary:{first,second}};
   });
-  results.sort((a,b)=>b.cycleRankScore-a.cycleRankScore||b.cycleScore-a.cycleScore||b.score-a.score||a.id.localeCompare(b.id));
+  results.sort((a,b)=>(b.level90Count||0)-(a.level90Count||0)||(a.below80Count||0)-(b.below80Count||0)||(b.level80PlusCount||0)-(a.level80PlusCount||0)||b.cycleRankScore-a.cycleRankScore||b.cycleScore-a.cycleScore||b.score-a.score||a.id.localeCompare(b.id));
   return{...base,cycleApplied:true,results};
 }
