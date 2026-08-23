@@ -1,11 +1,12 @@
 import { arlecchinoCompatibilityForCharacter } from '../data/character-compatibility/arlecchino.js';
 import { columbinaCompatibilityForCharacter } from '../data/character-compatibility/columbina.js';
+import { clorindeCompatibilityForCharacter } from '../data/character-compatibility/clorinde.js';
 
 function key(value=''){return String(value||'').trim().toLowerCase()}
 function smartCard(){return document.querySelector('.smart-team-card')}
 function resultsHost(card){return card?.querySelector(':scope > .section')||null}
-function escapeHtml(value=''){return String(value||'').replace(/[&<>'"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]))}
-const policyFor=name=>key(name)==='arlecchino'?arlecchinoCompatibilityForCharacter:key(name)==='columbina'?columbinaCompatibilityForCharacter:null;
+function escapeHtml(value=''){return String(value||'').replace(/[&<>'\"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]))}
+const policyFor=name=>key(name)==='arlecchino'?arlecchinoCompatibilityForCharacter:key(name)==='columbina'?columbinaCompatibilityForCharacter:key(name)==='clorinde'?clorindeCompatibilityForCharacter:null;
 
 document.addEventListener('click',event=>{
   const button=event.target.closest?.('[data-action="generate-smart-team"]');
