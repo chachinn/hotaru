@@ -46,12 +46,13 @@ const preview=planReviewedAbyssTeams({roster:sparse,allowUnowned:true,limit:5});
 
 const controller=fs.readFileSync(new URL('../js/features/smart-team-mobile-controller.js',import.meta.url),'utf8'),ux=fs.readFileSync(new URL('../js/features/character-mobile-ux.js',import.meta.url),'utf8'),lockUi=fs.readFileSync(new URL('../js/features/abyss-locked-core-ui.js',import.meta.url),'utf8'),sourceCleanup=fs.readFileSync(new URL('../js/features/visible-source-cleanup.js',import.meta.url),'utf8'),artifactAutofill=fs.readFileSync(new URL('../js/features/build-artifact-autofill.js',import.meta.url),'utf8');
 assert.ok(controller.includes("if(mode==='abyss')"),'mobile controller must execute Current Abyss itself');assert.ok(controller.includes('planReviewedAbyssTeams({roster:normalized,allowUnowned,limit:5})'),'existing controller stays the execution path and planner reads saved Abyss preferences');
-assert.ok(ux.includes("import './abyss-locked-core-ui.js'"));assert.ok(ux.includes("import './visible-source-cleanup.js'"));assert.ok(ux.includes("import './build-artifact-autofill.js'"));
+assert.ok(ux.includes("import './abyss-locked-core-ui.js?v=1.0.1'"));assert.ok(ux.includes("import './visible-source-cleanup.js?v=1.0.1'"));assert.ok(ux.includes("import './build-artifact-autofill.js?v=1.0.1'"));
 assert.ok(lockUi.includes('Let Hotaru place them'));assert.ok(lockUi.includes('1–4 characters total · any side'));assert.ok(lockUi.includes('1–2 characters per side'));assert.ok(lockUi.includes('Preferred ${i+1}'));assert.ok(!lockUi.includes('Slot ${index+1}'),'Abyss preferences must not expose fixed positional slots');assert.ok(lockUi.includes('__hotaruAbyssPreferences'));
 assert.ok(lockUi.includes('LEGACY_STORAGE_KEY'),'v2 positional selections must migrate safely');
 assert.ok(lockUi.includes('let syncQueued=false'),'Abyss UI must coalesce mutation-driven renders instead of synchronously rebuilding on every mutation');
 assert.ok(lockUi.includes('requestAnimationFrame(()=>{syncQueued=false;sync()})'),'Abyss UI mutation handling must be frame-queued');
 assert.ok(lockUi.includes('if(box.dataset.hotaruMarkup===markup)return'),'Abyss UI must skip identical DOM rewrites to prevent self-triggered mutation loops');
+assert.ok(lockUi.includes("new MutationObserver(scheduleSync).observe(app,{childList:true})"),'Abyss UI must only observe top-level app rerenders');
 assert.ok(!lockUi.includes("new MutationObserver(()=>queueMicrotask(sync))"),'Regression: unguarded self-triggered mutation observer can freeze all taps');
 assert.ok(sourceCleanup.includes('.team-source,.hotaru-source-card,.abyss-cycle-sources'));assert.ok(sourceCleanup.includes('Game8|KQM|KeqingMains'));
 assert.ok(artifactAutofill.includes('ownedArtifacts'));assert.ok(artifactAutofill.includes('Imported equipped set'));assert.ok(artifactAutofill.includes('Imported equipped mix'));
