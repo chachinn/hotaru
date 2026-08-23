@@ -24,10 +24,10 @@ assert.equal(plan.previewFallback,false,'complete owned pairs should not be mark
 const best=plan.results[0],names=best.teams.flatMap(team=>team.members.map(name=>name.toLowerCase()));
 assert.equal(new Set(names).size,8,'Abyss pair must use eight unique canonical character slots');
 assert.equal(best.ownedCount,8);assert.equal(best.readyCount,7);assert.equal(best.ownedComplete,true);assert.equal(best.readyComplete,false);
-assert.equal(best.nextStep.type,'build');assert.equal(best.nextStep.name,'Lauma','already-Building owned gap should be surfaced before changing a Not Building goal');
+assert.equal(best.nextStep.type,'build');assert.equal(best.nextStep.name,'Lauma','the only sub-90 owned member should be surfaced as the next level-up target');
 assert.ok(best.teams[0].members.includes('Kaedehara Kazuha'),'Kazuha alias must resolve to canonical live-catalogue name');
 
-const fullyReady=roster.map(entry=>({...entry,status:entry.name==='Lauma'?'Usable':entry.status}));
+const fullyReady=roster.map(entry=>({...entry,level:entry.name==='Lauma'?90:entry.level,status:entry.name==='Lauma'?'Usable':entry.status}));
 plan=planReviewedAbyssTeams({roster:fullyReady,allowUnowned:false,limit:1});
 assert.equal(plan.results[0].readyComplete,true);assert.equal(plan.results[0].nextStep.type,'ready');
 
@@ -43,12 +43,12 @@ for(const pair of preview.results){const pairNames=pair.teams.flatMap(team=>team
 const app=fs.readFileSync(new URL('../app.js',import.meta.url),'utf8'),controller=fs.readFileSync(new URL('../js/features/smart-team-mobile-controller.js',import.meta.url),'utf8'),sw=fs.readFileSync(new URL('../service-worker.js',import.meta.url),'utf8'),index=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8'),style=fs.readFileSync(new URL('../style.css',import.meta.url),'utf8'),bootstrap=fs.readFileSync(new URL('../js/features/team-community-bootstrap.js',import.meta.url),'utf8');
 assert.ok(app.includes("value=\"abyss\""));assert.ok(app.includes('Current Abyss · cycle-aware'));assert.ok(app.includes('Who to build next'));assert.ok(app.includes('planReviewedAbyssTeams'));assert.ok(app.includes('Current-cycle intelligence is dated, not guessed'));assert.ok(app.includes('cycle scoring automatically when the reviewed rotation expires'));
 assert.ok(controller.includes("if(mode==='abyss')"),'mobile controller must execute Current Abyss itself');
-assert.ok(controller.includes('planReviewedAbyssTeams({roster:normalized,allowUnowned,limit:5})'),'mobile controller must invoke the real planner with saved roster state');
+assert.ok(controller.includes('planReviewedAbyssTeams({roster:normalized,allowUnowned,limit:5})'),'mobile controller must invoke the real planner; v47 planner itself supplies Lv90-first ranking from roster state');
 assert.ok(controller.includes('applyAbyssCycleIntelligence'),'mobile controller must retain cycle-aware ranking');
 assert.ok(controller.includes('Closest sourced 8-slot preview'),'sparse-roster fallback must render a visible explanation');
 assert.ok(!controller.includes("if(mode==='abyss')return;"),'Current Abyss must not fall through to the iPhone-stale bubble generator');
-assert.ok(style.includes('.abyss-team-grid'));assert.ok(style.includes('.abyss-next'));
+assert.ok(style.includes('.abyss-team-grid'));assert.ok(style.includes('.abyss-next'));const v47=fs.readFileSync(new URL('../js/features/smart-team-v47-enhancements.js',import.meta.url),'utf8');assert.ok(v47.includes('Build next for this side'),'v47 enhancement must surface a level-up recommendation for each Abyss side');
 assert.ok(bootstrap.includes("card.querySelector('#hotaru-team-source-status')?.remove()"),'coverage QA banner must stay out of the user-facing Team Creator');
 assert.ok(bootstrap.includes("card.querySelector('.team-pending')?.remove()"),'legacy reviewed-only pending banner must stay out of the user-facing Team Creator');
-assert.ok(sw.includes("const CACHE = 'hotaru-shell-v46'"));assert.ok(sw.includes("PREVIOUS_CACHE = 'hotaru-shell-v45'"));assert.ok(sw.includes('js/features/abyss-team-planner.js'));assert.ok(sw.includes('smart-team-mobile-controller.js?v=1.0.5'));assert.ok(index.includes('app.js?v=1.12.0'));assert.ok(index.includes('style.css?v=1.8.1'));assert.ok(index.includes('smart-team-mobile-controller.js?v=1.0.5'));
+assert.ok(sw.includes("const CACHE = 'hotaru-shell-v47'"));assert.ok(sw.includes("PREVIOUS_CACHE = 'hotaru-shell-v46'"));assert.ok(sw.includes('js/features/abyss-team-planner.js'));assert.ok(sw.includes('smart-team-mobile-controller.js?v=1.0.5'));assert.ok(index.includes('app.js?v=1.12.0'));assert.ok(index.includes('style.css?v=1.8.1'));assert.ok(index.includes('smart-team-mobile-controller.js?v=1.0.5'));
 console.log('Smart Team Creator Abyss planner + mobile execution + fallback QA passed.');
