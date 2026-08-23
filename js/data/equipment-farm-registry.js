@@ -3,10 +3,13 @@ export const ARTIFACT_FARM_INFO={
   'Noblesse Oblige':{source:'Clear Pool and Mountain Cavern',region:'Liyue',kind:'Artifact Domain / Artifact Strongbox'},
   'Aubade of Morningstar and Moon':{source:"Moonchild's Treasures",region:'Nod-Krai',kind:'Artifact Domain',sourceUrl:'https://game8.co/games/Genshin-Impact/archives/393918'},
   'Instructor':{source:'World/elite/boss drops and reliquaries',region:'Teyvat',kind:'4-star world-drop set'},
-  'Fragment of Harmonic Whimsy':{source:'Faded Theater',region:'Fontaine',kind:'Artifact Domain'},
+  'Fragment of Harmonic Whimsy':{source:'Faded Theater, Petrichor',region:'Fontaine',kind:'Artifact Domain',sourceUrl:'https://game8.co/games/Genshin-Impact/archives/451899'},
   "Night of the Sky's Unveiling":{source:'Frostladen Machinery',region:'Nod-Krai',kind:'Artifact Domain'},
   "Gladiator's Finale":{source:'Normal/Weekly Bosses and Artifact Strongbox',region:'Teyvat',kind:'Boss-drop set / Artifact Strongbox'},
-  "Nymph's Dream":{source:'Molten Iron Fortress',region:'Sumeru',kind:'Artifact Domain'},
+  'Echoes of an Offering':{source:'The Lost Valley, The Chasm',region:'Liyue',kind:'Artifact Domain / Artifact Strongbox'},
+  'Crimson Witch of Flames':{source:'Hidden Palace of Zhou Formula, Wuwang Hill; also Artifact Strongbox',region:'Liyue',kind:'Artifact Domain / Artifact Strongbox'},
+  'Unfinished Reverie':{source:'Faded Theater, Petrichor',region:'Fontaine',kind:'Artifact Domain'},
+  'Nymph\'s Dream':{source:'Molten Iron Fortress',region:'Sumeru',kind:'Artifact Domain'},
   'Heart of Depth':{source:'Peak of Vindagnyr',region:'Dragonspine',kind:'Artifact Domain / Artifact Strongbox'},
   'Heart of the Furnace':{source:'Artifact Domain',region:'Snezhnaya',kind:'Artifact Domain'},
   'Scarlet Proof':{source:'Artifact Domain',region:'Snezhnaya',kind:'Artifact Domain'},
@@ -32,7 +35,16 @@ export const WEAPON_FARM_INFO={
   'Haran Geppaku Futsu':{source:'Limited Weapon Event Wishes when featured',kind:'Limited 5-star gacha weapon'},
   'Toukabou Shigure':{source:'Akitsu Kimodameshi event reward; currently unavailable if the event was missed',kind:'Limited event weapon'},
   "Xiphos' Moonlight":{source:'Limited Weapon Event Wishes when featured',kind:'Limited 4-star gacha weapon'},
-  'Harbinger of Dawn':{source:'Wishes and early-game/chest sources depending on availability',kind:'3-star weapon'}
+  'Harbinger of Dawn':{source:'Wishes and early-game/chest sources depending on availability',kind:'3-star weapon'},
+  "Crimson Moon's Semblance":{source:'Limited Weapon Event Wishes when featured',kind:'Limited 5-star signature Polearm'},
+  'Staff of Homa':{source:'Limited Weapon Event Wishes when featured',kind:'Limited 5-star gacha Polearm'},
+  'Primordial Jade Winged-Spear':{source:'Standard Wish and Weapon Event Wishes',kind:'5-star gacha Polearm'},
+  'Deathmatch':{source:'Battle Pass / Gnostic Hymn weapon selection',kind:'Battle Pass Polearm'},
+  'Blackcliff Pole':{source:"Paimon's Bargains when Blackcliff weapons are in the Starglitter rotation",kind:'Starglitter shop Polearm'},
+  'Staff of the Scarlet Sands':{source:'Limited Weapon Event Wishes when featured',kind:'Limited 5-star gacha Polearm'},
+  'Fractured Halo':{source:'Limited Weapon Event Wishes when featured',kind:'Limited 5-star gacha Polearm'},
+  'Ballad of the Fjords':{source:'Battle Pass / Gnostic Hymn weapon selection',kind:'Battle Pass Polearm'},
+  'White Tassel':{source:'Exquisite-or-higher chests in Liyue and The Chasm; lock copies because it is not normally available from Wishes',kind:'3-star exploration/chest Polearm'}
 };
 
 export function artifactFarmInfo(name=''){
