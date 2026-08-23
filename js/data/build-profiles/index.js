@@ -12,8 +12,9 @@ import aratakiItto from './arataki-itto.js';
 import baizhu from './baizhu.js';
 import chasca from './chasca.js';
 import chiori from './chiori.js';
+import citlali from './citlali.js';
 
-export const REVIEWED_BUILD_PROFILES=[arlecchino,tartaglia,columbina,clorinde,odette,aino,alhaitham,albedo,aloy,amber,aratakiItto,baizhu,chasca,chiori];
+export const REVIEWED_BUILD_PROFILES=[arlecchino,tartaglia,columbina,clorinde,odette,aino,alhaitham,albedo,aloy,amber,aratakiItto,baizhu,chasca,chiori,citlali];
 
 function key(value=''){return String(value||'').trim().toLowerCase()}
 const PROFILE_INDEX=new Map();
