@@ -1,0 +1,56 @@
+const KQM='https://keqingmains.com/q/dehya-quickguide/';
+const GAME8='https://game8.co/games/Genshin-Impact/archives/Dehya-Best-Builds';
+const source=(label,url,type='Reviewed theorycraft')=>({label,url,type,platform:'Guide',reviewedAt:'2026-08-23'});
+const kqm=()=>source('KQM Dehya Quick Guide',KQM);
+const game8=()=>source('Game8 Dehya Best Builds and Teams',GAME8,'Source-backed guide');
+const confidenceFor=s=>s?.type==='Reviewed theorycraft'?'Reviewed':'Community-sourced';
+const team=(id,name,members,reaction,why,src,notes='',provenance='exact')=>({id,name,members,reaction,why,notes,provenance,confidence:confidenceFor(src),source:src,anchor:'Dehya',profileId:'dehya'});
+export const DEHYA_REVIEWED_TEAMS=[
+  team('dehya-game8-main-furina-sigewinne-kazuha','Vaporize DPS · Furina/Sigewinne/Kazuha',['Dehya','Furina','Sigewinne','Kaedehara Kazuha'],'vaporize','Game8 exact Main DPS team with Furina buffs, healing, and Anemo utility.',game8()),
+  team('dehya-game8-main-raiden-chevreuse-bennett','Overloaded DPS · Raiden/Chevreuse/Bennett',['Dehya','Raiden Shogun','Chevreuse','Bennett'],'overload','Game8 exact Main DPS team and KQM-supported low-ER Chevreuse shell.',{...game8(),links:[game8(),kqm()]}),
+  team('dehya-game8-main-xiangling-kazuha-bennett','Mono Pyro DPS · Xiangling/Kazuha/Bennett',['Dehya','Xiangling','Kaedehara Kazuha','Bennett'],'mono-pyro','Game8 exact Main DPS team and current KQM easy-use archetype.',{...game8(),links:[game8(),kqm()]}),
+  team('dehya-game8-burn-emilie-xiangling-bennett','Burning · Emilie/Xiangling/Bennett',['Dehya','Emilie','Xiangling','Bennett'],'burning','Game8 exact Burning team.',game8()),
+  team('dehya-game8-burn-nahida-kazuha-bennett','Burning · Nahida/Kazuha/Bennett',['Dehya','Nahida','Kaedehara Kazuha','Bennett'],'burning','Game8 exact Burning team.',game8()),
+  team('dehya-game8-melt-ganyu-nahida-bennett','Melt Support · Ganyu/Nahida/Bennett',['Dehya','Ganyu','Nahida','Bennett'],'melt','Game8 exact Melt support team and KQM exact Ganyu/Nahida example.',{...game8(),links:[game8(),kqm()]}),
+  team('dehya-game8-vape-hutao-xingqiu-yelan','Vaporize Support · Hu Tao/Xingqiu/Yelan',['Dehya','Hu Tao','Xingqiu','Yelan'],'vaporize','Game8 exact off-field support team. Dehya is not the on-field Burst driver here.',game8()),
+  team('dehya-game8-vape-neuvi-xiangling-kazuha','Vaporize Support · Neuvillette/Xiangling/Kazuha',['Dehya','Neuvillette','Xiangling','Kaedehara Kazuha'],'vaporize','Game8 exact Vaporize support team.',game8()),
+  team('dehya-game8-burgeon-lauma-furina-kokomi','Burgeon · Lauma/Furina/Kokomi',['Dehya','Lauma','Furina','Sangonomiya Kokomi'],'burgeon','Game8 exact Burgeon team with Lauma Bloom support and Kokomi sustain.',game8()),
+  team('dehya-game8-burgeon-kinich-nahida-yelan','Burgeon · Kinich/Nahida/Yelan',['Dehya','Kinich','Nahida','Yelan'],'burgeon','Game8 exact Burgeon team.',game8()),
+  team('dehya-game8-burgeon-ayato-nahida-kokomi','Burgeon · Ayato/Nahida/Kokomi',['Dehya','Kamisato Ayato','Nahida','Sangonomiya Kokomi'],'burgeon','Game8 exact Burgeon team.',game8()),
+  team('dehya-game8-burgeon-nahida-xingqiu-kokomi','Burgeon · Nahida/Xingqiu/Kokomi',['Dehya','Nahida','Xingqiu','Sangonomiya Kokomi'],'burgeon','Game8 exact Burgeon team.',game8()),
+  team('dehya-game8-f2p-xiangling-sucrose-bennett','F2P Pyro · Xiangling/Sucrose/Bennett',['Dehya','Xiangling','Sucrose','Bennett'],'mono-pyro','Game8 exact F2P team.',game8()),
+
+  team('dehya-kqm-support-mualani-emilie-xilonen','Vaporize Support · Mualani/Emilie/Xilonen',['Dehya','Mualani','Emilie','Xilonen'],'vaporize','KQM exact Mualani/Emilie/Xilonen off-field support example.',kqm()),
+  team('dehya-kqm-support-mualani-emilie-nahida','Vaporize Support · Mualani/Emilie/Nahida',['Dehya','Mualani','Emilie','Nahida'],'vaporize','KQM exact Mualani variant; Emilie supplies the extra hit source KQM requires when Nahida is used here.',kqm()),
+  team('dehya-kqm-melt-ganyu-emilie-bennett','Melt Support · Ganyu/Emilie/Bennett',['Dehya','Ganyu','Emilie','Bennett'],'melt','KQM exact Ganyu/Emilie Melt team.',kqm()),
+  team('dehya-kqm-support-kinich-iansan-emilie','Burning Support · Kinich/Iansan/Emilie',['Dehya','Kinich','Iansan','Emilie'],'burning','KQM exact Kinich team; Dehya should hold Deepwood in this shell.',kqm()),
+  team('dehya-kqm-support-lyney-bennett-kazuha','Pyro Support · Lyney/Bennett/Kazuha',['Dehya','Lyney','Bennett','Kaedehara Kazuha'],'mono-pyro','KQM exact Lyney support team.',kqm()),
+  team('dehya-kqm-support-clorinde-sara-chevreuse','Overloaded Support · Clorinde/Sara/Chevreuse',['Dehya','Clorinde','Kujou Sara','Chevreuse'],'overload','KQM exact Clorinde/C2+ Sara example.',kqm()),
+  team('dehya-kqm-support-clorinde-fischl-chevreuse','Overloaded Support · Clorinde/Fischl/Chevreuse',['Dehya','Clorinde','Fischl','Chevreuse'],'overload','KQM exact Clorinde/Fischl example.',kqm()),
+  team('dehya-kqm-support-neuvi-furina-kazuha','Hydro Support · Neuvillette/Furina/Kazuha',['Dehya','Neuvillette','Furina','Kaedehara Kazuha'],'vaporize','KQM exact Neuvillette team using Dehya as a defensive support.',kqm()),
+
+  team('dehya-kqm-hyperburgeon-lauma-xingqiu-kuki','Hyperburgeon · Lauma/Xingqiu/Kuki',['Dehya','Lauma','Xingqiu','Kuki Shinobu'],'burgeon','KQM exact Hyperburgeon example; Kuki triggers Hyperblooms between Dehya Burgeons.',kqm()),
+  team('dehya-kqm-hyperburgeon-lauma-xingqiu-raiden','Hyperburgeon · Lauma/Xingqiu/Raiden',['Dehya','Lauma','Xingqiu','Raiden Shogun'],'burgeon','KQM exact Hyperburgeon example with Raiden as Hyperbloom trigger.',kqm()),
+  team('dehya-kqm-burgeon-nahida-kokomi-fischl','Burgeon · Nahida/Kokomi/Fischl',['Dehya','Nahida','Sangonomiya Kokomi','Fischl'],'burgeon','KQM exact damage-oriented Burgeon example.',kqm()),
+  team('dehya-kqm-burgeon-nahida-kokomi-furina','Burgeon · Nahida/Kokomi/Furina',['Dehya','Nahida','Sangonomiya Kokomi','Furina'],'burgeon','KQM exact Burgeon example with Kokomi healing through Furina drain and Burgeon self-damage.',kqm()),
+
+  team('dehya-kqm-dps-bennett-furina-xilonen','Vaporize DPS · Bennett/Furina/Xilonen',['Dehya','Bennett','Furina','Xilonen'],'vaporize','KQM current on-field Dehya shell using Furina and Xilonen.',kqm()),
+  team('dehya-kqm-dps-bennett-furina-kazuha','Vaporize DPS · Bennett/Furina/Kazuha',['Dehya','Bennett','Furina','Kaedehara Kazuha'],'vaporize','KQM current Furina Vaporize shell.',kqm()),
+  team('dehya-kqm-dps-bennett-escoffier-citlali','Melt DPS · Bennett/Escoffier/Citlali',['Dehya','Bennett','Escoffier','Citlali'],'melt','KQM exact Melt team where Escoffier + Citlali provide enough Cryo for Dehya to Melt Burst hits in single target.',kqm()),
+  team('dehya-kqm-dps-bennett-furina-ineffa','Overvape DPS · Bennett/Furina/Ineffa',['Dehya','Bennett','Furina','Ineffa'],'overvape','KQM exact Overvape example; Ineffa adds Lunar-Charged and AoE damage.',kqm()),
+  team('dehya-kqm-dps-bennett-furina-fischl','Overvape DPS · Bennett/Furina/Fischl',['Dehya','Bennett','Furina','Fischl'],'overvape','KQM exact Overvape example with Fischl.',kqm()),
+  team('dehya-kqm-dps-bennett-fischl-chevreuse','Overloaded DPS · Bennett/Fischl/Chevreuse',['Dehya','Bennett','Fischl','Chevreuse'],'overload','KQM exact Chevreuse Overloaded shell.',kqm()),
+  team('dehya-kqm-dps-bennett-raiden-chevreuse','Overloaded DPS · Bennett/Raiden/Chevreuse',['Dehya','Bennett','Raiden Shogun','Chevreuse'],'overload','KQM exact Raiden Chevreuse shell and lowest listed on-field ER scenario.',kqm()),
+  team('dehya-kqm-dps-bennett-emilie-kazuha','Burning DPS · Bennett/Emilie/Kazuha',['Dehya','Bennett','Emilie','Kaedehara Kazuha'],'burning','KQM exact on-field Burning shell with Emilie.',kqm()),
+  team('dehya-kqm-dps-bennett-xiangling-kazuha','Mono Pyro DPS · Bennett/Xiangling/Kazuha',['Dehya','Bennett','Xiangling','Kaedehara Kazuha'],'mono-pyro','KQM exact Mono Pyro shell and Game8 exact team.',{...kqm(),links:[kqm(),game8()]}),
+
+  team('dehya-nodkrai-ineffa-aino-bennett','Nod-Krai Overvape · Ineffa/Aino/Bennett',['Dehya','Ineffa','Aino','Bennett'],'overvape','KQM specifically requires both Ineffa and Aino to fully activate Night of the Sky’s Unveiling and full-effect Master Key for on-field Dehya.',kqm(),'Source-informed from the exact Nod-Krai build requirement; Vaporize procs are inconsistent.','adapted'),
+  team('dehya-adapt-support-wrio-emilie-bennett','Melt Support · Wriothesley/Emilie/Bennett',['Dehya','Wriothesley','Emilie','Bennett'],'melt','KQM lists Wriothesley as a Cryo/Hydro DPS option and Emilie as the preferred consistent Burning partner.',kqm(),'Source-informed off-field support shell.','adapted'),
+  team('dehya-adapt-support-varesa-fischl-chevreuse','Overloaded Support · Varesa/Fischl/Chevreuse',['Dehya','Varesa','Fischl','Chevreuse'],'overload','KQM lists Varesa among DPS units that benefit from Dehya and supports Dehya as off-field Pyro in Chevreuse teams.',kqm(),'Source-informed Chevreuse support shell.','adapted'),
+  team('dehya-adapt-support-wanderer-faruzan-bennett','Anemo Carry Support · Wanderer/Faruzan/Bennett',['Dehya','Wanderer','Faruzan','Bennett'],'support','KQM lists Wanderer among DPS units that benefit from Dehya’s interruption resistance; Faruzan/Bennett supply the standard carry support roles.',kqm(),'Source-informed defensive support shell.','adapted'),
+  team('dehya-adapt-support-arlecchino-fischl-chevreuse','Overloaded Support · Arlecchino/Fischl/Chevreuse',['Dehya','Arlecchino','Fischl','Chevreuse'],'overload','KQM lists Arlecchino among DPS units that can use Dehya and notes her off-field Pyro usefulness in Chevreuse teams.',kqm(),'Source-informed Overloaded support shell.','adapted'),
+  team('dehya-adapt-burgeon-alhaitham-xingqiu-kuki','Hyperburgeon · Alhaitham/Xingqiu/Kuki',['Dehya','Alhaitham','Xingqiu','Kuki Shinobu'],'burgeon','KQM lists Alhaitham, Xingqiu and Kuki in the Burgeon teambuilding roles and explicitly endorses a Hyperbloom trigger to reduce wasted Cores.',kqm(),'Source-informed Hyperburgeon shell.','adapted'),
+  team('dehya-adapt-burgeon-baizhu-yelan-raiden','Hyperburgeon · Baizhu/Yelan/Raiden',['Dehya','Baizhu','Yelan','Raiden Shogun'],'burgeon','KQM lists Baizhu, Yelan and Raiden for the Dendro/Hydro/Hyperbloom roles in Dehya Burgeon.',kqm(),'Source-informed Hyperburgeon shell.','adapted'),
+  team('dehya-adapt-burgeon-dmc-kokomi-kuki','Hyperburgeon · Dendro Traveler/Kokomi/Kuki',['Dehya','Dendro Traveler','Sangonomiya Kokomi','Kuki Shinobu'],'burgeon','KQM lists Dendro Traveler, Kokomi and Kuki for these Burgeon roles; Kokomi provides needed sustain.',kqm(),'Source-informed accessible Hyperburgeon shell.','adapted')
+];
+export default DEHYA_REVIEWED_TEAMS;
