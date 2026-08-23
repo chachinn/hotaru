@@ -77,7 +77,7 @@ assert.match(index,/guide-loader\.js\?v=1\.2\.0/);
 assert.match(sw,/equipment-farm-registry\.js/);
 assert.match(sw,/guide-item-details\.js/);
 assert.match(sw,/SKIP_WAITING/);
-assert.match(sw,/const CACHE = 'hotaru-shell-v47'/,'Clorinde release must use the v47 PWA shell');
-assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v46'/,'v47 must preserve exact v46 lineage');
+assert.match(sw,/const CACHE = 'hotaru-shell-v46'/,'stable reviewed-character release keeps the v46 PWA shell');
+assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v45'/,'v46 must preserve exact v45 lineage');
 
 console.log('Reviewed multi-build table + exact reviewed data + global clickable equipment + no-cap reviewed UI + manual refresh QA passed.');
