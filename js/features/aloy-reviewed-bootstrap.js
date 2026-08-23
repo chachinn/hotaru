@@ -17,6 +17,7 @@ import { FURINA_REVIEWED_TEAMS } from '../data/team-profiles/furina-reviewed.js'
 import { GANYU_REVIEWED_TEAMS } from '../data/team-profiles/ganyu-reviewed.js';
 import { HU_TAO_REVIEWED_TEAMS } from '../data/team-profiles/hu-tao-reviewed-clean.js';
 import { INEFFA_REVIEWED_TEAMS } from '../data/team-profiles/ineffa-reviewed.js';
+import { JEAN_REVIEWED_TEAMS } from '../data/team-profiles/jean-reviewed.js';
 
 registerReviewedTeams(ALOY_REVIEWED_TEAMS);
 registerReviewedTeams(AMBER_REVIEWED_TEAMS);
@@ -36,3 +37,4 @@ registerReviewedTeams(FURINA_REVIEWED_TEAMS);
 registerReviewedTeams(GANYU_REVIEWED_TEAMS);
 registerReviewedTeams(HU_TAO_REVIEWED_TEAMS);
 registerReviewedTeams(INEFFA_REVIEWED_TEAMS);
+registerReviewedTeams(JEAN_REVIEWED_TEAMS);
