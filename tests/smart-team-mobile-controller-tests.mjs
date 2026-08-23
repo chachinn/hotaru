@@ -46,17 +46,17 @@ assert.match(css,/@media\(max-width:600px\)[\s\S]*\.smart-team-card \.team-contr
 assert.match(css,/@media\(max-width:600px\)[\s\S]*\.hotaru-team-utility-field select\{width:100%\}/,'Team Need must remain full-width on phone');
 assert.match(index,/roster-sections-team-filter\.css\?v=1\.3\.0/,'index must load the stability stylesheet revision');
 assert.match(index,/roster-sections-team-filter\.js\?v=1\.3\.2/,'index must load the direct Team Need controller revision');
-assert.match(index,/smart-team-mobile-controller\.js\?v=1\.0\.5/,'index must preserve the Current Abyss mobile controller revision');
+assert.match(index,/smart-team-mobile-controller\.js\?v=1\.0\.6/,'index must load the v47 Current Abyss mobile controller request');
 assert.match(index,/smart-team-results-pagination\.js\?v=1\.2\.2&hotfix=52/,'index must load the v52 no-jump team-results layer');
 assert.match(index,/flexible-pair-ui\.js\?v=1\.0\.4/,'index must load the ownership-safe flexible pair UI');
-assert.match(sw,/const CACHE = 'hotaru-shell-v46'/,'service worker shell must remain v46');
-assert.match(sw,/PREVIOUS_CACHE = 'hotaru-shell-v45'/,'service worker must retain v45 as previous cache');
+assert.match(sw,/const CACHE = 'hotaru-shell-v47'/,'service worker shell must be v47');
+assert.match(sw,/PREVIOUS_CACHE = 'hotaru-shell-v46'/,'service worker must retain v46 as previous cache');
 assert.match(sw,/roster-sections-team-filter\.css\?v=1\.3\.0/,'service worker must cache the stability stylesheet revision');
 assert.match(sw,/roster-sections-team-filter\.js\?v=1\.3\.2/,'service worker must cache the direct Team Need controller revision');
-assert.match(sw,/smart-team-mobile-controller\.js\?v=1\.0\.5/,'service worker must keep the Current Abyss mobile controller');
-assert.match(sw,/smart-team-results-pagination\.js\?v=1\.2\.1/,'stable v46 shell must retain its established pagination cache entry');
+assert.match(sw,/smart-team-mobile-controller\.js\?v=1\.0\.6/,'service worker must cache the v47 Current Abyss mobile controller request');
+assert.match(sw,/smart-team-results-pagination\.js\?v=1\.2\.2&hotfix=52/,'v47 shell must retain the no-jump pagination cache entry');
 assert.match(sw,/flexible-pair-ui\.js\?v=1\.0\.4/,'service worker must cache the ownership-safe flexible pair UI');
-assert.match(updater,/RELEASE='v46'/,'PWA updater must remain on the stable v46 shell');
+assert.match(updater,/RELEASE='v47'/,'PWA updater must target the recovery v47 shell');
 assert.equal(pkg.version,'1.0.0','package version must remain 1.0.0');
 
 console.log('Smart Team mobile controller + Current Abyss + direct Team Need QA passed');
