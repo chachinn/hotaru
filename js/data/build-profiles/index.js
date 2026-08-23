@@ -27,8 +27,9 @@ import ineffa from './ineffa.js';
 import jean from './jean.js';
 import kaedeharaKazuha from './kaedehara-kazuha.js';
 import kamisatoAyaka from './kamisato-ayaka.js';
+import kamisatoAyato from './kamisato-ayato.js';
 
-export const REVIEWED_BUILD_PROFILES=[arlecchino,tartaglia,columbina,clorinde,odette,aino,alhaitham,albedo,aloy,amber,aratakiItto,baizhu,chasca,chiori,citlali,cyno,dehya,diluc,emilie,escoffier,eula,flins,furina,ganyu,huTao,ineffa,jean,kaedeharaKazuha,kamisatoAyaka];
+export const REVIEWED_BUILD_PROFILES=[arlecchino,tartaglia,columbina,clorinde,odette,aino,alhaitham,albedo,aloy,amber,aratakiItto,baizhu,chasca,chiori,citlali,cyno,dehya,diluc,emilie,escoffier,eula,flins,furina,ganyu,huTao,ineffa,jean,kaedeharaKazuha,kamisatoAyaka,kamisatoAyato];
 function key(value=''){return String(value||'').trim().toLowerCase()}
 const PROFILE_INDEX=new Map();for(const profile of REVIEWED_BUILD_PROFILES){PROFILE_INDEX.set(key(profile.character),profile);for(const alias of profile.aliases||[])PROFILE_INDEX.set(key(alias),profile)}
 export function reviewedBuildProfile(name=''){return PROFILE_INDEX.get(key(name))||null}
