@@ -19,6 +19,7 @@ const css=fs.readFileSync('css/smart-team-v48.css','utf8');
 const index=fs.readFileSync('index.html','utf8');
 const sw=fs.readFileSync('service-worker.js','utf8');
 const scrollFix=fs.readFileSync('js/features/smart-team-filter-scroll-fix.js','utf8');
+const mobileMenus=fs.readFileSync('js/features/smart-team-mobile-result-menus.js','utf8');
 assert.match(pager,/const PAGE_SIZE=10/,'Smart Team pages must render exactly 10 entries');
 assert.match(pager,/matchReviewedTeams\(\{roster,weapons:state\?\.weapons\|\|\[\],artifacts:state\?\.ownedArtifacts\|\|\[\],lockedNames:cleanLocks,allowUnowned,limit:'all'\}\)/,'pagination layer must request the full valid set');
 assert.match(pager,/const start=\(session\.page-1\)\*PAGE_SIZE,end=Math\.min\(results\.length,start\+PAGE_SIZE\)/,'each page must slice the full filtered set into a bounded 10-result window');
@@ -43,6 +44,20 @@ assert.match(css,/\.hotaru-team-results-pager/,'paged results must have stable c
 assert.match(css,/\.hotaru-team-page-actions/,'Previous/Next controls must have a dedicated layout');
 assert.match(css,/@media\(max-width:600px\)[\s\S]*\.hotaru-team-results-pager\{align-items:stretch;flex-direction:column\}/,'pager controls must remain phone-friendly');
 assert.match(index,/smart-team-results-pagination\.js\?v=1\.2\.1&hotfix=50/);assert.match(sw,/smart-team-results-pagination\.js\?v=1\.2\.1/,'stable v46 shell may keep the old cached URL because the index requests a fresh versioned pagination module');
+assert.match(index,/css\/smart-team-v48\.css\?v=1\.0\.1/,'mobile custom-menu styles must use a fresh cache-busted URL');
+assert.match(index,/smart-team-mobile-result-menus\.js\?v=1\.0\.0/,'mobile Show/Sort custom menu layer must load after pagination');
+assert.match(mobileMenus,/hotaru-team-result-filter/);assert.match(mobileMenus,/hotaru-team-result-sort/);
+assert.match(mobileMenus,/mobileResultMenusEnabled/,'custom result menus must be limited to phone/coarse-pointer contexts');
+assert.match(mobileMenus,/select\.classList\.add\('hotaru-mobile-native-select-hidden'\)/,'native Show/Sort selects must be hidden from touch interaction');
+assert.match(mobileMenus,/label\.before\(control\);control\.append\(caption,select,toggle,menu\);label\.remove\(\)/,'custom control must remove the native select label activation path that opens Safari picker');
+assert.match(mobileMenus,/aria-haspopup/,'custom result menu toggle must expose popup semantics');
+assert.match(mobileMenus,/role/,'custom result options must expose listbox/option semantics');
+assert.match(mobileMenus,/select\.dispatchEvent\(new Event\('change',\{bubbles:true\}\)\)/,'custom choice must reuse the existing result filter/sort change pipeline');
+assert.match(mobileMenus,/focus\(\{preventScroll:true\}\)/,'custom result menu focus changes must not move the viewport');
+assert.match(mobileMenus,/MutationObserver\(queueScan\)/,'custom menus must reattach after Smart Team rerenders');
+assert.match(mobileMenus,/event\.key!=='Escape'/,'custom menus must support Escape close');
+assert.match(css,/\.hotaru-mobile-native-select-hidden\{display:none!important\}/,'native mobile result selects must not open on iOS');
+assert.match(css,/\.hotaru-mobile-result-menu\[hidden\]/,'Hotaru-owned mobile result menu must have a reliable closed state');
 
 assert.match(index,/smart-team-filter-scroll-fix\.js\?v=1\.0\.0/,'iPhone filter scroll guard must be loaded after pagination');
 assert.match(scrollFix,/hotaru-team-result-filter/);assert.match(scrollFix,/hotaru-team-result-sort/);
