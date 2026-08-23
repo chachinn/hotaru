@@ -13,8 +13,9 @@ import baizhu from './baizhu.js';
 import chasca from './chasca.js';
 import chiori from './chiori.js';
 import citlali from './citlali.js';
+import cyno from './cyno.js';
 
-export const REVIEWED_BUILD_PROFILES=[arlecchino,tartaglia,columbina,clorinde,odette,aino,alhaitham,albedo,aloy,amber,aratakiItto,baizhu,chasca,chiori,citlali];
+export const REVIEWED_BUILD_PROFILES=[arlecchino,tartaglia,columbina,clorinde,odette,aino,alhaitham,albedo,aloy,amber,aratakiItto,baizhu,chasca,chiori,citlali,cyno];
 
 function key(value=''){return String(value||'').trim().toLowerCase()}
 const PROFILE_INDEX=new Map();
