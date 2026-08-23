@@ -1,4 +1,5 @@
 import './character-section-shortcuts.js';
+import './user-requested-ux-fixes.js?v=1.0.0';
 
 if(!document.querySelector('link[data-character-section-shortcuts]')){
   const link=document.createElement('link');
