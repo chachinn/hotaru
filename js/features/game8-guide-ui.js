@@ -1,32 +1,15 @@
-import { profileSourceLabel, profileSources } from './build-profiles.js';
+import { loadCatalog, getCharacterDetail } from '../data/game-data.js';
+import { inferBuildProfile } from './build-engine.js';
+import { resolveBuildProfile } from './build-profiles.js';
+import { enhanceReferenceGuide } from './guide-ui.js';
+import { enhanceExplorationGuide } from './exploration-ui.js';
+import { enhanceGuideTaxonomy } from './guide-taxonomy.js';
+import { enhanceGame8Guide } from './game8-guide-ui.js';
+import './guide-item-details.js';
 
-const esc=value=>String(value??'').replace(/[&<>'\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-function safeUrl(value=''){try{const url=new URL(String(value||''));return/^https?:$/.test(url.protocol)?url.href:''}catch{return''}}
-function cardByHeading(root,text){return [...root.querySelectorAll('.hotaru-reference-card')].find(card=>[...card.querySelectorAll('h2')].some(h=>h.textContent.trim()===text))}
-function renameHeading(root,from,to){const card=cardByHeading(root,from);const heading=card?.querySelector('h2');if(heading)heading.textContent=to;return card}
-function reorderRows(container,priority=[]){if(!container||!priority.length)return;const order=new Map(priority.map((name,index)=>[String(name).toLowerCase(),index]));const rows=[...container.children];rows.sort((a,b)=>{const an=a.querySelector('strong')?.textContent?.trim().toLowerCase()||'',bn=b.querySelector('strong')?.textContent?.trim().toLowerCase()||'';const ai=order.get(an),bi=order.get(bn);return(ai??999)-(bi??999)}).forEach(row=>container.appendChild(row))}
-function reorderTalent(card,priority=[]){if(!card||!priority.length)return;const labels={attack:'Normal Attack',skill:'Elemental Skill',burst:'Elemental Burst'},order=priority.map(key=>labels[String(key).toLowerCase()]).filter(Boolean),grid=card.querySelector('.hotaru-priority-grid');if(!grid)return;const rows=[...grid.children];rows.sort((a,b)=>order.indexOf(a.querySelector('strong')?.textContent?.trim())-order.indexOf(b.querySelector('strong')?.textContent?.trim())).forEach((row,index)=>{const badge=row.querySelector('b');if(badge)badge.textContent=`${index+1}${index===0?'st':index===1?'nd':'rd'}`;grid.appendChild(row)})}
-function summaryCard(profile){const weapon=profile.weaponPriority?.[0]||'See ranked weapons below',artifact=profile.artifactPriority?.[0]||'See ranked artifacts below',f2p=profile.f2pWeapon||'Team dependent';return`<section class="section card hotaru-reference-card hotaru-game8-card hotaru-build-summary"><div class="section-head"><div><div class="eyebrow">Builds</div><h2>Build Summary</h2></div><span class="pill ${profile.profileSource==='reviewed'?'good':'warn'}">${esc(profileSourceLabel(profile))}</span></div><div class="hotaru-build-summary-grid"><div><span>Recommended build</span><strong>${esc(profile.role||'Recommended Build')}</strong></div><div><span>Best weapon</span><strong>${esc(weapon)}</strong></div><div><span>F2P option</span><strong>${esc(f2p)}</strong></div><div><span>Best artifact</span><strong>${esc(artifact)}</strong></div><div><span>Sands</span><strong>${esc((profile.mainStats?.sands||[]).join(' / ')||'Build dependent')}</strong></div><div><span>Goblet</span><strong>${esc((profile.mainStats?.goblet||[]).join(' / ')||'Build dependent')}</strong></div><div><span>Circlet</span><strong>${esc((profile.mainStats?.circlet||[]).join(' / ')||'Build dependent')}</strong></div><div><span>Substats</span><strong>${esc((profile.substats||[]).join(' → ')||'See targets below')}</strong></div></div>${Array.isArray(profile.goalStats)&&profile.goalStats.length?`<div class="hotaru-game8-goals">${profile.goalStats.map(item=>`<div><strong>${esc(item.label)}</strong><span>${esc(item.value)}</span></div>`).join('')}</div>`:''}</section>`}
-function strengthsCard(profile){const strengths=(profile.strengths||[]).filter(Boolean),weaknesses=(profile.weaknesses||[]).filter(Boolean);if(!strengths.length&&!weaknesses.length)return'';return`<section class="section card hotaru-reference-card hotaru-game8-card"><div class="section-head"><h2>Strengths & Weaknesses</h2><span class="pill good">Reviewed</span></div><div class="hotaru-procon-grid"><div><h3>Strengths</h3>${strengths.map(text=>`<p><b>＋</b><span>${esc(text)}</span></p>`).join('')}</div><div><h3>Weaknesses</h3>${weaknesses.map(text=>`<p><b>−</b><span>${esc(text)}</span></p>`).join('')}</div></div></section>`}
-function howToUse(profile){const tips=(profile.playstyleTips||[]).filter(Boolean);if(!tips.length)return'';return`<div class="hotaru-howto"><h3>How to Use</h3>${tips.map((tip,index)=>`<div><b>${index+1}</b><p>${esc(tip)}</p></div>`).join('')}</div>`}
-function sourcesCard(profile){const sources=profileSources(profile);if(!sources.length)return'';return`<section class="section card hotaru-reference-card hotaru-source-card"><div class="section-head"><h2>Guide Sources</h2><span class="pill good">Reviewed</span></div><div class="hotaru-source-list">${sources.map(source=>{const href=safeUrl(source.url);return href?`<a href="${esc(href)}" target="_blank" rel="noopener noreferrer"><strong>${esc(source.label)}</strong><span>${esc(source.kind||'Reference')}</span></a>`:''}).join('')}</div></section>`}
-function appendMarkup(root,html){if(!html)return;const holder=document.createElement('div');holder.innerHTML=html;while(holder.firstElementChild)root.appendChild(holder.firstElementChild)}
-
-export function enhanceGame8Guide({profile}={}){
-  const root=document.getElementById('hotaru-deep-guide');if(!root||!profile||root.dataset.game8Enhanced==='1')return;root.dataset.game8Enhanced='1';root.classList.add('hotaru-game8-guide');
-  const section=root.dataset.section||'';
-  if(section==='overview'){
-    const profileCard=root.querySelector('.hotaru-reference-card');const eyebrow=profileCard?.querySelector('.eyebrow');if(eyebrow)eyebrow.textContent='Rating & Info';
-    const strengths=strengthsCard(profile);if(strengths&&profileCard)profileCard.insertAdjacentHTML('afterend',strengths);
-    const talent=renameHeading(root,'Talent priority','Talents & How to Use');reorderTalent(talent,profile.talentPriority||[]);const how=howToUse(profile);if(how&&talent&&!talent.querySelector('.hotaru-howto'))talent.insertAdjacentHTML('beforeend',how);
-    appendMarkup(root,sourcesCard(profile));
-  }else if(section==='build'){
-    root.insertAdjacentHTML('afterbegin',summaryCard(profile));
-    renameHeading(root,'Build variants','Build Variants');renameHeading(root,'Goal stat values','Goal Stat Values');
-    const artifacts=renameHeading(root,'Artifacts ranked','Best Artifacts');reorderRows(artifacts?.querySelector('.hotaru-guide-list'),profile.artifactPriority||[]);
-    const weapons=renameHeading(root,'Recommended weapons','Best Weapons');reorderRows(weapons?.querySelector('.hotaru-guide-list'),profile.weaponPriority||[]);
-    renameHeading(root,'Team comps','Best Team Comps');appendMarkup(root,sourcesCard(profile));
-  }else if(section==='materials'){
-    renameHeading(root,'Material summary','Materials');renameHeading(root,'Ascension by level','Ascension Materials by Level');renameHeading(root,'Talent level-up materials','Talent Level-Up Materials');renameHeading(root,'Exploration shortcuts','Farm Locations');appendMarkup(root,sourcesCard(profile));
-  }
-}
+const app=document.getElementById('app');
+let queued=false,catalogPromise=null,detailPromise=null,lastName='';
+function queue(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;run().catch(error=>console.warn('Hotaru deep guide skipped safely:',error))})}
+async function getCatalog(){catalogPromise=catalogPromise||loadCatalog().catch(()=>null);return catalogPromise}
+async function run(){enhanceExplorationGuide();const name=app?.querySelector('.detail-name')?.textContent?.trim();if(!name)return;const activeSection=app.querySelector('.segmented button.active')?.textContent?.trim().toLowerCase();if(activeSection==='build'&&app.querySelector('main .skeleton'))return;const catalog=await getCatalog();if(!catalog)return;const character=catalog.characters.find(c=>c.name===name);if(!character)return;if(lastName!==name){detailPromise=null;lastName=name}detailPromise=detailPromise||getCharacterDetail(character).catch(()=>null);const detail=await detailPromise;if(!detail)return;const profile=resolveBuildProfile(detail,inferBuildProfile(detail));await enhanceReferenceGuide({app,catalog,detail,character,profile});enhanceGame8Guide({app,catalog,detail,character,profile});enhanceGuideTaxonomy(character).catch(()=>{})}
+const observer=new MutationObserver(queue);observer.observe(app,{childList:true});queue();
