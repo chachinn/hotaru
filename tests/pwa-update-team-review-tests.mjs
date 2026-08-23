@@ -14,7 +14,7 @@ assert.equal(teamReviewStatus('Flins').status,'teammate-reviewed','Flins appears
 const screenshotPair=matchReviewedTeams({roster:[{name:'Odette'},{name:'Flins'}],lockedNames:['Odette','Flins'],allowUnowned:true,limit:5});
 assert.deepEqual(screenshotPair.pendingLocks,[],'A reviewed Odette + Flins lock may have no exact shared team, but neither character is pending review');
 
-// v47 specifically exists to recover installed iPhone PWAs from stale startup/cache state.
+// v47 specifically exists to recover installed iPhone PWAs from stale startup/cache state; keep this branch on the normal fix/** QA path.
 const index=read('index.html'),sw=read('service-worker.js'),updater=read('js/pwa-update.js');
 assert.ok(index.indexOf('js/pwa-update.js?v=1.1.0')<index.indexOf('app.js?v=1.12.1'),'PWA updater must start before app modules so stale installed PWAs recover promptly');
 assert.match(sw,/const CACHE = 'hotaru-shell-v47'/);
