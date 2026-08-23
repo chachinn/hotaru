@@ -5,8 +5,9 @@ import clorinde from './clorinde.js';
 import odette from './odette.js';
 import aino from './aino.js';
 import alhaitham from './alhaitham.js';
+import albedo from './albedo.js';
 
-export const REVIEWED_BUILD_PROFILES=[arlecchino,tartaglia,columbina,clorinde,odette,aino,alhaitham];
+export const REVIEWED_BUILD_PROFILES=[arlecchino,tartaglia,columbina,clorinde,odette,aino,alhaitham,albedo];
 
 function key(value=''){return String(value||'').trim().toLowerCase()}
 const PROFILE_INDEX=new Map();
