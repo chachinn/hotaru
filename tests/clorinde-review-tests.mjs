@@ -46,8 +46,10 @@ assert.match(artifactFarmInfo('Thundering Fury').source,/Midsummer Courtyard/i);
 
 const sourced=recommendedTeamsForCharacter('Clorinde').filter(teamHasValidSource);
 const unique=new Set(sourced.map(team=>[...new Set((team.members||[]).map(name=>String(name).toLowerCase()))].sort().join('|')));
+const reviewedUnique=new Set(CLORINDE_REVIEWED_TEAMS.map(team=>[...new Set((team.members||[]).map(name=>String(name).toLowerCase()))].sort().join('|')));
 assert.ok(unique.size>=30,`Clorinde must expose at least 30 genuinely distinct sourced/source-informed compositions when evidence supports them; got ${unique.size}`);
-assert.equal(unique.size,CLORINDE_REVIEWED_TEAMS.length,'reviewed Clorinde team library should not inflate counts through duplicate member sets');
+assert.equal(reviewedUnique.size,CLORINDE_REVIEWED_TEAMS.length,'Clorinde reviewed team file must not inflate counts through duplicate member sets');
+assert.ok([...reviewedUnique].every(key=>unique.has(key)),'every reviewed Clorinde team must remain present in the combined sourced result set');
 assert.ok(CLORINDE_REVIEWED_TEAMS.every(team=>team.source?.url&&/^https?:\/\//.test(team.source.url)));
 assert.ok(CLORINDE_REVIEWED_TEAMS.every(team=>['exact','adapted'].includes(team.provenance)));
 const audit=auditClorindeCompatibility(RELEASED_AVATAR_AUDIT_V45);
