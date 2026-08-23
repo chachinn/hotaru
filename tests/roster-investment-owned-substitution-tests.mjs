@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { matchReviewedTeams } from '../js/features/roster-team-matcher.js';
+import { scoreReviewedTeam } from '../js/features/team-scoring.js';
 import { buildFlexiblePairTeams } from '../js/features/flexible-pair-builder.js';
 import { teamPickerCharacters, teamPickerIdentity } from '../js/data/team-picker-identities.js';
 
@@ -18,10 +19,38 @@ const weapons=[
   {id:'navia-weapon',name:'Verdict',rarity:5,level:90,refinement:1},
   {id:'wrio-weapon',name:'The Widsith',rarity:4,level:80,refinement:1}
 ];
-const ranked=matchReviewedTeams({roster:naviaRoster,weapons,allowUnowned:false,limit:12});
+const naviaArtifacts=[
+  ...['flower','plume','sands','goblet','circlet'].map(slot=>({slotKey:slot,level:20,location:'Navia'})),
+  ...['flower','plume','sands','goblet','circlet'].map(slot=>({slotKey:slot,level:20,location:'Furina'})),
+  ...['flower','plume','sands','goblet','circlet'].map(slot=>({slotKey:slot,level:20,location:'Bennett'})),
+  ...['flower','plume','sands','goblet','circlet'].map(slot=>({slotKey:slot,level:16,location:'Illuga'})),
+  ...['flower','plume','sands','goblet','circlet'].map(slot=>({slotKey:slot,level:8,location:'Wriothesley'})),
+  ...['flower','plume','sands','goblet','circlet'].map(slot=>({slotKey:slot,level:4,location:'Odette'})),
+  ...['flower','plume','sands','goblet','circlet'].map(slot=>({slotKey:slot,level:4,location:'Nicole'})),
+  ...['flower','plume','sands','goblet','circlet'].map(slot=>({slotKey:slot,level:4,location:'YaeMiko'}))
+];
+const ranked=matchReviewedTeams({roster:naviaRoster,weapons,artifacts:naviaArtifacts,allowUnowned:false,limit:12});
 assert.ok(ranked.results.length>=2,'fixture should expose at least two fully owned sourced teams');
 assert.ok(ranked.results[0].members.includes('Navia'),'Best teams from my roster should prioritize the most invested account carry instead of source tier alone');
 assert.ok(ranked.results[0].score>ranked.results.find(team=>team.members.includes('Wriothesley')).score,'Navia investment must materially affect ranking');
+
+const metaButUnbuilt=[
+  {name:'Tartaglia',status:'Not Building',priority:'Low',level:40,ascension:1,constellation:0,talents:{attack:2,skill:2,burst:2},equippedWeapon:{name:'Rust',rarity:4,level:40,refinement:1}},
+  {name:'Kaedehara Kazuha',status:'Not Building',priority:'Low',level:50,ascension:2,constellation:0,talents:{attack:2,skill:3,burst:3},equippedWeapon:{name:'Iron Sting',rarity:4,level:40,refinement:1}},
+  {name:'Xiangling',status:'Not Building',priority:'Low',level:50,ascension:2,constellation:2,talents:{attack:2,skill:3,burst:3},equippedWeapon:{name:'Favonius Lance',rarity:4,level:40,refinement:1}},
+  {name:'Bennett',status:'Finished',priority:'High',level:90,ascension:6,constellation:6,talents:{attack:6,skill:9,burst:10},equippedWeapon:{name:'Aquila Favonia',rarity:5,level:90,refinement:1}}
+];
+const accountReadyNavia=[
+  {name:'Navia',status:'Finished',priority:'High',level:90,ascension:6,constellation:1,talents:{attack:9,skill:10,burst:9},equippedWeapon:{name:'Verdict',rarity:5,level:90,refinement:1}},
+  {name:'Furina',status:'Usable',priority:'Medium',level:90,ascension:6,constellation:0,talents:{attack:6,skill:9,burst:9},equippedWeapon:{name:'Fleuve Cendre Ferryman',rarity:4,level:90,refinement:5}},
+  {name:'Bennett',status:'Finished',priority:'High',level:90,ascension:6,constellation:6,talents:{attack:6,skill:9,burst:10},equippedWeapon:{name:'Aquila Favonia',rarity:5,level:90,refinement:1}},
+  {name:'Noelle',status:'Usable',priority:'Medium',level:80,ascension:5,constellation:6,talents:{attack:8,skill:8,burst:8},equippedWeapon:{name:'Whiteblind',rarity:4,level:90,refinement:5}}
+];
+const syntheticRoster=[...accountReadyNavia,...metaButUnbuilt.filter(row=>row.name!=='Bennett')];
+const ownedNames=syntheticRoster.map(row=>row.name);
+const naviaAccountScore=scoreReviewedTeam({members:['Navia','Furina','Bennett','Noelle']},{roster:syntheticRoster,ownedNames});
+const internationalAccountScore=scoreReviewedTeam({members:['Tartaglia','Kaedehara Kazuha','Xiangling','Bennett']},{roster:syntheticRoster,ownedNames});
+assert.ok(naviaAccountScore>internationalAccountScore,'an unbuilt International shell must not outrank an account-ready Navia team even when the archetype is meta');
 
 const ownedRoster=[
   {name:'Navia',element:'Geo',level:90,constellation:1,talents:{attack:9,skill:10,burst:9}},
