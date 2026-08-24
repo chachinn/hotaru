@@ -5,9 +5,9 @@ function slug(value=''){return String(value||'').trim().toLowerCase().normalize(
 function key(value=''){return String(value||'').trim().toLowerCase()}
 function sourceFor(team={},profile={}){
   const source=team?.source||{};
-  if(source?.url)return{...source,label:source.label||'Current reviewed team reference',type:source.type||'Reviewed guide',reviewedAt:source.reviewedAt||REVIEWED_AT};
+  if(source?.url)return{...source,label:source.label||'Current reviewed team reference',type:source.type||'Reviewed guide',platform:source.platform||'Guide',reviewedAt:source.reviewedAt||REVIEWED_AT};
   const fallback=profile.sourceRefs?.[0];
-  return fallback?.url?{label:fallback.label||'Current reviewed team reference',url:fallback.url,type:fallback.kind||'Reviewed guide',reviewedAt:REVIEWED_AT}:{label:'Reviewed team structure',url:'',type:'Reviewed guide',reviewedAt:REVIEWED_AT};
+  return fallback?.url?{label:fallback.label||'Current reviewed team reference',url:fallback.url,type:fallback.kind||'Reviewed guide',platform:fallback.platform||'Guide',reviewedAt:REVIEWED_AT}:{label:'Reviewed team structure',url:'',type:'Reviewed guide',platform:'Guide',reviewedAt:REVIEWED_AT};
 }
 function reactionFromName(value=''){
   const text=String(value||'').toLowerCase();
