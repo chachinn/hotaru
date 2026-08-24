@@ -1,0 +1,21 @@
+import assert from 'node:assert/strict';
+import { RELEASED_AVATAR_AUDIT_V45 as AVATARS } from './fixtures/released-avatar-audit-v45.mjs';
+import { reviewedBuildProfile } from '../js/data/build-profiles/index.js';
+import { BARBARA_REVIEWED_TEAMS as TEAMS } from '../js/data/team-profiles/barbara-reviewed.js';
+import { compositionKey } from '../js/data/team-recommendations.js';
+import { auditBarbaraCompatibility, barbaraCompatibilityForCharacter, BARBARA_COMPATIBILITY_POLICY } from '../js/data/character-compatibility/barbara.js';
+const profile=reviewedBuildProfile('Barbara');
+assert.ok(profile?.reviewed,'Barbara must resolve to reviewed data');
+assert.equal(profile.variants.length,3);assert.deepEqual(profile.variants.map(row=>row.id),['pure-healer','clam-driver','vaporize-dps']);
+for(const variant of profile.variants){const samples=variant.overrides?.buildSummaryTeams||[];assert.ok(samples.length>=2&&samples.length<=3,`${variant.id} Build Summary must stay at 2–3 representative teams`)}
+const healer=profile.variants.find(row=>row.id==='pure-healer').overrides;assert.deepEqual(healer.mainStats.sands,['HP%']);assert.deepEqual(healer.mainStats.circlet,['Healing Bonus']);assert.equal(healer.weaponPriority[0],'Thrilling Tales of Dragon Slayers');
+const clam=profile.variants.find(row=>row.id==='clam-driver').overrides;assert.deepEqual(clam.artifactPriority,['Ocean-Hued Clam']);assert.equal(clam.roleGroup,'Support');
+const vape=profile.variants.find(row=>row.id==='vaporize-dps').overrides;assert.equal(vape.roleGroup,'Main DPS');assert.equal(vape.artifactPriority[0],'Wanderer’s Troupe');assert.ok(vape.mainStats.sands.includes('Elemental Mastery'));
+assert.ok(TEAMS.length>=28,`Barbara needs broad reviewed coverage; found ${TEAMS.length}`);assert.equal(new Set(TEAMS.map(compositionKey)).size,TEAMS.length);assert.ok(TEAMS.every(team=>team.members.length===4&&team.members.includes('Barbara')));
+assert.ok(TEAMS.every(team=>!/(game8|kqm|keqingmains|icy veins|hoyolab|reddit|youtube|fandom)/i.test(`${team.name} ${team.why} ${team.notes||''}`)));
+for(const reaction of ['freeze','bloom','hyperbloom','burgeon','electro-charged','vaporize'])assert.ok(TEAMS.some(team=>team.reaction===reaction),`Barbara teams must cover ${reaction}`);
+const audit=auditBarbaraCompatibility(AVATARS);assert.equal(audit.total,148);assert.ok(audit.rows.every(row=>row.status!=='invalid'));assert.ok(audit.rows.every(row=>row.status!=='unverified'||(!row.smartTeamApproved&&!row.adaptationAllowed)));
+for(const partner of ['Kamisato Ayaka','Kaedehara Kazuha','Nilou','Nahida','Kuki Shinobu','Thoma','Beidou','Fischl','Rosaria','Bennett','Xiangling','Sucrose','Xingqiu'])assert.equal(barbaraCompatibilityForCharacter(partner).smartTeamApproved,true,`${partner} must be explicitly approved`);
+assert.equal(barbaraCompatibilityForCharacter('Barbara').status,'self');assert.equal(barbaraCompatibilityForCharacter('Aether TPS').status,'not-applicable');assert.equal(barbaraCompatibilityForCharacter('Manekin Anemo').status,'not-applicable');
+assert.match(BARBARA_COMPATIBILITY_POLICY.rule,/Compatibility outranks build fit and account investment/i);assert.match(BARBARA_COMPATIBILITY_POLICY.rule,/Hydro\/Dendro only/i);assert.match(BARBARA_COMPATIBILITY_POLICY.rule,/Unverified pairings remain blocked/i);
+console.log(`Barbara review QA passed · ${profile.variants.length} builds · ${TEAMS.length} distinct reviewed teams · ${audit.total}/148 compatibility records checked.`);
