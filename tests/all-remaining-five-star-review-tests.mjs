@@ -5,7 +5,7 @@ import { BASE_REVIEWED_BUILD_PROFILES, REVIEWED_BUILD_PROFILES, reviewedBuildPro
 import { REMAINING_FIVE_STAR_BUILD_PROFILES, REMAINING_FIVE_STAR_CHARACTER_NAMES } from '../js/data/build-profiles/remaining-five-stars.js';
 import { REMAINING_FIVE_STAR_REVIEWED_TEAMS } from '../js/data/team-profiles/remaining-five-stars-reviewed.js';
 import { registerReviewedTeams } from '../js/data/team-profiles/index.js';
-import { recommendedTeamsForCharacter, compositionKey } from '../js/data/team-recommendations.js';
+import { recommendedTeamsForCharacter, compositionKey, communityRecommendedTeams, registerCommunityTeams } from '../js/data/team-recommendations.js';
 import { auditRemainingFiveStarCompatibility, remainingFiveStarCompatibilityForCharacter, REMAINING_FIVE_STAR_COMPATIBILITY_POLICIES } from '../js/data/character-compatibility/remaining-five-stars.js';
 
 const key=value=>String(value||'').trim().toLowerCase();
@@ -44,6 +44,7 @@ assert.equal(new Set(REMAINING_FIVE_STAR_REVIEWED_TEAMS.map(team=>`${key(team.an
 assert.ok(REMAINING_FIVE_STAR_REVIEWED_TEAMS.every(team=>!/(game8|kqm|keqingmains|icy veins|hoyolab|reddit|youtube|fandom)/i.test(`${team.name} ${team.why} ${team.notes||''}`)),'external source branding must stay out of user-facing Team Comps text');
 
 registerReviewedTeams(REMAINING_FIVE_STAR_REVIEWED_TEAMS);
+registerCommunityTeams(communityRecommendedTeams());
 for(const profile of REMAINING_FIVE_STAR_BUILD_PROFILES){
   const anchorTeams=REMAINING_FIVE_STAR_REVIEWED_TEAMS.filter(team=>key(team.anchor)===key(profile.character));
   const rendered=recommendedTeamsForCharacter(profile.character),renderedKeys=new Set(rendered.map(compositionKey));
@@ -64,6 +65,8 @@ for(const profile of REMAINING_FIVE_STAR_BUILD_PROFILES){
 assert.equal(audited,5624,'38 characters × 148 avatar records must be audited');
 
 const ui=fs.readFileSync(new URL('../js/features/game8-guide-ui.js',import.meta.url),'utf8');
+const bootstrap=fs.readFileSync(new URL('../js/features/aloy-reviewed-bootstrap.js',import.meta.url),'utf8');
 assert.match(ui,/\.slice\(0,3\)/,'Build Summary must remain capped at three representative teams');
 assert.match(ui,/complete reviewed library is available in Best Team Comps below/i,'Build UI must explain that full teams live in Team Comps');
+assert.match(bootstrap,/registerCommunityTeams\(communityRecommendedTeams\(\)\)/,'review bootstrap must invalidate any prebuilt Team Comps registry after adding reviewed teams');
 console.log(`All remaining five-star review QA passed · ${REMAINING_FIVE_STAR_BUILD_PROFILES.length} characters · ${REMAINING_FIVE_STAR_REVIEWED_TEAMS.length} full team comps · ${audited} compatibility rows. Characters: ${REMAINING_FIVE_STAR_CHARACTER_NAMES.join(' · ')}`);
