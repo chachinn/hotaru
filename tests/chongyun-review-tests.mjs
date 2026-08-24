@@ -12,7 +12,7 @@ const support=profile.variants.find(row=>row.id==='burst-support-enabler').overr
 const melt=profile.variants.find(row=>row.id==='reverse-melt-burst').overrides;assert.ok(melt.mainStats.sands.includes('Elemental Mastery'));assert.ok(melt.goalStats.some(row=>/Only prioritize EM when Chongyun actually owns Reverse Melt/i.test(row.value)));
 const plunge=profile.variants.find(row=>row.id==='onfield-cryo-plunge').overrides;assert.ok(plunge.focus.includes('Normal Attack'));assert.ok(plunge.artifactPriority.includes('Marechaussee Hunter'));assert.ok(plunge.goalStats.some(row=>/Xianyun/i.test(row.value)));
 assert.equal(profile.f2pWeapon,'Sacrificial Greatsword');
-assert.equal(TEAMS.length,36);assert.equal(new Set(TEAMS.map(compositionKey)).size,TEAMS.length);assert.ok(TEAMS.every(team=>team.members.length===4&&team.members.includes('Chongyun')));
+assert.equal(TEAMS.length,37);assert.equal(new Set(TEAMS.map(compositionKey)).size,TEAMS.length);assert.ok(TEAMS.every(team=>team.members.length===4&&team.members.includes('Chongyun')));
 assert.ok(TEAMS.every(team=>!/(game8|kqm|keqingmains|icy veins|hoyolab|reddit|youtube|fandom)/i.test(`${team.name} ${team.why} ${team.notes||''}`)));
 for(const reaction of ['freeze','melt','hyperbloom','burgeon','vaporize'])assert.ok(TEAMS.some(team=>team.reaction===reaction),`Chongyun teams must cover ${reaction}`);
 const forward=TEAMS.filter(team=>team.forwardMeltInfusion);assert.equal(forward.length,3);assert.ok(forward.every(team=>team.constraints?.bennettMaxConstellation===5));
