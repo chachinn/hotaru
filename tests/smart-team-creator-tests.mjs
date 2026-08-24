@@ -36,9 +36,9 @@ assert.ok(matchReviewedTeams({roster:sparse,lockedNames:['Columbina'],allowUnown
 const neferTeams=recommendedTeamsForCharacter('Nefer');
 assert.ok(neferTeams.length>=12,`Nefer should have healthy source-backed coverage, got ${neferTeams.length}`);
 assert.ok(neferTeams.every(team=>teamHasValidSource(team)),'Nefer suggestions must remain source-backed');
-assert.ok(neferTeams.every(team=>team.confidence==='Reviewed'),'Nefer coverage must not be padded with unverified teams');
 const generalNeferSupplement=CURRENT_REVIEWED_TEAM_SUPPLEMENT.filter(team=>String(team.id||'').startsWith('nefer-'));
 assert.ok(generalNeferSupplement.length>=12,'the dedicated Nefer supplement should provide broad reviewed coverage');
+assert.ok(generalNeferSupplement.every(team=>team.confidence==='Reviewed'&&teamHasValidSource(team)),'new Nefer coverage must be reviewed and source-backed, never unverified padding');
 assert.ok(generalNeferSupplement.every(team=>!team.members.includes('Jahoda')),'general Nefer coverage must not bypass the existing C6-only Jahoda gate');
 
 const c6JahodaTeam=neferTeams.find(team=>team.id==='jahoda-nefer-xingqiu-lauma-c6');
@@ -57,7 +57,7 @@ assert.ok(neferOwned.results.every(team=>team.ownedComplete&&team.missing.length
 assert.ok(neferOwned.results.every(team=>!team.members.includes('Jahoda')),'C0/unowned Jahoda shells must not leak into general Nefer results');
 const neferAll=matchReviewedTeams({roster:[{name:'Nefer',status:'Usable',priority:'High',level:90,constellation:0}],lockedNames:['Nefer'],allowUnowned:true,limit:'all'});
 assert.equal(neferAll.results.length,neferAll.totalResults,'all-results mode must not cap Nefer pagination');
-assert.ok(neferAll.results.length>=12,'allow-unowned Nefer coverage should expose the full unrestricted reviewed library');
+assert.ok(neferAll.results.length>=12,'allow-unowned Nefer coverage should expose the full unrestricted sourced library');
 assert.ok(neferAll.results.every(team=>team.members.includes('Nefer')&&team.missing.length===3),'allow-unowned mode must preserve Nefer and correctly mark three missing teammates');
 assert.ok(neferAll.results.every(team=>!team.members.includes('Jahoda')),'allow-unowned must not bypass unknown C6 constellation requirements');
 const neferWithC6Jahoda=matchReviewedTeams({roster:[{name:'Nefer',level:90,constellation:0},{name:'Jahoda',level:90,constellation:6}],lockedNames:['Nefer'],allowUnowned:true,limit:'all'});
