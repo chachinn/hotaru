@@ -1,0 +1,23 @@
+import assert from 'node:assert/strict';
+import { RELEASED_AVATAR_AUDIT_V45 as AVATARS } from './fixtures/released-avatar-audit-v45.mjs';
+import { reviewedBuildProfile } from '../js/data/build-profiles/index.js';
+import { BENNETT_REVIEWED_TEAMS as TEAMS } from '../js/data/team-profiles/bennett-reviewed.js';
+import { compositionKey } from '../js/data/team-recommendations.js';
+import { auditBennettCompatibility, bennettCompatibilityForCharacter, BENNETT_COMPATIBILITY_POLICY } from '../js/data/character-compatibility/bennett.js';
+const profile=reviewedBuildProfile('Bennett');
+assert.ok(profile?.reviewed,'Bennett must resolve to reviewed data');
+assert.equal(profile.variants.length,4);assert.deepEqual(profile.variants.map(row=>row.id),['burst-support','onfield-reaction-dps','full-em-trigger','xianyun-plunge']);
+for(const variant of profile.variants){const samples=variant.overrides?.buildSummaryTeams||[];assert.ok(samples.length>=2&&samples.length<=3,`${variant.id} Build Summary must stay at 2–3 representative teams`)}
+const support=profile.variants.find(row=>row.id==='burst-support').overrides;assert.equal(support.artifactPriority[0],'Noblesse Oblige');assert.ok(support.weaponPriority.includes('Sapwood Blade'));assert.ok(support.goalStats.some(row=>/Base ATK/i.test(`${row.label} ${row.value}`)));
+const dps=profile.variants.find(row=>row.id==='onfield-reaction-dps').overrides;assert.ok(dps.artifactPriority.includes('Thundering Fury'));assert.ok(dps.artifactPriority.includes('Crimson Witch of Flames'));assert.ok(dps.mainStats.sands.includes('Elemental Mastery'));
+const trigger=profile.variants.find(row=>row.id==='full-em-trigger').overrides;assert.deepEqual(trigger.mainStats.goblet,['Elemental Mastery']);assert.deepEqual(trigger.mainStats.circlet,['Elemental Mastery']);assert.ok(trigger.artifactPriority.includes('Flower of Paradise Lost'));
+const plunge=profile.variants.find(row=>row.id==='xianyun-plunge').overrides;assert.equal(plunge.artifactPriority[0],'Long Night’s Oath');assert.ok(plunge.goalStats.some(row=>/requires Xianyun/i.test(row.value)));
+assert.equal(profile.talentPriority[0],'burst');assert.equal(profile.f2pWeapon,'Sapwood Blade');
+assert.ok(TEAMS.length>=40,`Bennett needs broad reviewed coverage; found ${TEAMS.length}`);assert.equal(new Set(TEAMS.map(compositionKey)).size,TEAMS.length,'Bennett teams may not duplicate four-character compositions');assert.ok(TEAMS.every(team=>team.members.length===4&&team.members.includes('Bennett')));
+assert.ok(TEAMS.every(team=>!/(game8|kqm|keqingmains|icy veins|hoyolab|reddit|youtube|fandom)/i.test(`${team.name} ${team.why} ${team.notes||''}`)));
+for(const reaction of ['vaporize','overload','melt','burning','burgeon'])assert.ok(TEAMS.some(team=>team.reaction===reaction),`Bennett teams must cover ${reaction}`);
+const audit=auditBennettCompatibility(AVATARS);assert.equal(audit.total,148);assert.ok(audit.rows.every(row=>row.status!=='invalid'));assert.ok(audit.rows.every(row=>row.status!=='unverified'||(!row.smartTeamApproved&&!row.adaptationAllowed)));
+for(const partner of ['Xiangling','Xingqiu','Sucrose','Raiden Shogun','Tartaglia','Arlecchino','Kaedehara Kazuha','Furina','Xianyun','Nahida','Chevreuse','Fischl','Chongyun','Rosaria','Yelan'])assert.equal(bennettCompatibilityForCharacter(partner).smartTeamApproved,true,`${partner} must be explicitly approved`);
+assert.equal(bennettCompatibilityForCharacter('Bennett').status,'self');assert.equal(bennettCompatibilityForCharacter('Aether TPS').status,'not-applicable');assert.equal(bennettCompatibilityForCharacter('Manekin Pyro').status,'not-applicable');
+assert.match(BENNETT_COMPATIBILITY_POLICY.rule,/Compatibility outranks build fit and account investment/i);assert.match(BENNETT_COMPATIBILITY_POLICY.rule,/Pyro\/Electro only/i);assert.match(BENNETT_COMPATIBILITY_POLICY.rule,/Xianyun Plunge requires Xianyun/i);assert.match(BENNETT_COMPATIBILITY_POLICY.rule,/ordinary support Bennett must not be converted to full EM/i);assert.match(BENNETT_COMPATIBILITY_POLICY.rule,/Unverified pairings remain blocked/i);
+console.log(`Bennett review QA passed · ${profile.variants.length} builds · ${TEAMS.length} distinct reviewed teams · ${audit.total}/148 compatibility records checked.`);
