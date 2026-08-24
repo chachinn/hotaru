@@ -9,11 +9,12 @@ const read=relative=>fs.readFileSync(path.join(root,relative),'utf8');
 const walk=dir=>fs.readdirSync(dir,{withFileTypes:true}).flatMap(entry=>entry.isDirectory()?walk(path.join(dir,entry.name)):[path.join(dir,entry.name)]);
 const jsFiles=walk(path.join(root,'js')).filter(file=>file.endsWith('.js'));
 
-// Every relative ES-module import must resolve to a real file.
+// Every relative ES-module import must resolve to a real file. Browser-valid query/hash cache busters do not change the filesystem target.
 for(const file of jsFiles){
   const source=fs.readFileSync(file,'utf8');
   for(const match of source.matchAll(/from\s+['"](\.[^'"]+)['"]/g)){
-    const resolved=path.resolve(path.dirname(file),match[1]);
+    const filesystemSpecifier=match[1].split(/[?#]/,1)[0];
+    const resolved=path.resolve(path.dirname(file),filesystemSpecifier);
     assert.ok(fs.existsSync(resolved),`broken relative import: ${path.relative(root,file)} -> ${match[1]}`);
   }
 }
