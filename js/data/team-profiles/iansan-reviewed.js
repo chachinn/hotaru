@@ -10,44 +10,34 @@ export const IANSAN_REVIEWED_TEAMS=[
   team('iansan-varesa-xiangling-chevreuse','Varesa Chevreuse · Xiangling',['Iansan','Varesa','Xiangling','Chevreuse'],'overload','Xiangling provides Pyro while Chevreuse supports the restricted Pyro/Electro shell and Varesa maintains Iansan’s movement buff.'),
   team('iansan-varesa-fischl-chevreuse','Varesa Chevreuse · Fischl',['Iansan','Varesa','Fischl','Chevreuse'],'overload','Fischl adds off-field Electro while Chevreuse supports a fully Pyro/Electro roster around mobile Varesa.','Use only where Pyro application from Chevreuse is sufficient for the intended Overloaded cadence.'),
   team('iansan-varesa-ororon-bennett','Varesa Ororon Bennett',['Iansan','Varesa','Ororon','Bennett'],'','Iansan and Bennett buff Varesa while Ororon contributes off-field Electro/Scroll utility.','If Ororon already holds Scroll, move Iansan to an alternate support set.'),
-
   team('iansan-chasca-mavuika-citlali','Chasca Natlan Core',['Iansan','Chasca','Mavuika','Citlali'],'','Chasca’s continuous movement while aiming easily sustains Iansan’s buff; Mavuika/Citlali provide strong off-field elemental support.'),
   team('iansan-chasca-furina-bennett','Chasca Furina Bennett',['Iansan','Chasca','Furina','Bennett'],'','Chasca’s movement supports Iansan while Bennett supplies practical healing and ATK; Furina adds DMG Bonus.','Bennett, not Iansan, is the practical sustain plan.'),
   team('iansan-chasca-ororon-bennett','Chasca Ororon Bennett',['Iansan','Chasca','Ororon','Bennett'],'','Chasca easily maintains movement while Ororon supplies off-field Electro and Bennett heals/buffs.','Avoid duplicate Scroll if Ororon already holds it.'),
   team('iansan-chasca-mavuika-bennett','Chasca Mavuika Bennett',['Iansan','Chasca','Mavuika','Bennett'],'','Mavuika and Bennett support Chasca while her aiming movement keeps Iansan’s Burst buff active.'),
-
   team('iansan-gaming-furina-xianyun','Gaming Furina Xianyun',['Iansan','Gaming','Furina','Xianyun'],'vaporize','Gaming’s plunge movement suits Iansan while Xianyun gives teamwide healing/Plunge support and Furina enables Vape/buffs.','Iansan is a direct ATK support, not the Vape trigger.'),
   team('iansan-gaming-citlali-xianyun','Gaming Melt Xianyun',['Iansan','Gaming','Citlali','Xianyun'],'melt','Gaming’s field movement maintains Iansan while Citlali supplies Cryo and Xianyun heals/buffs Plunges.'),
   team('iansan-gaming-citlali-bennett','Gaming Melt Bennett',['Iansan','Gaming','Citlali','Bennett'],'melt','Iansan and Bennett buff Gaming while Citlali enables Melt; Gaming’s plunge movement helps sustain the Iansan buff.'),
   team('iansan-gaming-mavuika-chevreuse','Gaming Chevreuse Mavuika',['Iansan','Gaming','Mavuika','Chevreuse'],'overload','The team remains Pyro/Electro-only for Chevreuse while Gaming’s movement supports Iansan’s Nightsoul requirement.'),
-
   team('iansan-mavuika-ororon-chevreuse','Mavuika Chevreuse Ororon',['Iansan','Mavuika','Ororon','Chevreuse'],'overload','All members are Pyro/Electro, preserving Chevreuse’s passive; Mavuika’s movement can maintain Iansan’s support buff.'),
   team('iansan-mavuika-fischl-chevreuse','Mavuika Chevreuse Fischl',['Iansan','Mavuika','Fischl','Chevreuse'],'overload','Fischl supplies off-field Electro while Iansan/Chevreuse support Mavuika in a valid Pyro/Electro-only roster.'),
   team('iansan-mavuika-xilonen-bennett','Mavuika Xilonen Bennett',['Iansan','Mavuika','Xilonen','Bennett'],'','Iansan and Bennett provide ATK while Xilonen adds sustain/RES Shred.','If Xilonen holds Scroll, Iansan should use an alternate support set.'),
   team('iansan-mavuika-furina-xilonen','Mavuika Furina Xilonen',['Iansan','Mavuika','Furina','Xilonen'],'vaporize','Xilonen supplies practical healing for Furina while Iansan buffs Mavuika and her movement helps sustain the buff.','Iansan is not the reaction owner.'),
-
   team('iansan-kinich-emilie-mavuika','Kinich Burning Core',['Iansan','Kinich','Emilie','Mavuika'],'burning','Kinich’s grappling movement is naturally compatible with Iansan while Emilie/Mavuika form the Burning core.'),
   team('iansan-kinich-emilie-bennett','Kinich Emilie Bennett',['Iansan','Kinich','Emilie','Bennett'],'burning','Kinich movement maintains Iansan while Bennett heals/buffs and Emilie exploits Burning.','Ensure a practical Pyro aura source through Bennett rotations.'),
   team('iansan-kinich-nicole-durin','Kinich Nicole Durin',['Iansan','Kinich','Nicole','Durin'],'','Current team evidence supports Iansan as the ATK buffer while Kinich’s movement maintains her buff and Nicole/Durin provide complementary support.'),
-
   team('iansan-ifa-furina-ororon','Ifa Furina Ororon',['Iansan','Ifa','Furina','Ororon'],'electro-charged','Ifa’s movement and healing make him a natural Iansan driver while Furina/Ororon provide off-field damage.','If Ororon holds Scroll, use an alternate Iansan set.'),
   team('iansan-ifa-furina-fischl','Ifa Furina Fischl',['Iansan','Ifa','Furina','Fischl'],'electro-charged','Ifa can maintain movement and practical healing for Furina while Iansan/Fischl provide Electro support.'),
   team('iansan-ifa-yelan-fischl','Ifa Yelan Fischl',['Iansan','Ifa','Yelan','Fischl'],'electro-charged','Ifa’s active movement maintains Iansan and drives Yelan/Fischl coordinated damage.','Iansan remains ATK support rather than reaction-owner EM trigger.'),
-
   team('iansan-clorinde-mavuika-chevreuse','Clorinde Mavuika Chevreuse',['Iansan','Clorinde','Mavuika','Chevreuse'],'overload','Mavuika helps the team maintain the movement condition while Chevreuse supports a fully Pyro/Electro roster around Clorinde.'),
-  team('iansan-clorinde-thoma-chevreuse','Clorinde Thoma Chevreuse',['Iansan','Clorinde','Thoma','Chevreuse'],'overload','A valid Pyro/Electro Chevreuse shell; Clorinde needs deliberate movement/dashes to sustain Iansan’s full buff.', '',c4),
+  team('iansan-clorinde-thoma-chevreuse','Clorinde Thoma Chevreuse',['Iansan','Clorinde','Thoma','Chevreuse'],'overload','A valid Pyro/Electro Chevreuse shell; Clorinde needs deliberate movement/dashes to sustain Iansan’s full buff.','',c4),
   team('iansan-clorinde-xingqiu-sucrose','Clorinde Xingqiu Sucrose',['Iansan','Clorinde','Xingqiu','Sucrose'],'electro-charged','Xingqiu supplies Hydro and Sucrose groups while Iansan buffs Clorinde.','Clorinde’s normal Skill movement alone is not enough for full Iansan uptime without extra movement support; this reviewed structure is gated to Iansan C4.',c4),
   team('iansan-clorinde-columbina-ineffa','Clorinde Columbina Ineffa',['Iansan','Clorinde','Columbina','Ineffa'],'lunar-charged','Iansan provides ATK support in the current Lunar-Charged Clorinde shell.','Use deliberate movement; C4 Iansan is assumed for comfortable full-buff maintenance.',c4),
-
   team('iansan-arlecchino-chevreuse-fischl','Arlecchino Chevreuse Fischl',['Iansan','Arlecchino','Chevreuse','Fischl'],'overload','Arlecchino can weave dashes to maintain Iansan while the roster stays strictly Pyro/Electro for Chevreuse.','Iansan’s healing does not solve Arlecchino’s combat-healing restriction.'),
   team('iansan-arlecchino-chevreuse-ororon','Arlecchino Chevreuse Ororon',['Iansan','Arlecchino','Chevreuse','Ororon'],'overload','Ororon supplies off-field Electro in a valid Pyro/Electro Chevreuse shell; Arlecchino can maintain movement through dashes.'),
-
   team('iansan-flins-aino-sucrose','Flins Aino Sucrose',['Iansan','Flins','Aino','Sucrose'],'lunar-charged','Flins benefits from Iansan’s ATK and can weave movement while Aino supplies Hydro and Sucrose provides grouping/EM utility.'),
   team('iansan-flins-columbina-aino','Flins Columbina Aino',['Iansan','Flins','Columbina','Aino'],'lunar-charged','Iansan buffs Flins while Columbina/Aino provide Hydro/Lunar support.','Flins should maintain deliberate movement during his field window.'),
-
-  team('iansan-nicole-durin-kinich','Nicole Durin Kinich',['Iansan','Nicole','Durin','Kinich'],'','Current evidence supports Iansan as the ATK buffer in this Nicole/Durin/Kinich structure; Kinich’s movement naturally sustains her buff.'),
+  team('iansan-nicole-durin-chasca','Nicole Durin Chasca',['Iansan','Nicole','Durin','Chasca'],'','Chasca provides a movement-friendly field-time option that naturally sustains Iansan while Nicole and Durin provide complementary support.'),
   team('iansan-nicole-durin-mavuika','Nicole Durin Mavuika',['Iansan','Nicole','Durin','Mavuika'],'','Mavuika supplies a mobile field-time option while Iansan provides Flat ATK and Nicole/Durin provide complementary support.'),
-
   team('iansan-sandrone-qiqi-beidou','Sandrone Qiqi Beidou',['Iansan','Sandrone','Qiqi','Beidou'],'','Current team evidence supports Iansan’s ATK buff alongside Qiqi sustain and Beidou off-field damage.','Maintain active-character movement deliberately.'),
   team('iansan-sandrone-qiqi-fischl','Sandrone Qiqi Fischl',['Iansan','Sandrone','Qiqi','Fischl'],'','Qiqi supplies sustain and Fischl off-field Electro while Iansan buffs Sandrone.','Movement must be deliberately maintained during Sandrone field time.')
 ];
