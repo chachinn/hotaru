@@ -10,11 +10,13 @@ const SANDRONE='https://www.icy-veins.com/genshin-impact/sandrone-team-guide';
 const NICOLE='https://www.icy-veins.com/genshin-impact/nicole-team-guide';
 const CRYO_TRAVELER='https://www.icy-veins.com/genshin-impact/cryo-traveler-team-guide';
 const ALYOSHA='https://www.icy-veins.com/genshin-impact/alyosha-team-guide';
+const NEFER='https://www.icy-veins.com/genshin-impact/nefer-team-guide';
 
 const sandroneSource=reviewedSource('Icy Veins Sandrone Team Guide',SANDRONE);
 const nicoleSource=reviewedSource('Icy Veins Nicole Team Guide',NICOLE);
 const travelerSource=reviewedSource('Icy Veins Cryo Traveler Team Guide',CRYO_TRAVELER);
 const alyoshaSource=reviewedSource('Icy Veins Alyosha Team Guide',ALYOSHA);
+const neferSource=reviewedSource('Icy Veins Nefer Team Guide',NEFER,'Guide','Asher');
 
 export const CURRENT_REVIEWED_TEAM_SUPPLEMENT=[
   reviewedTeam('sandrone-escoffier-yae-nicole','Stellar-Conduct · Escoffier + Nicole',['Sandrone','Escoffier','Yae Miko','Nicole'],'Sandrone stays on field while Yae supplies frequent Electro, Escoffier adds Cryo pressure, and Nicole supports the team.',sandroneSource),
@@ -62,7 +64,7 @@ export const CURRENT_REVIEWED_TEAM_SUPPLEMENT=[
   reviewedTeam('cryo-traveler-qiqi-beidou-xilonen','Stellar-Conduct · Xilonen',['Cryo Traveler','Qiqi','Beidou','Xilonen'],'Beidou supplies off-field Electro while Qiqi and Xilonen cover sustain and resistance reduction.',travelerSource),
   reviewedTeam('cryo-traveler-mizuki-odette-sucrose','Stellar-Swirl · Mizuki + Odette',['Yumemizuki Mizuki','Odette','Sucrose','Cryo Traveler'],'Cryo Traveler shifts to an off-field role while Mizuki drives Stellar-Swirl with Odette and Sucrose support.',travelerSource),
   reviewedTeam('cryo-traveler-mizuki-escoffier-sucrose','Stellar-Swirl · Mizuki + Escoffier',['Yumemizuki Mizuki','Escoffier','Sucrose','Cryo Traveler'],'Mizuki drives while Cryo Traveler and Escoffier provide Cryo-side contribution and Sucrose supports Anemo reactions.',travelerSource),
-  reviewedTeam('cryo-traveler-mizuki-sucrose-xilonen','Stellar-Swirl · Mizuki + Xilonen',['Yumemizuki Mizuki','Sucrose','Cryo Traveler','Xilonen'],'A Stellar-Swirl variation using Mizuki as driver with Sucrose and Xilonen as support.',travelerSource),
+  reviewedTeam('cryo-traveler-mizuki-sucrose-xilonen','Stellar-Swirl · Mizuki + Xilonen',['Yumemizuki Mizuki','Sucrose','Cryo Traveler','Xilonen'],'A Stellar-Swirl variation using Mizuki as the driver with Sucrose and Xilonen as support.',travelerSource),
   reviewedTeam('cryo-traveler-mizuki-qiqi-sucrose','Stellar-Swirl · Mizuki + Qiqi',['Yumemizuki Mizuki','Qiqi','Sucrose','Cryo Traveler'],'Mizuki drives Stellar-Swirl while Qiqi adds sustain and Cryo application alongside Cryo Traveler.',travelerSource),
 
   reviewedTeam('alyosha-sandrone-odette-yae','Stellar-Conduct · Sandrone',['Sandrone','Odette','Alyosha','Yae Miko'],'Alyosha supplies healing, buffs, and off-field Electro for a premium Sandrone/Odette Stellar-Conduct core.',alyoshaSource),
@@ -74,6 +76,23 @@ export const CURRENT_REVIEWED_TEAM_SUPPLEMENT=[
   reviewedTeam('alyosha-clorinde-xingqiu-sucrose','Electro reaction · Clorinde',['Clorinde','Alyosha','Xingqiu','Sucrose'],'Alyosha provides off-field Electro and sustain in a Clorinde reaction-driver team.',alyoshaSource,'General Electro-support use rather than Alyosha’s premier Stellar-Conduct role.'),
   reviewedTeam('alyosha-raiden-furina-jean','Electro-Charged · Raiden',['Raiden Shogun','Alyosha','Furina','Jean'],'Alyosha adds off-field Electro and utility to a Raiden/Furina/Jean shell.',alyoshaSource,'General support variation rather than a dedicated Stellar-Conduct team.'),
   reviewedTeam('alyosha-flins-aino-sucrose','Lunar/Electro · Flins',['Flins','Alyosha','Aino','Sucrose'],'Alyosha supplies off-field Electro support and healing around Flins with Aino and Sucrose.',alyoshaSource,'General Electro-support variation.'),
+
+  // Nefer coverage: exact source-listed Lunar-Bloom compositions only.
+  reviewedTeam('nefer-columbina-lauma-kuki','Lunar-Bloom · Kuki sustain',['Nefer','Columbina','Lauma','Kuki Shinobu'],'Columbina and Lauma form Nefer’s premium Lunar-Bloom core while Kuki Shinobu supplies sustain.',neferSource,'Kuki is used for sustain; Nefer’s kit prevents these teams from functioning as standard Hyperbloom.','lunar-bloom'),
+  reviewedTeam('nefer-columbina-lauma-zhongli','Lunar-Bloom · Zhongli sustain',['Nefer','Columbina','Lauma','Zhongli'],'Columbina and Lauma form the premium Lunar-Bloom core while Zhongli adds durable shielding.',neferSource,'','lunar-bloom'),
+  reviewedTeam('nefer-columbina-lauma-nahida','Lunar-Bloom · Nahida',['Nefer','Columbina','Lauma','Nahida'],'Nahida adds Elemental Mastery support and can carry Deepwood Memories around Nefer’s premium Lunar-Bloom core.',neferSource,'','lunar-bloom'),
+  reviewedTeam('nefer-columbina-lauma-aino','Lunar-Bloom · Aino',['Nefer','Columbina','Lauma','Aino'],'Aino provides an accessible support slot alongside Columbina and Lauma while preserving Nefer’s Lunar-Bloom core.',neferSource,'','lunar-bloom'),
+  reviewedTeam('nefer-columbina-lauma-ineffa','Lunar-Bloom · Ineffa',['Nefer','Columbina','Lauma','Ineffa'],'Ineffa supplies sustain and Elemental Mastery utility around Nefer, Columbina, and Lauma.',neferSource,'','lunar-bloom'),
+  reviewedTeam('nefer-columbina-nahida-aino','Lunar-Bloom · no Lauma',['Nefer','Columbina','Nahida','Aino'],'A source-listed no-Lauma Lunar-Bloom option using Nahida and Aino to support Nefer and Columbina.',neferSource,'Lower output than Lauma teams.','lunar-bloom'),
+  reviewedTeam('nefer-columbina-aino-collei','Lunar-Bloom · Collei',['Nefer','Columbina','Aino','Collei'],'A source-listed lower-cost Lunar-Bloom composition with Aino and Collei.',neferSource,'Lower output than Lauma teams.','lunar-bloom'),
+  reviewedTeam('nefer-columbina-aino-kirara','Lunar-Bloom · Kirara',['Nefer','Columbina','Aino','Kirara'],'Kirara supplies shielding in a source-listed no-Lauma Lunar-Bloom variation.',neferSource,'Lower output than Lauma teams.','lunar-bloom'),
+  reviewedTeam('nefer-kokomi-columbina-nahida','Lunar-Bloom · Kokomi',['Nefer','Sangonomiya Kokomi','Columbina','Nahida'],'Kokomi provides Hydro application and healing while Columbina and Nahida support Nefer’s Lunar-Bloom damage.',neferSource,'','lunar-bloom'),
+  reviewedTeam('nefer-zhongli-columbina-nahida','Lunar-Bloom · Zhongli + Nahida',['Nefer','Zhongli','Columbina','Nahida'],'Zhongli supplies shielding while Columbina and Nahida maintain the source-listed Lunar-Bloom support core.',neferSource,'','lunar-bloom'),
+  reviewedTeam('nefer-zhongli-columbina-sucrose','Lunar-Bloom · Zhongli + Sucrose',['Nefer','Zhongli','Columbina','Sucrose'],'Zhongli supplies shielding while Sucrose contributes Elemental Mastery-oriented support around Nefer and Columbina.',neferSource,'','lunar-bloom'),
+  reviewedTeam('nefer-aino-xingqiu-sucrose','Lunar-Bloom · F2P Sucrose',['Nefer','Aino','Xingqiu','Sucrose'],'A source-listed F2P-friendly composition using Aino and Xingqiu for Hydro-side support and Sucrose for Elemental Mastery utility.',neferSource,'','lunar-bloom'),
+  reviewedTeam('nefer-aino-xingqiu-kuki','Lunar-Bloom · F2P Kuki',['Nefer','Aino','Xingqiu','Kuki Shinobu'],'A source-listed F2P-friendly composition with Xingqiu application and Kuki sustain.',neferSource,'Kuki is used for sustain; Nefer prevents standard Hyperbloom conversion.','lunar-bloom'),
+  reviewedTeam('nefer-aino-sucrose-yaoyao','Lunar-Bloom · Yaoyao',['Nefer','Aino','Sucrose','Yaoyao'],'Yaoyao supplies healing and Dendro support while Aino and Sucrose fill the source-listed accessible Lunar-Bloom shell.',neferSource,'','lunar-bloom'),
+  reviewedTeam('nefer-aino-collei-kirara','Lunar-Bloom · accessible Dendro',['Nefer','Aino','Collei','Kirara'],'A source-listed accessible Lunar-Bloom team with Kirara shielding and Collei as the second Dendro slot.',neferSource,'','lunar-bloom'),
 
   ...V45_REVIEWED_TEAM_BATCH,
 ];
