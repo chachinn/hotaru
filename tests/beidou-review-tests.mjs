@@ -1,0 +1,21 @@
+import assert from 'node:assert/strict';
+import { RELEASED_AVATAR_AUDIT_V45 as AVATARS } from './fixtures/released-avatar-audit-v45.mjs';
+import { reviewedBuildProfile } from '../js/data/build-profiles/index.js';
+import { BEIDOU_REVIEWED_TEAMS as TEAMS } from '../js/data/team-profiles/beidou-reviewed.js';
+import { compositionKey } from '../js/data/team-recommendations.js';
+import { auditBeidouCompatibility, beidouCompatibilityForCharacter, BEIDOU_COMPATIBILITY_POLICY } from '../js/data/character-compatibility/beidou.js';
+const profile=reviewedBuildProfile('Beidou');
+assert.ok(profile?.reviewed,'Beidou must resolve to reviewed data');
+assert.equal(profile.variants.length,2);assert.deepEqual(profile.variants.map(row=>row.id),['offfield-burst-dps','aggravate-sub-dps']);
+for(const variant of profile.variants){const samples=variant.overrides?.buildSummaryTeams||[];assert.ok(samples.length>=2&&samples.length<=3,`${variant.id} Build Summary must stay at 2–3 representative teams`)}
+const standard=profile.variants.find(row=>row.id==='offfield-burst-dps').overrides;assert.equal(standard.artifactPriority[0],'Emblem of Severed Fate');assert.ok(standard.mainStats.sands.includes('Energy Recharge'));assert.deepEqual(standard.mainStats.goblet,['Electro DMG%']);
+const aggravate=profile.variants.find(row=>row.id==='aggravate-sub-dps').overrides;assert.ok(aggravate.mainStats.sands.includes('Elemental Mastery'));assert.ok(aggravate.goalStats.some(row=>/Aggravate/i.test(row.value)));
+assert.equal(profile.talentPriority[0],'burst');assert.equal(profile.f2pWeapon,'Ultimate Overlord’s Mega Magic Sword');
+assert.ok(TEAMS.length>=30,`Beidou needs broad reviewed coverage; found ${TEAMS.length}`);assert.equal(new Set(TEAMS.map(compositionKey)).size,TEAMS.length,'Beidou teams may not duplicate four-character compositions');assert.ok(TEAMS.every(team=>team.members.length===4&&team.members.includes('Beidou')));
+assert.ok(TEAMS.every(team=>!/(game8|kqm|keqingmains|icy veins|hoyolab|reddit|youtube|fandom)/i.test(`${team.name} ${team.why} ${team.notes||''}`)));
+for(const reaction of ['electro-charged','aggravate','overload','stellar-conduct','hyperbloom'])assert.ok(TEAMS.some(team=>team.reaction===reaction),`Beidou teams must cover ${reaction}`);
+const audit=auditBeidouCompatibility(AVATARS);assert.equal(audit.total,148);assert.ok(audit.rows.every(row=>row.status!=='invalid'));assert.ok(audit.rows.every(row=>row.status!=='unverified'||(!row.smartTeamApproved&&!row.adaptationAllowed)));
+for(const partner of ['Fischl','Xingqiu','Sucrose','Tartaglia','Kamisato Ayato','Sangonomiya Kokomi','Keqing','Nahida','Clorinde','Cyno','Chevreuse','Arlecchino','Yoimiya','Sandrone','Odette','Alyosha','Kuki Shinobu','Eula'])assert.equal(beidouCompatibilityForCharacter(partner).smartTeamApproved,true,`${partner} must be explicitly approved`);
+assert.equal(beidouCompatibilityForCharacter('Beidou').status,'self');assert.equal(beidouCompatibilityForCharacter('Aether TPS').status,'not-applicable');assert.equal(beidouCompatibilityForCharacter('Manekin Electro').status,'not-applicable');
+assert.match(BEIDOU_COMPATIBILITY_POLICY.rule,/Compatibility outranks build fit and account investment/i);assert.match(BEIDOU_COMPATIBILITY_POLICY.rule,/dedicated Hyperbloom trigger/i);assert.match(BEIDOU_COMPATIBILITY_POLICY.rule,/Raiden Burst attacks do not trigger Stormbreaker/i);assert.match(BEIDOU_COMPATIBILITY_POLICY.rule,/Unverified pairings remain blocked/i);
+console.log(`Beidou review QA passed · ${profile.variants.length} builds · ${TEAMS.length} distinct reviewed teams · ${audit.total}/148 compatibility records checked.`);
