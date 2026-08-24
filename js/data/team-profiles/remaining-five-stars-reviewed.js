@@ -21,25 +21,22 @@ function reactionFromName(value=''){
   return rules.find(([,pattern])=>pattern.test(text))?.[0]||'';
 }
 function compositionKey(members=[]){return[...new Set((members||[]).map(name=>key(name)).filter(Boolean))].sort().join('|')}
+function variantSamples(profile={}){return(profile.variants||[]).flatMap(variant=>(variant?.overrides?.buildSummaryTeams||[]).map(team=>({...team,_variant:variant.name||'Reviewed build',_note:variant.note||''})))}
 
 const rows=[];
 for(const profile of REMAINING_FIVE_STAR_BUILD_PROFILES){
-  const anchor=profile.character;
-  const seen=new Set();
-  for(const [variantIndex,variant] of (profile.variants||[]).entries()){
-    const teams=variant?.overrides?.buildSummaryTeams||[];
-    for(const [teamIndex,team] of teams.entries()){
-      const members=(team.members||[]).map(name=>String(name||'').trim()).filter(Boolean);
-      if(members.length!==4||!members.some(name=>key(name)===key(anchor)))continue;
-      const comp=compositionKey(members);if(!comp||seen.has(comp))continue;seen.add(comp);
-      rows.push({
-        id:`${slug(anchor)}-${slug(variant.id||variant.name||`build-${variantIndex+1}`)}-${teamIndex+1}`,
-        name:String(team.name||variant.name||'Reviewed Team').trim(),members,
-        reaction:reactionFromName(`${team.name||''} ${variant.name||''}`),
-        why:`Reviewed ${variant.name||'build'} composition for ${anchor}; Hotaru preserves the listed four-character structure before considering account-investment substitutions.`,
-        notes:variant.note||'',provenance:'source-informed',confidence:'Reviewed',source:sourceFor(team,profile),anchor,profileId:profile.id
-      });
-    }
+  const anchor=profile.character,seen=new Set(),full=(profile.reviewedTeams||[]).map(team=>({...team,_variant:'Reviewed Team Comps',_note:''})),candidates=[...full,...variantSamples(profile)];
+  for(const [index,team] of candidates.entries()){
+    const members=(team.members||[]).map(name=>String(name||'').trim()).filter(Boolean);
+    if(members.length!==4||!members.some(name=>key(name)===key(anchor)))continue;
+    const comp=compositionKey(members);if(!comp||seen.has(comp))continue;seen.add(comp);
+    rows.push({
+      id:`${slug(anchor)}-reviewed-${index+1}`,
+      name:String(team.name||team._variant||'Reviewed Team').trim(),members,
+      reaction:reactionFromName(`${team.name||''} ${team._variant||''}`),
+      why:`Reviewed composition for ${anchor}; Hotaru preserves the listed four-character structure before considering account-investment substitutions.`,
+      notes:team._note||'',provenance:'source-informed',confidence:'Reviewed',source:sourceFor(team,profile),anchor,profileId:profile.id
+    });
   }
 }
 
