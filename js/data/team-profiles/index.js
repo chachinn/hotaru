@@ -25,7 +25,7 @@ export const REVIEWED_TEAM_PROFILES=[
       team('arle-overload-ineffa-bennett','Overloaded · Ineffa + Bennett',['Arlecchino','Chevreuse','Ineffa','Bennett'],'Ineffa trades some raw off-field damage for shielding and comfortable Overloaded uptime while Bennett and Chevreuse buff Arlecchino.',source('KQM Arlecchino Quick Guide',KQM_ARLECCHINO)),
       team('arle-overload-fischl-durin','Overloaded · Fischl + Durin',['Arlecchino','Chevreuse','Fischl','Durin'],'Durin adds off-field damage and Pyro/Electro RES Shred while Fischl and Chevreuse maintain the Overloaded core.',source('KQM Arlecchino Quick Guide',KQM_ARLECCHINO)),
       team('arle-overload-yae-thoma','Overloaded · shielded',['Arlecchino','Chevreuse','Yae Miko','Thoma'],'Yae provides off-field Electro while Thoma supplies defensive utility for a more comfortable Chevreuse team.',source('KQM Arlecchino Quick Guide',KQM_ARLECCHINO)),
-      team('arle-lunar-charged','Lunar-Charged core',['Arlecchino','Columbina','Ineffa','Xilonen'],'Columbina and Ineffa form a high-damage Lunar-Charged core while Xilonen provides offensive support.',source('KQM Arlecchino Quick Guide',KQM_COLUMBINA))
+      team('arle-lunar-charged','Lunar-Charged core',['Arlecchino','Columbina','Ineffa','Xilonen'],'Columbina and Ineffa form a high-damage Lunar-Charged core while Xilonen provides offensive support.',source('KQM Arlecchino Quick Guide',KQM_ARLECCHINO))
     ]
   },
   {
