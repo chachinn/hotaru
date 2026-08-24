@@ -1,0 +1,25 @@
+import assert from 'node:assert/strict';
+import { RELEASED_AVATAR_AUDIT_V45 as AVATARS } from './fixtures/released-avatar-audit-v45.mjs';
+import { reviewedBuildProfile } from '../js/data/build-profiles/index.js';
+import { COLLEI_REVIEWED_TEAMS as TEAMS } from '../js/data/team-profiles/collei-reviewed.js';
+import { compositionKey } from '../js/data/team-recommendations.js';
+import { auditColleiCompatibility, colleiCompatibilityForCharacter, COLLEI_COMPATIBILITY_POLICY } from '../js/data/character-compatibility/collei.js';
+const profile=reviewedBuildProfile('Collei');
+assert.ok(profile?.reviewed,'Collei must resolve to reviewed data');
+assert.equal(profile.variants.length,3);assert.deepEqual(profile.variants.map(row=>row.id),['general-dendro-support','pure-bloom-burning-em','physical-onfield']);
+for(const variant of profile.variants){const samples=variant.overrides?.buildSummaryTeams||[];assert.ok(samples.length>=2&&samples.length<=3,`${variant.id} Build Summary must stay at 2–3 representative teams`)}
+const support=profile.variants.find(row=>row.id==='general-dendro-support').overrides;assert.ok(support.artifactPriority.includes('Deepwood Memories'));assert.ok(support.goalStats.some(row=>/200%/i.test(row.value)));assert.ok(support.goalStats.some(row=>/cannot own those triggers/i.test(row.value)));
+const bloom=profile.variants.find(row=>row.id==='pure-bloom-burning-em').overrides;assert.deepEqual(bloom.mainStats.goblet,['Elemental Mastery']);assert.ok(bloom.goalStats.some(row=>/Hydro\/Dendro-only/i.test(row.value)));
+const physical=profile.variants.find(row=>row.id==='physical-onfield').overrides;assert.deepEqual(physical.mainStats.goblet,['Physical DMG%']);assert.equal(physical.focus,'Normal Attack');
+assert.equal(profile.f2pWeapon,'Favonius Warbow');
+assert.equal(TEAMS.length,36);assert.equal(new Set(TEAMS.map(compositionKey)).size,TEAMS.length);assert.ok(TEAMS.every(team=>team.members.length===4&&team.members.includes('Collei')));
+assert.ok(TEAMS.every(team=>!/(game8|kqm|keqingmains|icy veins|hoyolab|reddit|youtube|fandom)/i.test(`${team.name} ${team.why} ${team.notes||''}`)));
+for(const reaction of ['aggravate','spread','hyperbloom','burgeon','bloom','burning','melt','superconduct'])assert.ok(TEAMS.some(team=>team.reaction===reaction),`Collei teams must cover ${reaction}`);
+const hyper=TEAMS.filter(team=>team.reaction==='hyperbloom');assert.ok(hyper.every(team=>team.members.includes('Kuki Shinobu')||team.members.includes('Raiden Shogun')||team.members.includes('Sucrose')));
+const burgeon=TEAMS.filter(team=>team.reaction==='burgeon');assert.ok(burgeon.every(team=>team.members.includes('Thoma')||team.members.includes('Dehya')));
+const nilou=TEAMS.filter(team=>team.members.includes('Nilou'));const allowed=new Set(['Collei','Nilou','Nahida','Sangonomiya Kokomi','Yaoyao','Xingqiu','Dendro Traveler','Barbara']);assert.ok(nilou.every(team=>team.members.every(member=>allowed.has(member))));
+const audit=auditColleiCompatibility(AVATARS);assert.equal(audit.total,148);assert.ok(audit.rows.every(row=>row.status!=='invalid'));assert.ok(audit.rows.every(row=>row.status!=='unverified'||(!row.smartTeamApproved&&!row.adaptationAllowed)));
+for(const partner of ['Clorinde','Fischl','Keqing','Yae Miko','Alhaitham','Kuki Shinobu','Xingqiu','Thoma','Nilou','Nahida','Sangonomiya Kokomi','Bennett','Venti','Emilie','Kinich','Ganyu','Rosaria'])assert.equal(colleiCompatibilityForCharacter(partner).smartTeamApproved,true,`${partner} must be explicitly approved`);
+assert.equal(colleiCompatibilityForCharacter('Collei').status,'self');assert.equal(colleiCompatibilityForCharacter('Aether TPS').status,'not-applicable');assert.equal(colleiCompatibilityForCharacter('Manekin Dendro').status,'not-applicable');
+assert.match(COLLEI_COMPATIBILITY_POLICY.rule,/Compatibility outranks build fit and account investment/i);assert.match(COLLEI_COMPATIBILITY_POLICY.rule,/cannot trigger Hyperbloom or Burgeon/i);assert.match(COLLEI_COMPATIBILITY_POLICY.rule,/Hydro\/Dendro-only/i);assert.match(COLLEI_COMPATIBILITY_POLICY.rule,/Unverified pairings remain blocked/i);
+console.log(`Collei review QA passed · ${profile.variants.length} builds · ${TEAMS.length} distinct reviewed teams · ${audit.total}/148 compatibility records checked.`);
