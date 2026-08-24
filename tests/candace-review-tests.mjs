@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';
+import { RELEASED_AVATAR_AUDIT_V45 as AVATARS } from './fixtures/released-avatar-audit-v45.mjs';
+import { reviewedBuildProfile } from '../js/data/build-profiles/index.js';
+import { CANDACE_REVIEWED_TEAMS as TEAMS } from '../js/data/team-profiles/candace-reviewed.js';
+import { compositionKey } from '../js/data/team-recommendations.js';
+import { auditCandaceCompatibility, candaceCompatibilityForCharacter, CANDACE_COMPATIBILITY_POLICY } from '../js/data/character-compatibility/candace.js';
+const profile=reviewedBuildProfile('Candace');
+assert.ok(profile?.reviewed,'Candace must resolve to reviewed data');
+assert.equal(profile.variants.length,3);assert.deepEqual(profile.variants.map(row=>row.id),['offfield-support','bloom-dps','onfield-driver']);
+for(const variant of profile.variants){const samples=variant.overrides?.buildSummaryTeams||[];assert.ok(samples.length>=2&&samples.length<=3,`${variant.id} Build Summary must stay at 2–3 representative teams`)}
+const support=profile.variants.find(row=>row.id==='offfield-support').overrides;assert.ok(support.mainStats.sands.includes('HP%'));assert.ok(support.mainStats.sands.includes('Energy Recharge'));assert.equal(support.weaponPriority[0],'Favonius Lance');
+const bloom=profile.variants.find(row=>row.id==='bloom-dps').overrides;assert.deepEqual(bloom.mainStats.goblet,['Elemental Mastery']);assert.deepEqual(bloom.mainStats.circlet,['Elemental Mastery']);assert.ok(bloom.goalStats.some(row=>/Hyperbloom or Burgeon/i.test(row.value)));
+const driver=profile.variants.find(row=>row.id==='onfield-driver').overrides;assert.ok(driver.focus.includes('Normal Attack'));assert.ok(driver.weaponPriority.includes('Favonius Lance'));
+assert.equal(profile.f2pWeapon,'Rightful Reward');assert.ok(profile.sourceRefs.some(row=>/candace-quickguide/.test(row.url)));
+assert.ok(TEAMS.length>=30,`Candace needs broad reviewed coverage; found ${TEAMS.length}`);assert.equal(new Set(TEAMS.map(compositionKey)).size,TEAMS.length);assert.ok(TEAMS.every(team=>team.members.length===4&&team.members.includes('Candace')));
+assert.ok(TEAMS.every(team=>!/(game8|kqm|keqingmains|icy veins|hoyolab|reddit|youtube|fandom)/i.test(`${team.name} ${team.why} ${team.notes||''}`)));
+for(const reaction of ['freeze','hyperbloom','bloom','electro-charged','vaporize','burgeon'])assert.ok(TEAMS.some(team=>team.reaction===reaction),`Candace teams must cover ${reaction}`);
+const audit=auditCandaceCompatibility(AVATARS);assert.equal(audit.total,148);assert.ok(audit.rows.every(row=>row.status!=='invalid'));assert.ok(audit.rows.every(row=>row.status!=='unverified'||(!row.smartTeamApproved&&!row.adaptationAllowed)));
+for(const partner of ['Skirk','Furina','Escoffier','Clorinde','Nahida','Fischl','Arlecchino','Yelan','Nilou','Yaoyao','Kuki Shinobu','Beidou','Sucrose','Xiangling','Bennett','Thoma'])assert.equal(candaceCompatibilityForCharacter(partner).smartTeamApproved,true,`${partner} must be explicitly approved`);
+assert.equal(candaceCompatibilityForCharacter('Candace').status,'self');assert.equal(candaceCompatibilityForCharacter('Aether TPS').status,'not-applicable');assert.equal(candaceCompatibilityForCharacter('Manekin Hydro').status,'not-applicable');
+assert.match(CANDACE_COMPATIBILITY_POLICY.rule,/Compatibility outranks build fit and account investment/i);assert.match(CANDACE_COMPATIBILITY_POLICY.rule,/only authorized when Candace owns Bloom/i);assert.match(CANDACE_COMPATIBILITY_POLICY.rule,/Nilou teams must remain Hydro\/Dendro only/i);assert.match(CANDACE_COMPATIBILITY_POLICY.rule,/C6-dependent/i);assert.match(CANDACE_COMPATIBILITY_POLICY.rule,/Unverified pairings remain blocked/i);
+console.log(`Candace review QA passed · ${profile.variants.length} builds · ${TEAMS.length} distinct reviewed teams · ${audit.total}/148 compatibility records checked.`);
