@@ -1,0 +1,20 @@
+import assert from 'node:assert/strict';
+import { RELEASED_AVATAR_AUDIT_V45 as AVATARS } from './fixtures/released-avatar-audit-v45.mjs';
+import { reviewedBuildProfile } from '../js/data/build-profiles/index.js';
+import { GOROU_REVIEWED_TEAMS as TEAMS } from '../js/data/team-profiles/gorou-reviewed.js';
+import { compositionKey } from '../js/data/team-recommendations.js';
+import { auditGorouCompatibility, gorouCompatibilityForCharacter, GOROU_COMPATIBILITY_POLICY } from '../js/data/character-compatibility/gorou.js';
+const profile=reviewedBuildProfile('Gorou');
+assert.ok(profile?.reviewed,'Gorou must resolve to reviewed data');assert.equal(profile.variants.length,2);assert.deepEqual(profile.variants.map(row=>row.id),['general-geo-support','zibai-def-stacking-support']);
+for(const variant of profile.variants){const samples=variant.overrides?.buildSummaryTeams||[];assert.ok(samples.length>=2&&samples.length<=3,`${variant.id} Build Summary must stay at 2–3 representative teams`)}
+const general=profile.variants.find(row=>row.id==='general-geo-support').overrides;assert.ok(general.goalStats.some(row=>/220% ER with Favonius/i.test(row.value)));assert.ok(general.goalStats.some(row=>/minor sustain/i.test(row.value)));
+const zibai=profile.variants.find(row=>row.id==='zibai-def-stacking-support').overrides;assert.match(zibai.focus,/every other rotation/i);assert.ok(zibai.mainStats.sands.includes('DEF%'));assert.ok(zibai.artifactPriority.includes('Instructor'));assert.ok(zibai.goalStats.some(row=>/stack DEF/i.test(row.value)));
+assert.equal(TEAMS.length,36);assert.equal(new Set(TEAMS.map(compositionKey)).size,TEAMS.length);assert.ok(TEAMS.every(team=>team.members.length===4&&team.members.includes('Gorou')));assert.ok(TEAMS.every(team=>!/(game8|kqm|keqingmains|icy veins|hoyolab|reddit|youtube|fandom)/i.test(`${team.name} ${team.why} ${team.notes||''}`)));
+const zteams=TEAMS.filter(team=>team.carry==='Zibai');assert.equal(zteams.length,12);assert.ok(zteams.every(team=>team.gorouBuild==='zibai-def-stacking-support'&&team.members.some(member=>['Columbina','Aino','Yelan','Xingqiu'].includes(member))));
+const itto=TEAMS.filter(team=>team.members.includes('Arataki Itto'));const noelle=TEAMS.filter(team=>team.members.includes('Noelle'));assert.equal(itto.length,12);assert.equal(noelle.length,12);assert.ok([...itto,...noelle].every(team=>team.gorouBuild==='general-geo-support'));
+const furina=TEAMS.filter(team=>team.members.includes('Furina'));assert.ok(furina.length>=5);assert.ok(furina.every(team=>team.members.includes('Noelle')),'Reviewed Furina Gorou teams must retain practical teamwide healing through Noelle');
+const audit=auditGorouCompatibility(AVATARS);assert.equal(audit.total,148);assert.ok(audit.rows.every(row=>row.status!=='invalid'));assert.ok(audit.rows.every(row=>row.status!=='unverified'||(!row.smartTeamApproved&&!row.adaptationAllowed)));
+for(const partner of ['Zibai','Illuga','Columbina','Aino','Arataki Itto','Albedo','Chiori','Zhongli','Noelle','Yun Jin','Furina'])assert.equal(gorouCompatibilityForCharacter(partner).smartTeamApproved,true,`${partner} must be explicitly approved`);
+assert.equal(gorouCompatibilityForCharacter('Gorou').status,'self');assert.equal(gorouCompatibilityForCharacter('Aether TPS').status,'not-applicable');assert.equal(gorouCompatibilityForCharacter('Manekina Geo').status,'not-applicable');
+assert.match(GOROU_COMPATIBILITY_POLICY.rule,/Compatibility outranks build fit and account investment/i);assert.match(GOROU_COMPATIBILITY_POLICY.rule,/dedicated DEF\/Geo support/i);assert.match(GOROU_COMPATIBILITY_POLICY.rule,/every other rotation/i);assert.match(GOROU_COMPATIBILITY_POLICY.rule,/C4 healing is minor/i);assert.match(GOROU_COMPATIBILITY_POLICY.rule,/valid Hydro enabler/i);assert.match(GOROU_COMPATIBILITY_POLICY.rule,/Unverified pairings remain blocked/i);
+console.log(`Gorou review QA passed · ${profile.variants.length} builds · ${TEAMS.length} distinct reviewed teams · ${audit.total}/148 compatibility records checked.`);
