@@ -39,10 +39,10 @@ assert.ok(neferTeams.every(team=>teamHasValidSource(team)),'Nefer suggestions mu
 const generalNeferSupplement=CURRENT_REVIEWED_TEAM_SUPPLEMENT.filter(team=>String(team.id||'').startsWith('nefer-'));
 assert.ok(generalNeferSupplement.length>=12,'the dedicated Nefer supplement should provide broad reviewed coverage');
 assert.ok(generalNeferSupplement.every(team=>team.confidence==='Reviewed'&&teamHasValidSource(team)),'new Nefer coverage must be reviewed and source-backed, never unverified padding');
-assert.ok(generalNeferSupplement.every(team=>!team.members.includes('Jahoda')),'general Nefer coverage must not bypass the existing C6-only Jahoda gate');
+assert.ok(generalNeferSupplement.every(team=>!team.members.includes('Jahoda')),'general Nefer coverage must not bypass the C6-only Jahoda review boundary');
 
-const c6JahodaTeam=neferTeams.find(team=>team.id==='jahoda-nefer-xingqiu-lauma-c6');
-assert.ok(c6JahodaTeam?.constraints?.jahodaMinConstellation===6,'existing Nefer/Jahoda reviewed shell must retain its C6 gate');
+// The completed Jahoda audit is not registered in Smart Team today, but any future registered C6-only shell must be gated.
+const c6JahodaTeam={id:'synthetic-nefer-jahoda-c6',members:['Jahoda','Nefer','Xingqiu','Lauma'],constraints:{jahodaMinConstellation:6}};
 assert.equal(teamMeetsRosterConstraints(c6JahodaTeam,[{name:'Jahoda',constellation:0}]),false,'C0 Jahoda must not satisfy a C6-only Nefer shell');
 assert.equal(teamMeetsRosterConstraints(c6JahodaTeam,[{name:'Jahoda',constellation:6}]),true,'C6 Jahoda must satisfy its reviewed Nefer shell');
 assert.equal(teamMeetsRosterConstraints(c6JahodaTeam,[]),false,'unknown or unowned Jahoda constellation must stay blocked');
@@ -54,14 +54,12 @@ const neferOwned=matchReviewedTeams({roster:neferRoster,lockedNames:['Nefer'],al
 assert.ok(neferOwned.totalResults>=12,`owned Nefer roster should yield many valid teams, got ${neferOwned.totalResults}`);
 assert.ok(neferOwned.results.length>2,'Nefer result presentation must not collapse to two when the roster supports more');
 assert.ok(neferOwned.results.every(team=>team.ownedComplete&&team.missing.length===0),'owned-only Nefer suggestions must stay fully owned');
-assert.ok(neferOwned.results.every(team=>!team.members.includes('Jahoda')),'C0/unowned Jahoda shells must not leak into general Nefer results');
+assert.ok(neferOwned.results.every(team=>!team.members.includes('Jahoda')),'general Nefer results must not invent a Jahoda shell');
 const neferAll=matchReviewedTeams({roster:[{name:'Nefer',status:'Usable',priority:'High',level:90,constellation:0}],lockedNames:['Nefer'],allowUnowned:true,limit:'all'});
 assert.equal(neferAll.results.length,neferAll.totalResults,'all-results mode must not cap Nefer pagination');
 assert.ok(neferAll.results.length>=12,'allow-unowned Nefer coverage should expose the full unrestricted sourced library');
 assert.ok(neferAll.results.every(team=>team.members.includes('Nefer')&&team.missing.length===3),'allow-unowned mode must preserve Nefer and correctly mark three missing teammates');
-assert.ok(neferAll.results.every(team=>!team.members.includes('Jahoda')),'allow-unowned must not bypass unknown C6 constellation requirements');
-const neferWithC6Jahoda=matchReviewedTeams({roster:[{name:'Nefer',level:90,constellation:0},{name:'Jahoda',level:90,constellation:6}],lockedNames:['Nefer'],allowUnowned:true,limit:'all'});
-assert.ok(neferWithC6Jahoda.results.some(team=>team.id==='jahoda-nefer-xingqiu-lauma-c6'),'C6 Jahoda should restore valid gated Nefer candidates');
+assert.ok(neferAll.results.every(team=>!team.members.includes('Jahoda')),'allow-unowned must not invent an unregistered Jahoda shell');
 
 const app=fs.readFileSync(new URL('../app.js',import.meta.url),'utf8'),sw=fs.readFileSync(new URL('../service-worker.js',import.meta.url),'utf8'),index=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
 assert.ok(app.includes('Smart Team Creator'));assert.ok(app.includes('Team review pending'));assert.ok(app.includes('team-lock-1'));assert.ok(app.includes('team-lock-2'));assert.ok(app.includes('team-allow-unowned'));assert.ok(app.includes('generate-smart-team'));
