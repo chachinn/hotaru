@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { reviewedTeamProfile, reviewedTeamsForCharacter, teamReviewStatus, allReviewedTeams } from '../js/data/team-profiles/index.js';
-import { matchReviewedTeams } from '../js/features/roster-team-matcher.js';
+import { CURRENT_REVIEWED_TEAM_SUPPLEMENT, recommendedTeamsForCharacter, teamHasValidSource } from '../js/data/team-recommendations.js';
+import { matchReviewedTeams, teamMeetsRosterConstraints } from '../js/features/roster-team-matcher.js';
 
 assert.equal(reviewedTeamProfile('Childe')?.character,'Tartaglia');
 assert.ok(reviewedTeamsForCharacter('Bennett').length>=3,'reviewed teammate should be reusable across reviewed templates');
@@ -30,6 +31,35 @@ assert.deepEqual(match.pendingLocks,['Brand New Character']);assert.equal(match.
 const sparse=[{name:'Columbina',status:'Building',priority:'High',level:80}];
 assert.equal(matchReviewedTeams({roster:sparse,lockedNames:['Columbina'],allowUnowned:false}).results.length,0);
 assert.ok(matchReviewedTeams({roster:sparse,lockedNames:['Columbina'],allowUnowned:true}).results.some(team=>team.missing.length===3));
+
+// Regression: Nefer used to collapse to the tiny inherited catalog instead of exposing her broader sourced team library.
+const neferTeams=recommendedTeamsForCharacter('Nefer');
+assert.ok(neferTeams.length>=12,`Nefer should have healthy source-backed coverage, got ${neferTeams.length}`);
+assert.ok(neferTeams.every(team=>teamHasValidSource(team)),'Nefer suggestions must remain source-backed');
+const generalNeferSupplement=CURRENT_REVIEWED_TEAM_SUPPLEMENT.filter(team=>String(team.id||'').startsWith('nefer-'));
+assert.ok(generalNeferSupplement.length>=12,'the dedicated Nefer supplement should provide broad reviewed coverage');
+assert.ok(generalNeferSupplement.every(team=>team.confidence==='Reviewed'&&teamHasValidSource(team)),'new Nefer coverage must be reviewed and source-backed, never unverified padding');
+assert.ok(generalNeferSupplement.every(team=>!team.members.includes('Jahoda')),'general Nefer coverage must not bypass the C6-only Jahoda review boundary');
+
+// The completed Jahoda audit is not registered in Smart Team today, but any future registered C6-only shell must be gated.
+const c6JahodaTeam={id:'synthetic-nefer-jahoda-c6',members:['Jahoda','Nefer','Xingqiu','Lauma'],constraints:{jahodaMinConstellation:6}};
+assert.equal(teamMeetsRosterConstraints(c6JahodaTeam,[{name:'Jahoda',constellation:0}]),false,'C0 Jahoda must not satisfy a C6-only Nefer shell');
+assert.equal(teamMeetsRosterConstraints(c6JahodaTeam,[{name:'Jahoda',constellation:6}]),true,'C6 Jahoda must satisfy its reviewed Nefer shell');
+assert.equal(teamMeetsRosterConstraints(c6JahodaTeam,[]),false,'unknown or unowned Jahoda constellation must stay blocked');
+
+const neferRoster=[
+  'Nefer','Columbina','Lauma','Kuki Shinobu','Zhongli','Nahida','Aino','Ineffa','Collei','Kirara','Sangonomiya Kokomi','Sucrose','Xingqiu','Yaoyao'
+].map(name=>({name,status:'Usable',priority:'High',level:90,constellation:0}));
+const neferOwned=matchReviewedTeams({roster:neferRoster,lockedNames:['Nefer'],allowUnowned:false,limit:5});
+assert.ok(neferOwned.totalResults>=12,`owned Nefer roster should yield many valid teams, got ${neferOwned.totalResults}`);
+assert.ok(neferOwned.results.length>2,'Nefer result presentation must not collapse to two when the roster supports more');
+assert.ok(neferOwned.results.every(team=>team.ownedComplete&&team.missing.length===0),'owned-only Nefer suggestions must stay fully owned');
+assert.ok(neferOwned.results.every(team=>!team.members.includes('Jahoda')),'general Nefer results must not invent a Jahoda shell');
+const neferAll=matchReviewedTeams({roster:[{name:'Nefer',status:'Usable',priority:'High',level:90,constellation:0}],lockedNames:['Nefer'],allowUnowned:true,limit:'all'});
+assert.equal(neferAll.results.length,neferAll.totalResults,'all-results mode must not cap Nefer pagination');
+assert.ok(neferAll.results.length>=12,'allow-unowned Nefer coverage should expose the full unrestricted sourced library');
+assert.ok(neferAll.results.every(team=>team.members.includes('Nefer')&&team.missing.length===3),'allow-unowned mode must preserve Nefer and correctly mark three missing teammates');
+assert.ok(neferAll.results.every(team=>!team.members.includes('Jahoda')),'allow-unowned must not invent an unregistered Jahoda shell');
 
 const app=fs.readFileSync(new URL('../app.js',import.meta.url),'utf8'),sw=fs.readFileSync(new URL('../service-worker.js',import.meta.url),'utf8'),index=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
 assert.ok(app.includes('Smart Team Creator'));assert.ok(app.includes('Team review pending'));assert.ok(app.includes('team-lock-1'));assert.ok(app.includes('team-lock-2'));assert.ok(app.includes('team-allow-unowned'));assert.ok(app.includes('generate-smart-team'));
