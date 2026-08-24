@@ -7,7 +7,7 @@ import { auditDoriCompatibility, doriCompatibilityForCharacter, DORI_COMPATIBILI
 const profile=reviewedBuildProfile('Dori');
 assert.ok(profile?.reviewed,'Dori must resolve to reviewed data');assert.equal(profile.variants.length,3);assert.deepEqual(profile.variants.map(row=>row.id),['healer-battery-support','hyperbloom-trigger','c6-aggravate-driver']);
 for(const variant of profile.variants){const samples=variant.overrides?.buildSummaryTeams||[];assert.ok(samples.length>=2&&samples.length<=3,`${variant.id} Build Summary must stay at 2–3 representative teams`)}
-const support=profile.variants.find(row=>row.id==='healer-battery-support').overrides;assert.ok(support.goalStats.some(row=>/active character/i.test(row.value)));assert.ok(support.goalStats.some(row=>/210–260%/i.test(row.value)));
+const support=profile.variants.find(row=>row.id==='healer-battery-support').overrides;assert.ok(support.goalStats.some(row=>/currently connected/i.test(row.value)));assert.ok(support.goalStats.some(row=>/210–260%/i.test(row.value)));
 const hb=profile.variants.find(row=>row.id==='hyperbloom-trigger').overrides;assert.deepEqual(hb.mainStats.goblet,['Elemental Mastery']);assert.ok(hb.goalStats.some(row=>/actual Hyperbloom trigger/i.test(row.value)));assert.ok(hb.goalStats.some(row=>/Level 90/i.test(row.label)));
 const c6=profile.variants.find(row=>row.id==='c6-aggravate-driver');assert.equal(c6.overrides.constraints?.doriMinConstellation,6);assert.ok(c6.overrides.mainStats.goblet.includes('Electro DMG Bonus'));assert.ok(c6.overrides.goalStats.some(row=>/C6 required/i.test(row.value)));
 assert.equal(profile.f2pWeapon,'Favonius Greatsword');
