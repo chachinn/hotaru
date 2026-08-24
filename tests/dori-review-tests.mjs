@@ -1,0 +1,21 @@
+import assert from 'node:assert/strict';
+import { RELEASED_AVATAR_AUDIT_V45 as AVATARS } from './fixtures/released-avatar-audit-v45.mjs';
+import { reviewedBuildProfile } from '../js/data/build-profiles/index.js';
+import { DORI_REVIEWED_TEAMS as TEAMS } from '../js/data/team-profiles/dori-reviewed.js';
+import { compositionKey } from '../js/data/team-recommendations.js';
+import { auditDoriCompatibility, doriCompatibilityForCharacter, DORI_COMPATIBILITY_POLICY } from '../js/data/character-compatibility/dori.js';
+const profile=reviewedBuildProfile('Dori');
+assert.ok(profile?.reviewed,'Dori must resolve to reviewed data');assert.equal(profile.variants.length,3);assert.deepEqual(profile.variants.map(row=>row.id),['healer-battery-support','hyperbloom-trigger','c6-aggravate-driver']);
+for(const variant of profile.variants){const samples=variant.overrides?.buildSummaryTeams||[];assert.ok(samples.length>=2&&samples.length<=3,`${variant.id} Build Summary must stay at 2–3 representative teams`)}
+const support=profile.variants.find(row=>row.id==='healer-battery-support').overrides;assert.ok(support.goalStats.some(row=>/active character/i.test(row.value)));assert.ok(support.goalStats.some(row=>/210–260%/i.test(row.value)));
+const hb=profile.variants.find(row=>row.id==='hyperbloom-trigger').overrides;assert.deepEqual(hb.mainStats.goblet,['Elemental Mastery']);assert.ok(hb.goalStats.some(row=>/actual Hyperbloom trigger/i.test(row.value)));assert.ok(hb.goalStats.some(row=>/Level 90/i.test(row.label)));
+const c6=profile.variants.find(row=>row.id==='c6-aggravate-driver');assert.equal(c6.overrides.constraints?.doriMinConstellation,6);assert.ok(c6.overrides.mainStats.goblet.includes('Electro DMG Bonus'));assert.ok(c6.overrides.goalStats.some(row=>/C6 required/i.test(row.value)));
+assert.equal(profile.f2pWeapon,'Favonius Greatsword');
+assert.equal(TEAMS.length,36);assert.equal(new Set(TEAMS.map(compositionKey)).size,TEAMS.length);assert.ok(TEAMS.every(team=>team.members.length===4&&team.members.includes('Dori')));assert.ok(TEAMS.every(team=>!/(game8|kqm|keqingmains|icy veins|hoyolab|reddit|youtube|fandom)/i.test(`${team.name} ${team.why} ${team.notes||''}`)));
+const hteams=TEAMS.filter(team=>team.reaction==='hyperbloom');assert.ok(hteams.length>=5);assert.ok(hteams.every(team=>team.reactionOwner==='Dori'&&team.doriBuild==='hyperbloom-trigger'&&team.members.includes('Jean')));
+const c6teams=TEAMS.filter(team=>team.constraints?.doriMinConstellation===6);assert.ok(c6teams.length>=6);assert.ok(c6teams.every(team=>team.doriBuild==='c6-aggravate-driver'));
+const audit=auditDoriCompatibility(AVATARS);assert.equal(audit.total,148);assert.ok(audit.rows.every(row=>row.status!=='invalid'));assert.ok(audit.rows.every(row=>row.status!=='unverified'||(!row.smartTeamApproved&&!row.adaptationAllowed)));
+for(const partner of ['Freminet','Eula','Fischl','Nahida','Jean','Xingqiu','Furina','Kamisato Ayato','Yoimiya','Arataki Itto','Xiao','Wanderer'])assert.equal(doriCompatibilityForCharacter(partner).smartTeamApproved,true,`${partner} must be explicitly approved`);
+assert.equal(doriCompatibilityForCharacter('Kujou Sara').smartTeamApproved,false,'C6-only pairing must remain blocked without constellation evidence');assert.equal(doriCompatibilityForCharacter('Kujou Sara',{doriConstellation:6}).smartTeamApproved,true,'C6-only pairing may unlock at Dori C6');assert.equal(doriCompatibilityForCharacter('Dori').status,'self');assert.equal(doriCompatibilityForCharacter('Lumine TPS').status,'not-applicable');assert.equal(doriCompatibilityForCharacter('Manekina Electro').status,'not-applicable');
+assert.match(DORI_COMPATIBILITY_POLICY.rule,/Compatibility outranks build fit and account investment/i);assert.match(DORI_COMPATIBILITY_POLICY.rule,/Full-EM Hyperbloom gearing is valid only when Dori actually owns/i);assert.match(DORI_COMPATIBILITY_POLICY.rule,/strictly C6-only/i);assert.match(DORI_COMPATIBILITY_POLICY.rule,/active character connected to the Jinni/i);assert.match(DORI_COMPATIBILITY_POLICY.rule,/does not provide interruption resistance/i);assert.match(DORI_COMPATIBILITY_POLICY.rule,/Unverified pairings remain blocked/i);
+console.log(`Dori review QA passed · ${profile.variants.length} builds · ${TEAMS.length} distinct reviewed teams · ${audit.total}/148 compatibility records checked.`);
