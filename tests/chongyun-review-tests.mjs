@@ -1,0 +1,25 @@
+import assert from 'node:assert/strict';
+import { RELEASED_AVATAR_AUDIT_V45 as AVATARS } from './fixtures/released-avatar-audit-v45.mjs';
+import { reviewedBuildProfile } from '../js/data/build-profiles/index.js';
+import { CHONGYUN_REVIEWED_TEAMS as TEAMS } from '../js/data/team-profiles/chongyun-reviewed.js';
+import { compositionKey } from '../js/data/team-recommendations.js';
+import { auditChongyunCompatibility, chongyunCompatibilityForCharacter, CHONGYUN_COMPATIBILITY_POLICY } from '../js/data/character-compatibility/chongyun.js';
+const profile=reviewedBuildProfile('Chongyun');
+assert.ok(profile?.reviewed,'Chongyun must resolve to reviewed data');
+assert.equal(profile.variants.length,3);assert.deepEqual(profile.variants.map(row=>row.id),['burst-support-enabler','reverse-melt-burst','onfield-cryo-plunge']);
+for(const variant of profile.variants){const samples=variant.overrides?.buildSummaryTeams||[];assert.ok(samples.length>=2&&samples.length<=3,`${variant.id} Build Summary must stay at 2–3 representative teams`)}
+const support=profile.variants.find(row=>row.id==='burst-support-enabler').overrides;assert.ok(support.artifactPriority.includes('Noblesse Oblige'));assert.ok(support.goalStats.some(row=>/infuses Sword, Claymore and Polearm/i.test(row.value)));
+const melt=profile.variants.find(row=>row.id==='reverse-melt-burst').overrides;assert.ok(melt.mainStats.sands.includes('Elemental Mastery'));assert.ok(melt.goalStats.some(row=>/Only prioritize EM when Chongyun actually owns Reverse Melt/i.test(row.value)));
+const plunge=profile.variants.find(row=>row.id==='onfield-cryo-plunge').overrides;assert.ok(plunge.focus.includes('Normal Attack'));assert.ok(plunge.artifactPriority.includes('Marechaussee Hunter'));assert.ok(plunge.goalStats.some(row=>/Xianyun/i.test(row.value)));
+assert.equal(profile.f2pWeapon,'Sacrificial Greatsword');
+assert.equal(TEAMS.length,36);assert.equal(new Set(TEAMS.map(compositionKey)).size,TEAMS.length);assert.ok(TEAMS.every(team=>team.members.length===4&&team.members.includes('Chongyun')));
+assert.ok(TEAMS.every(team=>!/(game8|kqm|keqingmains|icy veins|hoyolab|reddit|youtube|fandom)/i.test(`${team.name} ${team.why} ${team.notes||''}`)));
+for(const reaction of ['freeze','melt','hyperbloom','burgeon','vaporize'])assert.ok(TEAMS.some(team=>team.reaction===reaction),`Chongyun teams must cover ${reaction}`);
+const forward=TEAMS.filter(team=>team.forwardMeltInfusion);assert.equal(forward.length,3);assert.ok(forward.every(team=>team.constraints?.bennettMaxConstellation===5));
+const hyperbloom=TEAMS.filter(team=>team.reaction==='hyperbloom');assert.ok(hyperbloom.every(team=>team.members.includes('Kuki Shinobu')||team.members.includes('Raiden Shogun')));
+const burgeon=TEAMS.filter(team=>team.reaction==='burgeon');assert.ok(burgeon.every(team=>team.members.includes('Thoma')));
+const audit=auditChongyunCompatibility(AVATARS);assert.equal(audit.total,148);assert.ok(audit.rows.every(row=>row.status!=='invalid'));assert.ok(audit.rows.every(row=>row.status!=='unverified'||(!row.smartTeamApproved&&!row.adaptationAllowed)));
+for(const partner of ['Kaeya','Rosaria','Xingqiu','Jean','Shenhe','Kamisato Ayaka','Bennett','Xiangling','Kaedehara Kazuha','Furina','Xianyun','Nahida','Kuki Shinobu','Thoma'])assert.equal(chongyunCompatibilityForCharacter(partner).smartTeamApproved,true,`${partner} must be explicitly approved`);
+assert.equal(chongyunCompatibilityForCharacter('Chongyun').status,'self');assert.equal(chongyunCompatibilityForCharacter('Lumine TPS').status,'not-applicable');assert.equal(chongyunCompatibilityForCharacter('Manekina Cryo').status,'not-applicable');
+assert.match(CHONGYUN_COMPATIBILITY_POLICY.rule,/Compatibility outranks build fit and account investment/i);assert.match(CHONGYUN_COMPATIBILITY_POLICY.rule,/Bennett C0–C5/i);assert.match(CHONGYUN_COMPATIBILITY_POLICY.rule,/not the transformative-reaction owner/i);assert.match(CHONGYUN_COMPATIBILITY_POLICY.rule,/intentionally the driver with Xianyun/i);assert.match(CHONGYUN_COMPATIBILITY_POLICY.rule,/Unverified pairings remain blocked/i);
+console.log(`Chongyun review QA passed · ${profile.variants.length} builds · ${TEAMS.length} distinct reviewed teams · ${audit.total}/148 compatibility records checked.`);
