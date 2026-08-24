@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';
+import { RELEASED_AVATAR_AUDIT_V45 as AVATARS } from './fixtures/released-avatar-audit-v45.mjs';
+import { reviewedBuildProfile } from '../js/data/build-profiles/index.js';
+import { CHARLOTTE_REVIEWED_TEAMS as TEAMS } from '../js/data/team-profiles/charlotte-reviewed.js';
+import { compositionKey } from '../js/data/team-recommendations.js';
+import { auditCharlotteCompatibility, charlotteCompatibilityForCharacter, CHARLOTTE_COMPATIBILITY_POLICY } from '../js/data/character-compatibility/charlotte.js';
+const profile=reviewedBuildProfile('Charlotte');
+assert.ok(profile?.reviewed,'Charlotte must resolve to reviewed data');
+assert.equal(profile.variants.length,3);assert.deepEqual(profile.variants.map(row=>row.id),['teamwide-healer','offfield-cryo-dps','onfield-driver']);
+for(const variant of profile.variants){const samples=variant.overrides?.buildSummaryTeams||[];assert.ok(samples.length>=2&&samples.length<=3,`${variant.id} Build Summary must stay at 2–3 representative teams`)}
+const healer=profile.variants.find(row=>row.id==='teamwide-healer').overrides;assert.ok(healer.mainStats.sands.includes('Energy Recharge'));assert.ok(healer.mainStats.circlet.includes('Healing Bonus'));assert.equal(healer.weaponPriority[0],'Prototype Amber');assert.ok(healer.goalStats.some(row=>/Furina/i.test(row.value)));
+const damage=profile.variants.find(row=>row.id==='offfield-cryo-dps').overrides;assert.deepEqual(damage.mainStats.goblet,['Cryo DMG%']);assert.ok(damage.mainStats.circlet.includes('CRIT Rate'));assert.ok(damage.goalStats.some(row=>/modest/i.test(row.value)));
+const driver=profile.variants.find(row=>row.id==='onfield-driver').overrides;assert.ok(driver.focus.includes('Normal Attack'));assert.ok(driver.artifactPriority.includes('Marechaussee Hunter'));assert.ok(driver.goalStats.some(row=>/intentionally the on-field driver/i.test(row.value)));
+assert.equal(profile.f2pWeapon,'Prototype Amber');
+assert.ok(TEAMS.length>=30,`Charlotte needs broad reviewed coverage; found ${TEAMS.length}`);assert.equal(new Set(TEAMS.map(compositionKey)).size,TEAMS.length);assert.ok(TEAMS.every(team=>team.members.length===4&&team.members.includes('Charlotte')));
+assert.ok(TEAMS.every(team=>!/(game8|kqm|keqingmains|icy veins|hoyolab|reddit|youtube|fandom)/i.test(`${team.name} ${team.why} ${team.notes||''}`)));
+for(const reaction of ['freeze','melt','electro-charged','hyperbloom','burgeon'])assert.ok(TEAMS.some(team=>team.reaction===reaction),`Charlotte teams must cover ${reaction}`);
+const audit=auditCharlotteCompatibility(AVATARS);assert.equal(audit.total,148);assert.ok(audit.rows.every(row=>row.status!=='invalid'));assert.ok(audit.rows.every(row=>row.status!=='unverified'||(!row.smartTeamApproved&&!row.adaptationAllowed)));
+for(const partner of ['Furina','Neuvillette','Kaedehara Kazuha','Kamisato Ayaka','Skirk','Wriothesley','Eula','Raiden Shogun','Nahida','Kuki Shinobu','Thoma','Bennett','Xiangling'])assert.equal(charlotteCompatibilityForCharacter(partner).smartTeamApproved,true,`${partner} must be explicitly approved`);
+assert.equal(charlotteCompatibilityForCharacter('Charlotte').status,'self');assert.equal(charlotteCompatibilityForCharacter('Aether TPS').status,'not-applicable');assert.equal(charlotteCompatibilityForCharacter('Manekin Cryo').status,'not-applicable');
+assert.match(CHARLOTTE_COMPATIBILITY_POLICY.rule,/Compatibility outranks build fit and account investment/i);assert.match(CHARLOTTE_COMPATIBILITY_POLICY.rule,/intentionally the driver/i);assert.match(CHARLOTTE_COMPATIBILITY_POLICY.rule,/Arlecchino speedrun pairings must remain labeled niche/i);assert.match(CHARLOTTE_COMPATIBILITY_POLICY.rule,/Unverified pairings remain blocked/i);
+console.log(`Charlotte review QA passed · ${profile.variants.length} builds · ${TEAMS.length} distinct reviewed teams · ${audit.total}/148 compatibility records checked.`);
