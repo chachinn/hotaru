@@ -1,0 +1,20 @@
+import assert from 'node:assert/strict';
+import { RELEASED_AVATAR_AUDIT_V45 as AVATARS } from './fixtures/released-avatar-audit-v45.mjs';
+import { reviewedBuildProfile } from '../js/data/build-profiles/index.js';
+import { FISCHL_REVIEWED_TEAMS as TEAMS } from '../js/data/team-profiles/fischl-reviewed.js';
+import { compositionKey } from '../js/data/team-recommendations.js';
+import { auditFischlCompatibility, fischlCompatibilityForCharacter, FISCHL_COMPATIBILITY_POLICY } from '../js/data/character-compatibility/fischl.js';
+const profile=reviewedBuildProfile('Fischl');
+assert.ok(profile?.reviewed,'Fischl must resolve to reviewed data');assert.equal(profile.variants.length,3);assert.deepEqual(profile.variants.map(row=>row.id),['offfield-oz-dps','aggravate-offfield-dps','onfield-physical-electro']);
+for(const variant of profile.variants){const samples=variant.overrides?.buildSummaryTeams||[];assert.ok(samples.length>=2&&samples.length<=3,`${variant.id} Build Summary must stay at 2–3 representative teams`)}
+const general=profile.variants.find(row=>row.id==='offfield-oz-dps').overrides;assert.ok(general.artifactPriority.includes('Golden Troupe'));assert.ok(general.goalStats.some(row=>/120–140%/i.test(row.value)));assert.ok(general.goalStats.some(row=>/snapshot/i.test(row.label)));
+const agg=profile.variants.find(row=>row.id==='aggravate-offfield-dps').overrides;assert.ok(agg.mainStats.sands.includes('Elemental Mastery'));assert.ok(agg.weaponPriority.includes('The Stringless'));assert.ok(agg.goalStats.some(row=>/Spread itself does not trigger A4/i.test(row.value)));
+const onfield=profile.variants.find(row=>row.id==='onfield-physical-electro').overrides;assert.ok(onfield.mainStats.goblet.includes('Physical DMG Bonus'));assert.ok(onfield.goalStats.some(row=>/110–130%/i.test(row.value)));assert.equal(profile.f2pWeapon,'Song of Stillness');
+assert.equal(TEAMS.length,36);assert.equal(new Set(TEAMS.map(compositionKey)).size,TEAMS.length);assert.ok(TEAMS.every(team=>team.members.length===4&&team.members.includes('Fischl')));assert.ok(TEAMS.every(team=>!/(game8|kqm|keqingmains|icy veins|hoyolab|reddit|youtube|fandom)/i.test(`${team.name} ${team.why} ${team.notes||''}`)));
+const hb=TEAMS.filter(team=>team.reaction==='hyperbloom');assert.ok(hb.length>=4);assert.ok(hb.every(team=>team.reactionOwner&&team.reactionOwner!=='Fischl'));
+const chev=TEAMS.filter(team=>team.members.includes('Chevreuse'));assert.ok(chev.length>=4);const allowed=new Set(['Fischl','Chevreuse','Arlecchino','Bennett','Yoimiya','Yanfei','Clorinde','Thoma']);assert.ok(chev.every(team=>team.members.every(member=>allowed.has(member))));
+const audit=auditFischlCompatibility(AVATARS);assert.equal(audit.total,148);assert.ok(audit.rows.every(row=>row.status!=='invalid'));assert.ok(audit.rows.every(row=>row.status!=='unverified'||(!row.smartTeamApproved&&!row.adaptationAllowed)));
+for(const partner of ['Keqing','Clorinde','Yae Miko','Nahida','Kaedehara Kazuha','Sucrose','Xingqiu','Beidou','Chevreuse','Arlecchino','Eula','Freminet','Kuki Shinobu'])assert.equal(fischlCompatibilityForCharacter(partner).smartTeamApproved,true,`${partner} must be explicitly approved`);
+assert.equal(fischlCompatibilityForCharacter('Fischl').status,'self');assert.equal(fischlCompatibilityForCharacter('Aether TPS').status,'not-applicable');assert.equal(fischlCompatibilityForCharacter('Manekina Electro').status,'not-applicable');
+assert.match(FISCHL_COMPATIBILITY_POLICY.rule,/Compatibility outranks build fit and account investment/i);assert.match(FISCHL_COMPATIBILITY_POLICY.rule,/Golden Troupe remains the primary off-field set/i);assert.match(FISCHL_COMPATIBILITY_POLICY.rule,/full-EM Hyperbloom gearing must not be assigned/i);assert.match(FISCHL_COMPATIBILITY_POLICY.rule,/Chevreuse teams must stay Pyro\/Electro-only/i);assert.match(FISCHL_COMPATIBILITY_POLICY.rule,/must not replace a stronger reviewed driver/i);assert.match(FISCHL_COMPATIBILITY_POLICY.rule,/Unverified pairings remain blocked/i);
+console.log(`Fischl review QA passed · ${profile.variants.length} builds · ${TEAMS.length} distinct reviewed teams · ${audit.total}/148 compatibility records checked.`);
