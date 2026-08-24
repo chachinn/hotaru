@@ -1,0 +1,51 @@
+const KQM='https://keqingmains.com/q/dori-quickguide/';
+const IV='https://www.icy-veins.com/genshin-impact/dori-guide-best-builds';
+const source={label:'Dori reviewed team theorycraft',url:KQM,type:'Reviewed theorycraft',platform:'Guide',reviewedAt:'2026-08-24',links:[{label:'Current Dori build cross-check',url:IV,type:'Reviewed guide',platform:'Guide',reviewedAt:'2026-08-24'}]};
+const team=(id,name,members,reaction,why,notes='',extra={})=>({id,name,members,reaction,why,notes,confidence:'Reviewed',provenance:'source-informed',source,...extra});
+const c6={constraints:{doriMinConstellation:6},doriBuild:'c6-aggravate-driver'};
+const hb={doriBuild:'hyperbloom-trigger',reactionOwner:'Dori'};
+export const DORI_REVIEWED_TEAMS=[
+  team('dori-freminet-furina-mika','Freminet Superconduct',['Dori','Freminet','Furina','Mika'],'superconduct','Dori provides Electro for Superconduct plus active-character healing and Energy while Mika sustains and supports Freminet.','Dori is support here, not a Hyperbloom trigger.'),
+  team('dori-freminet-xingqiu-mika','Freminet Shatter Superconduct',['Dori','Freminet','Xingqiu','Mika'],'superconduct','Dori supplies Electro/healing while Xingqiu enables Freeze/Shatter and Mika supports the Physical driver.'),
+  team('dori-eula-rosaria-furina','Eula Battery Sustain',['Dori','Eula','Rosaria','Furina'],'superconduct','Dori adds Electro, healing and Flat Energy for Eula while Rosaria batteries Cryo and Furina buffs team damage.','Rotation must keep Eula connected when Dori’s healing/Energy is needed.'),
+  team('dori-eula-rosaria-mika','Eula Triple Sustain',['Dori','Eula','Rosaria','Mika'],'superconduct','Dori supplies Electro and Energy while Rosaria batteries and Mika heals/buffs Eula.'),
+  team('dori-eula-shenhe-mika','Eula Shenhe Sustain',['Dori','Eula','Shenhe','Mika'],'superconduct','Dori provides Electro and active-character Energy; Shenhe contributes Cryo support and Mika handles Physical-oriented sustain.'),
+  team('dori-razor-kaeya-mika','Razor Physical',['Dori','Razor','Kaeya','Mika'],'superconduct','Dori heals and batteries the active Razor while Kaeya enables Superconduct and Mika adds Physical support.'),
+  team('dori-razor-rosaria-mika','Razor Physical · Rosaria',['Dori','Razor','Rosaria','Mika'],'superconduct','Rosaria provides off-field Cryo/CRIT support while Dori supplies Electro, healing and active-character Energy.'),
+
+  team('dori-fischl-nahida-kazuha','Aggravate Sustain',['Dori','Fischl','Nahida','Kaedehara Kazuha'],'aggravate','Dori heals and contributes Electro while Fischl is the main off-field Electro damage source; Nahida enables Quicken and Kazuha supports Electro damage.'),
+  team('dori-fischl-nahida-sucrose','Aggravate Sustain · Sucrose',['Dori','Fischl','Nahida','Sucrose'],'aggravate','Dori sustains the team while Fischl/Nahida maintain Quicken and Sucrose groups and shares EM.'),
+  team('dori-yae-nahida-kazuha','Yae Aggravate Sustain',['Dori','Yae Miko','Nahida','Kaedehara Kazuha'],'aggravate','Dori consolidates healing and Electro utility while Yae/Nahida form the Quicken core and Kazuha supports Electro damage.'),
+  team('dori-keqing-nahida-kazuha','Keqing Aggravate Sustain',['Dori','Keqing','Nahida','Kaedehara Kazuha'],'aggravate','Dori heals and offers Energy while Keqing drives Aggravate with Nahida and Kazuha support.'),
+  team('dori-clorinde-fischl-nahida','Clorinde Aggravate Sustain',['Dori','Clorinde','Fischl','Nahida'],'aggravate','Dori provides healing/Energy while Clorinde and Fischl exploit Quicken from Nahida.'),
+  team('dori-sethos-fischl-nahida','Sethos Aggravate Sustain',['Dori','Sethos','Fischl','Nahida'],'aggravate','Dori supports Sethos with healing and Flat Energy while Fischl/Nahida maintain the Aggravate shell.'),
+  team('dori-cyno-nahida-furina','Cyno Quickbloom Sustain',['Dori','Cyno','Nahida','Furina'],'quickbloom','Dori can feed the active Cyno Energy and healing during field time while Nahida/Furina support Quickbloom.','Do not assign Dori the Hyperbloom trigger build unless she is actually triggering the seeds.'),
+
+  team('dori-jean-xingqiu-nahida','Jean Hyperbloom',['Dori','Jean','Xingqiu','Nahida'],'hyperbloom','Jean can repeatedly Swirl Dori’s self-applied Electro from the Jinni connection onto nearby Dendro Cores while Xingqiu/Nahida create them.','This is a reviewed Dori-owned Hyperbloom setup.',hb),
+  team('dori-jean-yelan-nahida','Jean Hyperbloom · Yelan',['Dori','Jean','Yelan','Nahida'],'hyperbloom','Yelan and Nahida create cores while Jean converts Dori’s self-applied Electro into AoE Electro Swirls that trigger Hyperbloom.','Dori owns the reaction engine through the self-Swirl setup.',hb),
+  team('dori-jean-furina-nahida','Quickbloom Self-Swirl',['Dori','Jean','Furina','Nahida'],'hyperbloom','Furina/Nahida create cores and Jean’s Burst interacts with Dori’s Electro self-application to trigger Hyperbloom while also supplying healing.','Use full EM only when this setup makes Dori the trigger.',hb),
+  team('dori-jean-kokomi-nahida','Hyperbloom · Kokomi',['Dori','Jean','Sangonomiya Kokomi','Nahida'],'hyperbloom','Kokomi and Nahida create cores while Jean uses Dori’s self-applied Electro to trigger them through Swirl.','Dori is the intended transformative trigger.',hb),
+  team('dori-jean-ayato-nahida','Hyperbloom · Ayato',['Dori','Jean','Kamisato Ayato','Nahida'],'hyperbloom','Ayato/Nahida create cores while Jean spreads Dori’s self-applied Electro onto them.','Dori owns Hyperbloom only through the reviewed self-Swirl interaction.',hb),
+
+  team('dori-fischl-nahida-baizhu','C6 Aggravate · Baizhu',['Dori','Fischl','Nahida','Baizhu'],'aggravate','At C6, Dori can drive infused Normal Attacks while Fischl supplies off-field damage and the Dendro core maintains Quicken.','Strictly C6 for the on-field Dori identity.',c6),
+  team('dori-fischl-baizhu-sucrose','C6 Aggravate · Sucrose',['Dori','Fischl','Baizhu','Sucrose'],'aggravate','C6 Dori drives Electro-infused attacks while Fischl adds damage, Baizhu supplies Dendro and Sucrose groups/shares EM.','Strictly C6.',c6),
+  team('dori-fischl-yaoyao-kazuha-c6','C6 Aggravate · Yaoyao Kazuha',['Dori','Fischl','Yaoyao','Kaedehara Kazuha'],'aggravate','C6 Dori takes field time with Electro infusion while Fischl supplies off-field damage, Yaoyao maintains Dendro, and Kazuha supports Electro damage.','Strictly C6.',c6),
+  team('dori-sara-nahida-kazuha','C6 Sara Aggravate',['Dori','Kujou Sara','Nahida','Kaedehara Kazuha'],'aggravate','C6 Dori uses Sara’s ATK/Electro CRIT buffs with Nahida/Kazuha support for an invested Aggravate driver setup.','Strictly C6.',c6),
+  team('dori-fischl-kirara-kazuha','C6 Aggravate · Kirara',['Dori','Fischl','Kirara','Kaedehara Kazuha'],'aggravate','C6 Dori drives while Kirara supplies Dendro/shielding, Fischl adds damage and Kazuha supports Electro.','Strictly C6.',c6),
+  team('dori-fischl-collei-sucrose','C6 Aggravate · Collei',['Dori','Fischl','Collei','Sucrose'],'aggravate','C6 Dori drives infused attacks while Collei supplies Dendro and Sucrose/Fischl support the Aggravate shell.','Strictly C6.',c6),
+
+  team('dori-neuvillette-furina-kazuha','Neuvillette Electro Sustain',['Dori','Neuvillette','Furina','Kaedehara Kazuha'],'electro-charged','Dori offers healing and Electro contact while Furina/Kazuha support Neuvillette.','Dori’s tether mechanics are less valuable than on-field-driver teams, so this is a lower-priority sustain option.'),
+  team('dori-ayato-fischl-kazuha','Ayato Electro-Charged Sustain',['Dori','Kamisato Ayato','Fischl','Kaedehara Kazuha'],'electro-charged','Dori heals the active Ayato and contributes Electro while Fischl/Kazuha provide sustained damage and support.'),
+  team('dori-tartaglia-fischl-kazuha','Tartaglia Electro-Charged Sustain',['Dori','Tartaglia','Fischl','Kaedehara Kazuha'],'electro-charged','Dori supplies healing/Energy to the active Tartaglia while Fischl/Kazuha support Electro-Charged damage.'),
+
+  team('dori-yoimiya-fischl-bennett','Yoimiya Overload Sustain',['Dori','Yoimiya','Fischl','Bennett'],'overload','Dori adds healing/Energy and Electro while Fischl provides reliable off-field Electro around Yoimiya/Bennett.','This is not a Chevreuse team and receives no Chevreuse passive restriction.'),
+  team('dori-yanfei-fischl-bennett','Yanfei Overload Sustain',['Dori','Yanfei','Fischl','Bennett'],'overload','Dori supports Yanfei with healing/Energy while Fischl provides the main off-field Electro application.'),
+  team('dori-arlecchino-fischl-bennett','Arlecchino Overload Flex',['Dori','Arlecchino','Fischl','Bennett'],'overload','Dori contributes Energy/Electro while Fischl drives the off-field Electro side and Bennett buffs.','Dori’s healing does not heal Arlecchino during combat; include her for utility rather than sustain.'),
+
+  team('dori-itto-gorou-albedo','Itto Energy Sustain',['Dori','Arataki Itto','Gorou','Albedo'],'','Dori can restore Flat Energy to the active Itto while providing healing; the Geo core supplies the team’s primary damage structure.','Electro is incidental here; this is a battery/sustain flex.'),
+  team('dori-noelle-gorou-furina','Noelle Furina Battery',['Dori','Noelle','Gorou','Furina'],'','Dori can help the active Noelle with Energy while Noelle’s team healing supports Furina Fanfare.'),
+  team('dori-xiao-faruzan-furina','Xiao Battery Sustain',['Dori','Xiao','Faruzan','Furina'],'','Dori can heal and restore Flat Energy to active Xiao while Faruzan/Furina provide offensive support.','Keep Xiao connected during Dori’s Burst to receive its utility.'),
+  team('dori-wanderer-faruzan-furina','Wanderer Battery Sustain',['Dori','Wanderer','Faruzan','Furina'],'','Dori supplies healing/Energy while Faruzan/Furina support Wanderer.','Dori lacks shielding, so this does not solve interruption resistance.'),
+  team('dori-gaming-furina-xianyun','Gaming Plunge Sustain',['Dori','Gaming','Furina','Xianyun'],'','Dori can feed the active Gaming Energy while Xianyun heals/enables Plunge and Furina buffs team damage.','Electro can alter aura/reaction sequencing, so use only where the team structure remains desirable.')
+];
+export default DORI_REVIEWED_TEAMS;
