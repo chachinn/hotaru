@@ -4,6 +4,7 @@ import columbina from './columbina.js';
 import clorinde from './clorinde.js';
 import odette from './odette.js';
 import aino from './aino.js';
+import alyosha from './alyosha.js';
 import alhaitham from './alhaitham.js';
 import albedo from './albedo.js';
 import aloy from './aloy.js';
@@ -32,7 +33,7 @@ import keqing from './keqing.js';
 import { REMAINING_FIVE_STAR_BUILD_PROFILES } from './remaining-five-stars.js';
 
 function key(value=''){return String(value||'').trim().toLowerCase()}
-export const BASE_REVIEWED_BUILD_PROFILES=[arlecchino,tartaglia,columbina,clorinde,odette,aino,alhaitham,albedo,aloy,amber,aratakiItto,baizhu,chasca,chiori,citlali,cyno,dehya,diluc,emilie,escoffier,eula,flins,furina,ganyu,huTao,ineffa,jean,kaedeharaKazuha,kamisatoAyaka,kamisatoAyato,keqing];
+export const BASE_REVIEWED_BUILD_PROFILES=[arlecchino,tartaglia,columbina,clorinde,odette,aino,alyosha,alhaitham,albedo,aloy,amber,aratakiItto,baizhu,chasca,chiori,citlali,cyno,dehya,diluc,emilie,escoffier,eula,flins,furina,ganyu,huTao,ineffa,jean,kaedeharaKazuha,kamisatoAyaka,kamisatoAyato,keqing];
 const existing=new Set(BASE_REVIEWED_BUILD_PROFILES.map(profile=>key(profile.character)));
 export const REVIEWED_BUILD_PROFILES=[...BASE_REVIEWED_BUILD_PROFILES,...REMAINING_FIVE_STAR_BUILD_PROFILES.filter(profile=>!existing.has(key(profile.character)))];
 const PROFILE_INDEX=new Map();for(const profile of REVIEWED_BUILD_PROFILES){PROFILE_INDEX.set(key(profile.character),profile);for(const alias of profile.aliases||[])PROFILE_INDEX.set(key(alias),profile)}
