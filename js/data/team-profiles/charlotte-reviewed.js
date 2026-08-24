@@ -33,11 +33,11 @@ export const CHARLOTTE_REVIEWED_TEAMS=[
   team('charlotte-nahida-thoma-xingqiu','Burgeon healer',['Charlotte','Nahida','Thoma','Xingqiu'],'burgeon','Charlotte consolidates healing while Thoma owns Burgeon and Xingqiu/Nahida maintain cores.'),
   team('charlotte-nahida-dehya-yelan','Burgeon · Dehya',['Charlotte','Nahida','Dehya','Yelan'],'burgeon','Charlotte heals and applies Cryo while Dehya owns Burgeon and Yelan/Nahida supply cores.'),
 
-  team('charlotte-driver-furina-yelan-kazuha','On-field Freeze Driver',['Charlotte','Furina','Yelan','Kaedehara Kazuha'],'freeze','Charlotte intentionally stays on field to drive Yelan while Furina/Kazuha provide buffs and Hydro support.'),
+  team('charlotte-driver-furina-xingqiu-kazuha','On-field Freeze Driver',['Charlotte','Furina','Xingqiu','Kaedehara Kazuha'],'freeze','Charlotte intentionally stays on field to drive Xingqiu while Furina/Kazuha provide buffs, Hydro application and team damage.'),
   team('charlotte-driver-xingqiu-yelan-kazuha','On-field Mono Hydro/Cryo Driver',['Charlotte','Xingqiu','Yelan','Kaedehara Kazuha'],'freeze','Charlotte’s Cryo Catalyst attacks drive coordinated Hydro attacks for frequent Freeze.'),
   team('charlotte-driver-bennett-xiangling-nahida','Reverse Melt Driver',['Charlotte','Bennett','Xiangling','Nahida'],'melt','Charlotte can intentionally trigger Reverse Melt with Cryo attacks over Burning/Pyro aura while Bennett/Xiangling support.'),
   team('charlotte-driver-bennett-xiangling-kazuha','Reverse Melt · Kazuha',['Charlotte','Bennett','Xiangling','Kaedehara Kazuha'],'melt','Bennett/Xiangling establish Pyro while Kazuha supports and Charlotte owns selected Reverse Melt hits.'),
-  team('charlotte-driver-nahida-xingqiu-thoma','Burgeon Driver',['Charlotte','Nahida','Xingqiu','Thoma'],'burgeon','Charlotte drives Cryo/Hydro coordinated attacks while Thoma remains the Burgeon trigger.'),
+  team('charlotte-driver-nahida-yelan-thoma','Burgeon Driver',['Charlotte','Nahida','Yelan','Thoma'],'burgeon','Charlotte drives Yelan/Nahida while Thoma remains the Burgeon trigger and owns transformative damage.'),
   team('charlotte-driver-nahida-yelan-shinobu','Hyperbloom Driver',['Charlotte','Nahida','Yelan','Kuki Shinobu'],'hyperbloom','Charlotte drives Yelan/Nahida while Shinobu owns Hyperbloom; Cryo can reduce unwanted Dendro consumption through Freeze.'),
 
   team('charlotte-arlecchino-bennett-kazuha','Arlecchino speedrun Cryo flex',['Charlotte','Arlecchino','Bennett','Kaedehara Kazuha'],'melt','Charlotte can provide brief Cryo setup in short rotations, but does not sustain Melt for normal extended Arlecchino gameplay.','Speedrun/niche setup only; Arlecchino cannot benefit from Charlotte’s healing.'),
