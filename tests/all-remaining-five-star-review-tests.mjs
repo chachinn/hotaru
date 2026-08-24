@@ -9,11 +9,18 @@ import { recommendedTeamsForCharacter, compositionKey } from '../js/data/team-re
 import { auditRemainingFiveStarCompatibility, remainingFiveStarCompatibilityForCharacter, REMAINING_FIVE_STAR_COMPATIBILITY_POLICIES } from '../js/data/character-compatibility/remaining-five-stars.js';
 
 const key=value=>String(value||'').trim().toLowerCase();
-assert.equal(REMAINING_FIVE_STAR_BUILD_PROFILES.length,40,'the recovered completion batch must contain exactly the 40 unfinished five-star reviews');
-assert.equal(new Set(REMAINING_FIVE_STAR_CHARACTER_NAMES.map(key)).size,40,'remaining five-star anchors must be unique');
+const EXPECTED_REMAINING_FIVE_STARS=[
+  'Durin','Kinich','Klee','Lauma','Linnea','Lohen','Lyney','Mavuika','Mona','Mualani','Nahida','Navia',
+  'Sandrone','Nicole','Varka','Zibai','Nefer','Skirk','Varesa','Yumemizuki Mizuki','Xilonen','Sigewinne','Xianyun','Neuvillette','Wriothesley',
+  'Wanderer','Nilou','Tighnari','Shenhe','Yelan','Yae Miko','Sangonomiya Kokomi','Raiden Shogun','Yoimiya','Qiqi','Zhongli','Xiao','Venti'
+];
+assert.equal(EXPECTED_REMAINING_FIVE_STARS.length,38);
+assert.equal(REMAINING_FIVE_STAR_BUILD_PROFILES.length,38,'completion batch must contain every one of the 38 five-stars that was unfinished after Keqing');
+assert.deepEqual([...REMAINING_FIVE_STAR_CHARACTER_NAMES].sort((a,b)=>a.localeCompare(b)),[...EXPECTED_REMAINING_FIVE_STARS].sort((a,b)=>a.localeCompare(b)),'the completion batch must contain the exact remaining five-star roster—no missing anchors and no four-star padding');
+assert.equal(new Set(REMAINING_FIVE_STAR_CHARACTER_NAMES.map(key)).size,38,'remaining five-star anchors must be unique');
 const baseNames=new Set(BASE_REVIEWED_BUILD_PROFILES.map(profile=>key(profile.character)));
 assert.ok(REMAINING_FIVE_STAR_CHARACTER_NAMES.every(name=>!baseNames.has(key(name))),'completion batch must not overwrite an already reviewed character');
-assert.equal(REVIEWED_BUILD_PROFILES.length,BASE_REVIEWED_BUILD_PROFILES.length+40,'all remaining profiles must be registered');
+assert.equal(REVIEWED_BUILD_PROFILES.length,BASE_REVIEWED_BUILD_PROFILES.length+38,'all remaining profiles must be registered');
 
 for(const profile of REMAINING_FIVE_STAR_BUILD_PROFILES){
   assert.ok(profile.reviewed,`${profile.character} must be marked reviewed`);
@@ -44,7 +51,7 @@ for(const profile of REMAINING_FIVE_STAR_BUILD_PROFILES){
   if(profile.variants.length>1)assert.ok(anchorTeams.length>3,`${profile.character}: Team Comps must not inherit the three-card Build cap`);
 }
 
-assert.equal(REMAINING_FIVE_STAR_COMPATIBILITY_POLICIES.length,40);
+assert.equal(REMAINING_FIVE_STAR_COMPATIBILITY_POLICIES.length,38);
 let audited=0;
 for(const profile of REMAINING_FIVE_STAR_BUILD_PROFILES){
   const audit=auditRemainingFiveStarCompatibility(profile.character,RELEASED_AVATAR_AUDIT_V45);audited+=audit.total;
@@ -54,7 +61,7 @@ for(const profile of REMAINING_FIVE_STAR_BUILD_PROFILES){
   assert.equal(remainingFiveStarCompatibilityForCharacter(profile.character,'Aether TPS').status,'not-applicable');
   assert.equal(remainingFiveStarCompatibilityForCharacter(profile.character,'Manekin Anemo').status,'not-applicable');
 }
-assert.equal(audited,5920,'40 characters × 148 avatar records must be audited');
+assert.equal(audited,5624,'38 characters × 148 avatar records must be audited');
 
 const ui=fs.readFileSync(new URL('../js/features/game8-guide-ui.js',import.meta.url),'utf8');
 assert.match(ui,/\.slice\(0,3\)/,'Build Summary must remain capped at three representative teams');
