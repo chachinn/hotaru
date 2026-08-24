@@ -42,8 +42,8 @@ export const IFA_REVIEWED_TEAMS=[
 
   team('ifa-wanderer-faruzan-bennett','Wanderer Faruzan Bennett',['Ifa','Wanderer','Faruzan','Bennett'],'','Ifa performs a short Scroll/TTDS setup, then Wanderer takes field time with Faruzan/Bennett support.','Do not use Ifa’s normal on-field driver rotation.',support),
   team('ifa-wanderer-faruzan-layla','Wanderer Faruzan Layla',['Ifa','Wanderer','Faruzan','Layla'],'','Ifa transfers Scroll/TTDS buffs while Layla shields Wanderer and Faruzan supports Anemo damage.','External shielding replaces Ifa’s normal sustained on-field healing.',support),
-  team('ifa-wanderer-faruzan-mika','Wanderer Faruzan Mika',['Ifa','Wanderer','Faruzan','Mika'],'','Mika provides healing/Attack SPD while Ifa gives low-field Scroll/TTDS support and Faruzan buffs Anemo.',support),
-  team('ifa-xiao-faruzan-bennett','Xiao Faruzan Bennett',['Ifa','Xiao','Faruzan','Bennett'],'','Ifa gives Scroll/TTDS support before Xiao’s field window; Bennett supplies healing/ATK and Faruzan Anemo support.',support),
+  team('ifa-wanderer-faruzan-mika','Wanderer Faruzan Mika',['Ifa','Wanderer','Faruzan','Mika'],'','Mika provides healing/Attack SPD while Ifa gives low-field Scroll/TTDS support and Faruzan buffs Anemo.','',support),
+  team('ifa-xiao-faruzan-bennett','Xiao Faruzan Bennett',['Ifa','Xiao','Faruzan','Bennett'],'','Ifa gives Scroll/TTDS support before Xiao’s field window; Bennett supplies healing/ATK and Faruzan Anemo support.','',support),
   team('ifa-xiao-faruzan-jean','Xiao Faruzan Jean',['Ifa','Xiao','Faruzan','Jean'],'','Jean provides healing and can hold VV while Ifa focuses on Scroll/TTDS before Xiao takes the field.','C4 Jean further improves the Anemo support shell but is not required for basic sustain.',support),
   team('ifa-xiao-faruzan-xianyun','Xiao Faruzan Xianyun',['Ifa','Xiao','Faruzan','Xianyun'],'','Xianyun heals and amplifies Plunges, Faruzan supports Anemo and Ifa contributes low-field Scroll/TTDS utility.','Ifa is not the team healer in this identity.',support)
 ];
