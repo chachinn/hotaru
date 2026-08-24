@@ -101,11 +101,12 @@ for(const profile of REVIEWED_TEAM_PROFILES){
 }
 
 export function canonicalTeamCharacter(name=''){return aliasToCanonical.get(key(name))||String(name||'').trim()}
-function baseReviewedTeams(){return REVIEWED_TEAM_PROFILES.flatMap(profile=>(profile.archetypes||[]).map(archetype=>({...archetype,anchor:profile.character,profileId:profile.id})))}
+function baseReviewedTeams(){return REVIEWED_TEAM_PROFILES.flatMap(profile=>(profile.archetypes||[]).map(archetype=>({...archetype,anchor:profile.character,profileId:profile.id}))) }
 function compositionKey(team={}){return [...new Set((team.members||[]).map(canonicalTeamCharacter).map(key))].sort().join('|')}
 function normalizeRegisteredTeam(team={}){return{...team,confidence:team.confidence||'Reviewed',profileId:team.profileId||'reviewed-supplement'}}
 function sourceLinks(source={}){const items=[...(Array.isArray(source?.links)?source.links:[]),source],seen=new Set(),out=[];for(const item of items){if(!item?.url)continue;const sig=`${item.type||''}|${item.label||''}|${item.url}`;if(seen.has(sig))continue;seen.add(sig);out.push({...item,links:undefined})}return out}
-function buildReviewedCatalog(){const map=new Map();for(const team of [...baseReviewedTeams(),...registeredReviewedTeams]){const comp=compositionKey(team);if(!comp)continue;const prior=map.get(comp);if(!prior){map.set(comp,{...team,source:{...(team.source||{}),links:sourceLinks(team.source)}});continue}const links=sourceLinks({...(prior.source||{}),links:[...sourceLinks(prior.source),...sourceLinks(team.source)]});map.set(comp,{...prior,source:{...(prior.source||{}),links}})}return [...map.values()]}
+function mergeConstraints(prior={},incoming={}){const merged={...(prior||{})};for(const [name,value] of Object.entries(incoming||{})){if(/MinConstellation$/i.test(name)&&Number.isFinite(Number(value))&&Number.isFinite(Number(merged[name])))merged[name]=Math.max(Number(merged[name]),Number(value));else if(!(name in merged))merged[name]=value}return merged}
+function buildReviewedCatalog(){const map=new Map();for(const team of [...baseReviewedTeams(),...registeredReviewedTeams]){const comp=compositionKey(team);if(!comp)continue;const prior=map.get(comp);if(!prior){map.set(comp,{...team,source:{...(team.source||{}),links:sourceLinks(team.source)}});continue}const links=sourceLinks({...(prior.source||{}),links:[...sourceLinks(prior.source),...sourceLinks(team.source)]}),constraints=mergeConstraints(prior.constraints,team.constraints);map.set(comp,{...prior,...(Object.keys(constraints).length?{constraints}:{}),source:{...(prior.source||{}),links}})}return [...map.values()]}
 function rebuildReviewedIndexes(){
   reviewedCatalog=buildReviewedCatalog();anchorIndex.clear();memberIndex.clear();
   for(const profile of REVIEWED_TEAM_PROFILES){const names=[profile.character,...(profile.aliases||[])];for(const name of names)anchorIndex.set(key(name),profile)}
