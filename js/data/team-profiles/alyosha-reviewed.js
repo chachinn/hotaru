@@ -1,0 +1,31 @@
+const KQM='https://keqingmains.com/q/alyosha-quickguide/';
+const ICY='https://www.icy-veins.com/genshin-impact/alyosha-guide-best-builds';
+const source=(label,url)=>({label,url,type:'Reviewed theorycraft',platform:'Guide',reviewedAt:'2026-08-24'});
+const team=(id,name,members,reaction,why,notes='')=>({id,name,members,reaction,why,notes,confidence:'Reviewed',provenance:'source-informed',source:source('Current Alyosha theorycraft',KQM)});
+export const ALYOSHA_REVIEWED_TEAMS=[
+  team('alyosha-sandrone-odette-yae','Stellar-Conduct · Sandrone',['Alyosha','Sandrone','Odette','Yae Miko'],'stellar-conduct','Premium reviewed Stellar-Conduct core: Sandrone takes field time while Odette and Yae provide the reaction engine and Alyosha supplies healing/buffs.'),
+  team('alyosha-traveler-odette-yae','Stellar-Conduct · Cryo Traveler',['Alyosha','Cryo Traveler','Odette','Yae Miko'],'stellar-conduct','Cryo Traveler drives a premium off-field Stellar-Conduct core with Odette, Yae and Alyosha.'),
+  team('alyosha-cyno-odette-yae','Stellar-Conduct · Cyno',['Alyosha','Cyno','Odette','Yae Miko'],'stellar-conduct','Cyno uses Alyosha’s long-duration support while Odette and Yae maintain Stellar-Conduct.'),
+  team('alyosha-sandrone-traveler-qiqi','Stellar-Conduct · Sandrone accessible core',['Alyosha','Sandrone','Cryo Traveler','Qiqi'],'stellar-conduct','Reviewed alternative when Odette or Yae are unavailable; Cryo Traveler enables the Stellar reaction and Qiqi adds Cryo sustain/support.'),
+  team('alyosha-cyno-traveler-qiqi','Stellar-Conduct · Cyno accessible core',['Alyosha','Cyno','Cryo Traveler','Qiqi'],'stellar-conduct','Cyno uses Cryo Traveler for Stellar enablement while Alyosha and Qiqi cover Electro support and sustain.'),
+  team('alyosha-wrio-odette-escoffier','Stellar-Conduct · Wriothesley',['Alyosha','Wriothesley','Odette','Escoffier'],'stellar-conduct','Reviewed Wriothesley option; Alyosha’s healing must be managed because Wriothesley may prefer lower HP.'),
+  team('alyosha-traveler-beidou-diona','Accessible Stellar-Conduct',['Alyosha','Cryo Traveler','Beidou','Diona'],'stellar-conduct','Four-star-accessible Stellar-Conduct structure using Beidou and Diona in alternating support windows.'),
+  team('alyosha-traveler-kaeya-sucrose','Free-access Stellar-Conduct',['Alyosha','Cryo Traveler','Kaeya','Sucrose'],'stellar-conduct','Limited-roster route that preserves Cryo application and Anemo support around Alyosha.'),
+  team('alyosha-sandrone-odette-sucrose','Stellar-Conduct · Sucrose flex',['Alyosha','Sandrone','Odette','Sucrose'],'stellar-conduct','Uses the reviewed Sucrose flex slot for grouping, VV and EM support when Yae is unavailable.'),
+  team('alyosha-sandrone-odette-xilonen','Stellar-Conduct · Xilonen flex',['Alyosha','Sandrone','Odette','Xilonen'],'stellar-conduct','Uses Xilonen as the resistance-reduction/support flex around the Sandrone–Odette core.'),
+  team('alyosha-sandrone-odette-nicole','Stellar-Conduct · Nicole flex',['Alyosha','Sandrone','Odette','Nicole'],'stellar-conduct','Nicole fills the reviewed support-flex role with ATK-focused utility around Sandrone and Odette.'),
+  team('alyosha-traveler-odette-sucrose','Stellar-Conduct · Traveler + Sucrose',['Alyosha','Cryo Traveler','Odette','Sucrose'],'stellar-conduct','Cryo Traveler and Odette provide the Stellar core while Sucrose supplies Anemo/EM utility.'),
+  team('alyosha-traveler-odette-xilonen','Stellar-Conduct · Traveler + Xilonen',['Alyosha','Cryo Traveler','Odette','Xilonen'],'stellar-conduct','Xilonen provides support and RES reduction around Cryo Traveler, Odette and Alyosha.'),
+  team('alyosha-cyno-odette-sucrose','Stellar-Conduct · Cyno + Sucrose',['Alyosha','Cyno','Odette','Sucrose'],'stellar-conduct','Sucrose supports Cyno’s reaction damage while Odette enables Stellar-Conduct and Alyosha sustains.'),
+  team('alyosha-cyno-odette-xilonen','Stellar-Conduct · Cyno + Xilonen',['Alyosha','Cyno','Odette','Xilonen'],'stellar-conduct','Xilonen supports Cyno while Odette and Alyosha maintain the Stellar-Conduct shell.'),
+  team('alyosha-arlecchino-chevreuse-bennett','Overloaded · Arlecchino',['Alyosha','Arlecchino','Chevreuse','Bennett'],'overload','Reviewed general-support example: Alyosha supplies off-field Electro/healing in a Chevreuse Overloaded shell.'),
+  team('alyosha-flins-columbina-sucrose','Lunar-Charged · Flins',['Alyosha','Flins','Columbina','Sucrose'],'lunar-charged','Reviewed general-support example where Alyosha adds healing, ATK and off-field Electro around Flins/Columbina.'),
+  team('alyosha-chasca-furina-durin','Chasca general support',['Alyosha','Chasca','Furina','Durin'],'','Reviewed general-support example using Alyosha’s ATK buff, Electro application and healing for Chasca.'),
+  team('alyosha-alhaitham-nahida-yelan','Quickbloom support',['Alyosha','Alhaitham','Nahida','Yelan'],'hyperbloom','Source-informed general-support application: Alyosha can provide off-field Electro/healing while Alhaitham drives Dendro reactions.','Best suited to higher-constellation general-support Alyosha; reaction ownership should be checked.'),
+  team('alyosha-chasca-furina-sucrose','Chasca · Anemo support',['Alyosha','Chasca','Furina','Sucrose'],'','General-support variation preserving Alyosha healing/ATK utility while Sucrose adds Anemo support.'),
+  team('alyosha-flins-columbina-xilonen','Lunar-Charged · Xilonen',['Alyosha','Flins','Columbina','Xilonen'],'lunar-charged','Source-informed flex variation using Xilonen instead of Sucrose around the reviewed Flins/Columbina core.'),
+  team('alyosha-arlecchino-chevreuse-xiangling','Overloaded · Arlecchino double Pyro',['Alyosha','Arlecchino','Chevreuse','Xiangling'],'overload','General-support Overloaded variation retaining the Pyro/Electro-only restriction required by Chevreuse.'),
+  team('alyosha-cyno-traveler-sucrose','Stellar-Conduct · Cyno limited roster',['Alyosha','Cyno','Cryo Traveler','Sucrose'],'stellar-conduct','Limited-roster Stellar-Conduct variation using Cryo Traveler for enablement and Sucrose for reaction support.'),
+  team('alyosha-sandrone-traveler-sucrose','Stellar-Conduct · Sandrone limited roster',['Alyosha','Sandrone','Cryo Traveler','Sucrose'],'stellar-conduct','Sandrone uses Cryo Traveler to enable Stellar-Conduct while Sucrose supplies accessible Anemo support.')
+];
+export default ALYOSHA_REVIEWED_TEAMS;
