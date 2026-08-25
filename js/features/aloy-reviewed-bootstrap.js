@@ -34,7 +34,7 @@ import { LISA_REVIEWED_TEAMS } from '../data/team-profiles/lisa-reviewed.js';
 import { LYNETTE_REVIEWED_TEAMS } from '../data/team-profiles/lynette-reviewed.js';
 import { MIKA_REVIEWED_TEAMS } from '../data/team-profiles/mika-reviewed.js';
 import { NINGGUANG_REVIEWED_TEAMS } from '../data/team-profiles/ningguang-reviewed.js';
-import { REMAINING_FOUR_STAR_REVIEWED_TEAMS } from '../data/team-profiles/remaining-four-stars-reviewed.js';
+import { REMAINING_FOUR_STAR_REVIEWED_TEAMS } from '../data/team-profiles/remaining-four-stars-canonical.js';
 import { ARATAKI_ITTO_REVIEWED_TEAMS } from '../data/team-profiles/arataki-itto-reviewed.js';
 import { BAIZHU_REVIEWED_TEAMS } from '../data/team-profiles/baizhu-reviewed.js';
 import { CHASCA_REVIEWED_TEAMS } from '../data/team-profiles/chasca-reviewed.js';
