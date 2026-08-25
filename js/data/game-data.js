@@ -14,6 +14,7 @@ const MIN_CATALOG_CHARACTERS=80;
 
 let runtimeCatalog=null;
 let runtimeStores=null;
+let catalogRevalidationTimer=null;
 const detailCache=new Map();
 const weaponDetailCache=new Map();
 
@@ -123,14 +124,28 @@ async function supplementCachedCatalog(catalog){
     try{const manifest=await fetchJSON(`${HAKUSH}/manifest.json`,9000,'no-store'),versions=pickVersions(manifest);latestVersion=versions.latest||versions.live||latestVersion;if(latestVersion){runtimeStores=runtimeStores||await fetchEnkaStores().catch(()=>({characters:{},weapons:{}}));const latestRaw=await fetchJSON(`${HAKUSH}/gi/${latestVersion}/character.json`,12000,'no-store');merged=mergeReleasedCharacters(merged,normalizeHakushCharacters(latestRaw,runtimeStores),releasedSlugs)}}catch{}
     merged=await supplementFromPaimon(merged,releaseRecords);
     if(merged.length===(catalog.characters||[]).length)return catalog;
-    const next={...catalog,characters:merged,latestVersion,loadedAt:Date.now(),releaseSupplemented:(catalog.releaseSupplemented||0)+(merged.length-(catalog.characters||[]).length)};await cacheSet(CACHE_KEY,{savedAt:Date.now(),catalog:next});return next;
+    return{...catalog,characters:merged,latestVersion,loadedAt:Date.now(),releaseSupplemented:(catalog.releaseSupplemented||0)+(merged.length-(catalog.characters||[]).length)};
   }catch{return catalog}
 }
 
+function scheduleCatalogRevalidation(catalog,{stale=false}={}){
+  if(!validCatalog(catalog)||catalogRevalidationTimer)return;
+  catalogRevalidationTimer=setTimeout(async()=>{
+    catalogRevalidationTimer=null;
+    try{
+      const next=stale?await loadHakush():await supplementCachedCatalog(catalog);
+      if(!validCatalog(next))return;
+      Object.assign(catalog,next);
+      runtimeCatalog=catalog;
+      await cacheSet(CACHE_KEY,{savedAt:Date.now(),catalog});
+    }catch{}
+  },0);
+}
+
 export async function loadCatalog({force=false}={}){
-  if(runtimeCatalog&&!force&&validCatalog(runtimeCatalog)){runtimeCatalog=await supplementCachedCatalog(runtimeCatalog);return runtimeCatalog}
+  if(runtimeCatalog&&!force&&validCatalog(runtimeCatalog)){scheduleCatalogRevalidation(runtimeCatalog);return runtimeCatalog}
   let cachedCurrent=null;
-  if(!force){cachedCurrent=await cacheGet(CACHE_KEY);if(validCatalog(cachedCurrent?.catalog)){runtimeCatalog=await supplementCachedCatalog(cachedCurrent.catalog);if(Date.now()-Number(cachedCurrent.savedAt||0)<CACHE_TTL)return runtimeCatalog}}
+  if(!force){cachedCurrent=await cacheGet(CACHE_KEY);if(validCatalog(cachedCurrent?.catalog)){runtimeCatalog=cachedCurrent.catalog;scheduleCatalogRevalidation(runtimeCatalog,{stale:Date.now()-Number(cachedCurrent.savedAt||0)>=CACHE_TTL});return runtimeCatalog}}
   let loadError=null;
   try{runtimeCatalog=await loadHakush()}catch(error){loadError=error;try{runtimeCatalog=await loadFallbackAll();const records=await getReleasedCharacterRecords().catch(()=>[]);if(records.length)runtimeCatalog={...runtimeCatalog,characters:await supplementFromPaimon(runtimeCatalog.characters,records),warning:`Primary current-source request failed; using resilient fallback. ${error.message}`}}catch(fallbackError){const cached=await getBestCachedCatalog();if(cached?.catalog)runtimeCatalog={...cached.catalog,warning:`Using last known-good cached catalog. ${error.message}`};else throw new Error(`Game data unavailable. ${fallbackError.message}`)}}
   if(!validCatalog(runtimeCatalog)){const cached=await getBestCachedCatalog();if(cached?.catalog)runtimeCatalog={...cached.catalog,warning:'Recovered the last known-good catalog after an incomplete upstream response.'};else throw new Error(`Game catalog incomplete. ${loadError?.message||''}`.trim())}
