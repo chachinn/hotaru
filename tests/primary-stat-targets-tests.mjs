@@ -1,3 +1,4 @@
+import './all-remaining-four-star-review-tests.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { inferBuildProfile, statTargets, statTargetRows } from '../js/features/build-engine.js';
