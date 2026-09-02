@@ -3,6 +3,7 @@ const CONTROL_META={
   'hotaru-team-result-filter':{title:'Show',key:'filter'},
   'hotaru-team-result-sort':{title:'Sort results',key:'sort'}
 };
+const PICKER_PANEL_ID='hotaru-mobile-result-picker-listbox';
 let scanQueued=false;
 let picker=null;
 let active=null;
@@ -12,9 +13,9 @@ function mobileResultMenusEnabled(){
 }
 function ensurePicker(){
   if(picker?.root?.isConnected)return picker;
-  const root=document.createElement('div');root.className='hotaru-mobile-result-picker';root.hidden=true;root.setAttribute('aria-hidden','true');
+  const root=document.createElement('div');root.className='hotaru-mobile-result-picker';root.setAttribute('aria-hidden','false');
   const backdrop=document.createElement('div');backdrop.className='hotaru-mobile-result-picker-backdrop';backdrop.setAttribute('aria-hidden','true');
-  const panel=document.createElement('div');panel.className='hotaru-mobile-result-picker-panel';panel.setAttribute('role','listbox');panel.id='hotaru-mobile-result-picker-listbox';
+  const panel=document.createElement('div');panel.className='hotaru-mobile-result-picker-panel';panel.setAttribute('role','listbox');panel.id=PICKER_PANEL_ID;
   const head=document.createElement('div');head.className='hotaru-mobile-result-picker-head';
   const title=document.createElement('strong');title.className='hotaru-mobile-result-picker-title';
   const close=document.createElement('button');close.type='button';close.className='hotaru-mobile-result-picker-close';close.textContent='Done';close.setAttribute('aria-label','Close result menu');
@@ -43,19 +44,20 @@ function syncControl(control,select){
 function closePicker(){
   if(active?.toggle?.isConnected)active.toggle.setAttribute('aria-expanded','false');
   const focused=document.activeElement;if(picker?.root?.contains(focused)&&typeof focused?.blur==='function')focused.blur();
-  if(picker?.root){picker.root.hidden=true;picker.root.setAttribute('aria-hidden','true');picker.list.replaceChildren()}
-  active=null;
+  if(picker?.root?.isConnected)picker.root.remove();
+  picker=null;active=null;
 }
 function openPicker(control,select,toggle,meta){
-  const ui=ensurePicker();if(active?.select===select&&!ui.root.hidden){closePicker();return}
-  closePicker();active={control,select,toggle,meta};ui.title.textContent=meta.title;ui.panel.setAttribute('aria-label',meta.title);ui.list.replaceChildren(...[...select.options].map(optionButton));toggle.setAttribute('aria-expanded','true');ui.root.hidden=false;ui.root.setAttribute('aria-hidden','false');
+  if(active?.select===select&&picker?.root?.isConnected){closePicker();return}
+  closePicker();
+  const ui=ensurePicker();active={control,select,toggle,meta};ui.title.textContent=meta.title;ui.panel.setAttribute('aria-label',meta.title);ui.list.replaceChildren(...[...select.options].map(optionButton));toggle.setAttribute('aria-expanded','true');
 }
 function transformSelect(select){
   if(!mobileResultMenusEnabled()||select.dataset.hotaruMobileResultMenu==='true')return;
   const meta=CONTROL_META[select.id],label=select.closest('label');if(!meta||!label)return;
-  const ui=ensurePicker(),control=document.createElement('div');control.className='hotaru-mobile-result-control';control.dataset.hotaruMobileResultControl=meta.key;
+  const control=document.createElement('div');control.className='hotaru-mobile-result-control';control.dataset.hotaruMobileResultControl=meta.key;
   const caption=document.createElement('span');caption.className='hotaru-mobile-result-label';caption.textContent=meta.title;
-  const toggle=document.createElement('button');toggle.type='button';toggle.className='hotaru-mobile-result-toggle';toggle.dataset.hotaruMobileResultToggle=meta.key;toggle.setAttribute('aria-haspopup','listbox');toggle.setAttribute('aria-controls',ui.panel.id);toggle.setAttribute('aria-expanded','false');
+  const toggle=document.createElement('button');toggle.type='button';toggle.className='hotaru-mobile-result-toggle';toggle.dataset.hotaruMobileResultToggle=meta.key;toggle.setAttribute('aria-haspopup','listbox');toggle.setAttribute('aria-controls',PICKER_PANEL_ID);toggle.setAttribute('aria-expanded','false');
   const value=document.createElement('span');value.dataset.hotaruMobileResultValue='';
   const chevron=document.createElement('span');chevron.className='hotaru-mobile-result-chevron';chevron.setAttribute('aria-hidden','true');chevron.textContent='⌄';toggle.append(value,chevron);
   select.dataset.hotaruMobileResultMenu='true';select.classList.add('hotaru-mobile-native-select-hidden');select.tabIndex=-1;select.setAttribute('aria-hidden','true');
@@ -68,9 +70,12 @@ function scan(){
   Object.keys(CONTROL_META).forEach(id=>{const select=document.getElementById(id);if(select)transformSelect(select)});
 }
 function queueScan(){if(scanQueued)return;scanQueued=true;requestAnimationFrame(scan)}
+function resetTransientPicker(){closePicker()}
 if(app)new MutationObserver(queueScan).observe(app,{childList:true,subtree:true});
 queueScan();
 window.addEventListener('resize',queueScan,{passive:true});
-window.addEventListener('orientationchange',closePicker,{passive:true});
+window.addEventListener('orientationchange',resetTransientPicker,{passive:true});
+window.addEventListener('pageshow',resetTransientPicker,{passive:true});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')resetTransientPicker()});
 document.addEventListener('change',event=>{const select=event.target;if(!CONTROL_META[select?.id])return;const control=select.closest('.hotaru-mobile-result-control');if(control)syncControl(control,select)});
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&active){event.preventDefault();closePicker()}});
