@@ -39,7 +39,7 @@ assert.equal(aloyCompatibilityForCharacter('Aether TPS').status,'not-applicable'
 const index=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
 const sw=fs.readFileSync(new URL('../service-worker.js',import.meta.url),'utf8');
 for(const token of ['build-profiles/aloy.js','team-profiles/aloy-reviewed.js','character-compatibility/aloy.js','aloy-reviewed-bootstrap.js']){assert.match(index,new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));assert.match(sw,new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')))}
-assert.match(index,/await import\('\.\/js\/features\/aloy-reviewed-bootstrap\.js\?v=1\.0\.1'\)/,'Aloy reviewed teams must register before app.js imports');
-assert.match(sw,/const CACHE = 'hotaru-shell-v47'/);
-assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v46'/);
+assert.match(index,/await import\('\.\/js\/features\/aloy-reviewed-bootstrap\.js\?v=1\.0\.2'\)/,'Aloy reviewed teams must register through the batched reviewed bootstrap after first paint');
+assert.match(sw,/const CACHE = 'hotaru-shell-v48'/);
+assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v47'/);
 console.log(`Aloy review QA passed · ${profile.variants.length} builds · ${unique.size} reviewed teams · ${audit.total}/148 compatibility records checked.`);
