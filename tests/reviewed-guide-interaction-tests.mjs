@@ -71,13 +71,13 @@ assert.match(updater,/hotaru-app-refresh/,'a persistent Sakura-style refresh con
 assert.match(updater,/fetch\(new URL\('\.\/index\.html'/,'manual refresh must verify a fresh online shell before clearing caches');
 assert.match(updater,/startsWith\('hotaru-shell-'\)/,'manual refresh must clear only Hotaru shell caches');
 assert.match(updater,/location\.reload\(\)/);
-assert.match(index,/js\/pwa-update\.js\?v=1\.1\.1/);
+assert.match(index,/js\/pwa-update\.js\?v=1\.1\.2/);
 assert.match(index,/css\/guide-ui\.css\?v=1\.4\.0/);
 assert.match(index,/guide-loader\.js\?v=1\.2\.0/);
 assert.match(sw,/equipment-farm-registry\.js/);
 assert.match(sw,/guide-item-details\.js/);
 assert.match(sw,/SKIP_WAITING/);
-assert.match(sw,/const CACHE = 'hotaru-shell-v47'/,'startup recovery release must use the v47 PWA shell');
-assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v46'/,'v47 must preserve exact v46 lineage');
+assert.match(sw,/const CACHE = 'hotaru-shell-v48'/,'startup recovery release must use the v48 PWA shell');
+assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v47'/,'v48 must preserve exact v47 lineage');
 
 console.log('Reviewed multi-build table + exact reviewed data + global clickable equipment + no-cap reviewed UI + manual refresh QA passed.');
