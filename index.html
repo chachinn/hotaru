@@ -36,10 +36,10 @@
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <div id="modal-root"></div>
   <script>
-    // Emergency v47 recovery runs inline so a v46 worker stuck in Cache Storage cannot block the updater script itself.
+    // Emergency v48 recovery runs inline so a v47 worker stuck in Cache Storage cannot block the updater script itself.
     (()=>{
       if(!('serviceWorker' in navigator))return;
-      const key='hotaru.pwa-reload.v47';
+      const key='hotaru.pwa-reload.v48';
       navigator.serviceWorker.addEventListener('controllerchange',()=>{
         try{if(sessionStorage.getItem(key))return;sessionStorage.setItem(key,'1')}catch{}
         location.reload();
@@ -47,7 +47,7 @@
       navigator.serviceWorker.register('./service-worker.js',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});
     })();
   </script>
-  <script src="js/pwa-update.js?v=1.1.1"></script>
+  <script src="js/pwa-update.js?v=1.1.2"></script>
   <script type="module">
     const settleWithin=(promise,ms=1800,fallback=null)=>{let timer;return Promise.race([Promise.resolve(promise).catch(()=>fallback),new Promise(resolve=>{timer=setTimeout(()=>resolve(fallback),ms)})]).finally(()=>clearTimeout(timer))};
     const hydrateReviewedData=async()=>{
@@ -87,8 +87,8 @@
             new URL('./js/features/game8-guide-ui.js',location.href).href,
             new URL('./js/features/guide-item-details.js',location.href).href,
             new URL('./js/features/flexible-pair-builder.js',location.href).href,
-            new URL('./js/features/aloy-reviewed-bootstrap.js?v=1.0.0',location.href).href,
-            new URL('./js/features/arlecchino-reviewed-bootstrap.js?v=1.0.0',location.href).href,
+            new URL('./js/features/aloy-reviewed-bootstrap.js?v=1.0.1',location.href).href,
+            new URL('./js/features/arlecchino-reviewed-bootstrap.js?v=1.0.1',location.href).href,
             new URL('./js/features/arlecchino-smart-team-guard.js?v=1.0.0',location.href).href,
             new URL('./css/character-mobile-ux.css?v=1.0.0',location.href).href,
             new URL('./js/features/character-mobile-ux.js?v=1.0.0',location.href).href
@@ -99,7 +99,7 @@
             if(cache)await settleWithin(Promise.allSettled(staleBuildProfiles.map(url=>cache.delete(url))),1400,null);
           })),1800,null);
         }
-        await import('./js/features/aloy-reviewed-bootstrap.js?v=1.0.1');
+        await import('./js/features/aloy-reviewed-bootstrap.js?v=1.0.2');
         document.dispatchEvent(new CustomEvent('hotaru:reviewed-data-ready'));
       }catch(error){console.warn('Reviewed data hydration deferred:',error)}
     };
@@ -118,7 +118,7 @@
   <script type="module" src="js/features/navigation-refresh.js?v=1.2.0"></script>
   <script type="module" src="js/features/mobile-sync-ui.js?v=1.1.0"></script>
   <script type="module" src="js/features/character-mobile-ux.js?v=1.0.0"></script>
-  <script type="module" src="js/features/arlecchino-reviewed-bootstrap.js?v=1.0.0"></script>
+  <script type="module" src="js/features/arlecchino-reviewed-bootstrap.js?v=1.0.1"></script>
   <script type="module" src="js/features/arlecchino-smart-team-guard.js?v=1.0.0"></script>
   <script type="module" src="js/features/team-community-bootstrap.js?v=1.1.1"></script>
   <script type="module" src="js/features/flexible-pair-ui.js?v=1.0.4"></script>
