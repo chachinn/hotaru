@@ -11,6 +11,8 @@ for(const name of files){
   const hits=[];
   if(/const CACHE = ['"]hotaru-shell-v47['"]/.test(text))hits.push('v47-current');
   if(/PREVIOUS_CACHE\s*=\s*['"]hotaru-shell-v46['"]/.test(text))hits.push('v46-previous');
+  if(/(?:const\s+)?RELEASE\s*=\s*['"]v47['"]/.test(text))hits.push('updater-release-v47');
+  if(/hotaru\\?\.pwa-reload\\?\.v47|hotaru\.pwa-reload\.v47/.test(text))hits.push('reload-key-v47');
   if(/pwa-update\\?\.js\\?\?v=1\\?\.1\\?\.1|pwa-update\.js\?v=1\.1\.1/.test(text))hits.push('updater-1.1.1');
   if(/aloy-reviewed-bootstrap\\?\.js\\?\?v=1\\?\.0\\?\.1|aloy-reviewed-bootstrap\.js\?v=1\.0\.1/.test(text))hits.push('bootstrap-1.0.1');
   if(hits.length)stale.push(`${name}: ${hits.join(', ')}`);
