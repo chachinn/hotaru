@@ -110,7 +110,7 @@ assert.match(game8Ui,/equipmentButton\('weapon'/);
 assert.match(game8Ui,/equipmentButton\('artifact'/);
 assert.match(guard,/arlecchinoCompatibilityForCharacter/);
 assert.match(guard,/stopImmediatePropagation/,'unverified pair guard must run before the generic pair controller');
-assert.match(index,/arlecchino-reviewed-bootstrap\.js\?v=1\.0\.0/);
+assert.match(index,/arlecchino-reviewed-bootstrap\.js\?v=1\.0\.1/);
 assert.match(index,/arlecchino-smart-team-guard\.js\?v=1\.0\.0/);
 assert.match(ARLECCHINO_COMPATIBILITY_POLICY.rule,/Every released avatar record/);
 
