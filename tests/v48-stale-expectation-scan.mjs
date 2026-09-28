@@ -14,9 +14,9 @@ for(const name of files){
   if(/(?:const\s+)?RELEASE\s*=\s*['"]v47['"]/.test(text))hits.push('updater-release-v47');
   if(/hotaru\\?\.pwa-reload\\?\.v47|hotaru\.pwa-reload\.v47/.test(text))hits.push('reload-key-v47');
   if(/pwa-update\\?\.js\\?\?v=1\\?\.1\\?\.1|pwa-update\.js\?v=1\.1\.1/.test(text))hits.push('updater-1.1.1');
-  if(/aloy-reviewed-bootstrap\\?\.js\\?\?v=1\\?\.0\\?\.1|aloy-reviewed-bootstrap\.js\?v=1\.0\.1/.test(text))hits.push('bootstrap-1.0.1');
+  if(/aloy-reviewed-bootstrap\\?\.js\\?\?v=1\\?\.0\\?\.[12]|aloy-reviewed-bootstrap\.js\?v=1\.0\.[12]/.test(text))hits.push('bootstrap-pre-1.0.3');
   if(hits.length)stale.push(`${name}: ${hits.join(', ')}`);
 }
 if(stale.length)console.error(`Stale v48 expectations:\n${stale.join('\n')}`);
-assert.deepEqual(stale,[],'tests must not pin the superseded v47/v46 recovery pair or old updater/bootstrap request keys');
+assert.deepEqual(stale,[],'tests must not pin the superseded v47/v46 recovery pair or old updater/bootstrap request keys; reviewed bootstrap expectations must be 1.0.3');
 console.log('v48 stale PWA expectation scan passed.');
