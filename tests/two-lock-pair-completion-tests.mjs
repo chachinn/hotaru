@@ -4,7 +4,7 @@ import '../js/features/aloy-reviewed-bootstrap.js';
 import { allRecommendedTeams, compositionKey, recommendedTeamsForCharacter } from '../js/data/team-recommendations.js';
 import { canonicalTeamCharacter } from '../js/data/team-profiles/index.js';
 import { matchReviewedTeams } from '../js/features/roster-team-matcher.js';
-import { buildFlexiblePairTeams } from '../js/features/flexible-pair-builder.js';
+import { buildFlexiblePairTeams, combineTwoLockResults } from '../js/features/flexible-pair-builder.js';
 
 const key=value=>String(value||'').trim().toLowerCase();
 const naviaChioriRoster=[
@@ -47,6 +47,41 @@ assert.match(flexible.rationale,/shared sourced archetypes/i);
 const allNaviaChiori=recommendedTeamsForCharacter('Navia').filter(team=>(team.members||[]).some(name=>key(name)==='chiori'));
 assert.ok(allNaviaChiori.length>=6,'Navia + Chiori is a well-covered sourced pair and must never be treated as a compatibility gap');
 
+// Regression: Vesna + Odette had several shared reviewed structures, but once one exact
+// owned lineup was found the lock2 controller returned early and hid every additional
+// owned completion. Exact results must stay first without becoming an early-stop condition.
+const vesnaOdetteRoster=[
+  {name:'Vesna',level:90,constellation:0,status:'Finished',element:'Anemo'},
+  {name:'Odette',level:90,constellation:0,status:'Finished',element:'Cryo'},
+  {name:'Vodyanitsa',level:90,constellation:0,status:'Finished',element:'Hydro'},
+  {name:'Faruzan',level:90,constellation:0,status:'Finished',element:'Anemo'},
+  {name:'Qiqi',level:90,constellation:0,status:'Finished',element:'Cryo'},
+  {name:'Diona',level:90,constellation:0,status:'Finished',element:'Cryo'}
+];
+const vesnaOdetteCatalog=[
+  {name:'Vesna',element:'Anemo'},{name:'Odette',element:'Cryo'},{name:'Vodyanitsa',element:'Hydro'},
+  {name:'Faruzan',element:'Anemo'},{name:'Cryo Traveler',element:'Cryo'},{name:'Qiqi',element:'Cryo'},
+  {name:'Diona',element:'Cryo'},{name:'Venti',element:'Anemo'},{name:'Nicole',element:'Cryo'}
+];
+const vesnaOdetteExact=matchReviewedTeams({roster:vesnaOdetteRoster,lockedNames:['Vesna','Odette'],allowUnowned:false,limit:'all'});
+assert.equal(vesnaOdetteExact.results.length,1,'regression setup must reproduce the one-option Vesna + Odette exact result');
+assert.ok(vesnaOdetteExact.sourceResults.length>=4,'Vesna + Odette must retain several shared sourced structures behind that one exact result');
+const vesnaOdetteFlexible=buildFlexiblePairTeams({
+  roster:vesnaOdetteRoster,
+  catalogCharacters:vesnaOdetteCatalog,
+  lockedNames:['Vesna','Odette'],
+  allowUnowned:false,
+  limit:12,
+  reaction:'all',
+  exactSourceTeams:vesnaOdetteExact.sourceResults
+});
+assert.ok(vesnaOdetteFlexible.results.length>=2,'shared Vesna + Odette archetypes should produce more owned completions instead of collapsing to one exact lineup');
+const vesnaOdetteShown=combineTwoLockResults(vesnaOdetteExact.results,vesnaOdetteFlexible.results,12);
+assert.ok(vesnaOdetteShown.length>=3,'two-lock presentation must combine the exact owned Vesna + Odette team with additional valid owned completions');
+assert.equal(compositionKey(vesnaOdetteShown[0]),compositionKey(vesnaOdetteExact.results[0]),'the best exact sourced team must remain first');
+assert.equal(new Set(vesnaOdetteShown.map(compositionKey)).size,vesnaOdetteShown.length,'combined exact + adapted results must stay composition-deduped');
+assert.ok(vesnaOdetteShown.some(team=>team.adaptationTier==='Owned element substitution'),'expanded Vesna + Odette results must include clearly labeled source-informed owned completions');
+
 // Cross-catalog pair audit: every pair contained in a valid stored team must reproduce that
 // exact composition when the complete team is owned at constellation levels high enough
 // to satisfy any explicit gates. This catches alias, lock-intersection, and matcher regressions
@@ -68,9 +103,11 @@ assert.ok(pairChecks>15000,`expected a broad pair audit, got only ${pairChecks} 
 const mobile=fs.readFileSync(new URL('../js/features/smart-team-mobile-controller.js',import.meta.url),'utf8');
 const fallbackUi=fs.readFileSync(new URL('../js/features/flexible-pair-ui.js',import.meta.url),'utf8');
 assert.match(mobile,/exactSourceTeams:exact\.sourceResults\|\|\[\]/,'primary lock2 controller must pass shared sourced archetypes into owned completion');
+assert.match(mobile,/combineTwoLockResults\(exact\.results\|\|\[\],adapted,12\)/,'primary lock2 controller must merge exact and adapted owned results instead of stopping at the first exact team');
 assert.match(fallbackUi,/matchReviewedTeams/,'Safari fallback must use the same exact pair matcher before adapting');
 assert.match(fallbackUi,/catalogCharacters:catalog\?\.characters\|\|\[\]/,'Safari fallback must retain element metadata for owned substitutions');
 assert.match(fallbackUi,/exactSourceTeams:exact\.sourceResults\|\|\[\]/,'Safari fallback must preserve shared exact archetypes');
+assert.match(fallbackUi,/combineTwoLockResults\(exact\.results\|\|\[\],adapted,12\)/,'Safari fallback must merge exact and adapted owned results too');
 assert.match(fallbackUi,/\.\.\.entry/,'Safari fallback roster must preserve constellation/build fields instead of reducing entries to names only');
 
 console.log(`Two-lock pair completion QA passed · Navia + Chiori shared archetype substitution works · ${pairChecks} exact pair/team intersections audited.`);
