@@ -35,7 +35,7 @@ assert.match(reviewedBootstrap,/\.\.\.VODYANITSA_REVIEWED_TEAMS/,'batched bootst
 assert.match(sw,/const CACHE = 'hotaru-shell-v48'/);
 assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v47'/);
 assert.match(sw,/js\/pwa-update\.js\?v=1\.1\.2/,'v48 updater must be available offline after the fresh shell is installed');
-assert.match(sw,/aloy-reviewed-bootstrap\.js\?v=1\.0\.2/,'v48 shell must cache the batched reviewed bootstrap request');
+assert.match(sw,/aloy-reviewed-bootstrap\.js\?v=1\.0\.3/,'v48 shell must cache the batched reviewed bootstrap request');
 assert.match(sw,/app\.js\?v=1\.12\.1/,'app.js must preserve the stable application request key');
 assert.match(sw,/CACHE_TIMEOUT_MS\s*=\s*1800/,'service-worker Cache Storage operations must have a hard settlement bound');
 assert.match(sw,/NETWORK_TIMEOUT_MS\s*=\s*5000/,'network-first module delivery must have an offline fallback deadline');
