@@ -8,7 +8,7 @@ assert.ok(appIndex>0,'app.js must remain present');
 assert.match(html,/id="app"[^>]*>\s*<div class="hotaru-startup">/,'initial HTML must include an immediate visible startup shell');
 assert.match(html,/scheduleReviewedHydration/,'reviewed-team hydration must be deferred');
 assert.match(html,/requestIdleCallback/,'heavy reviewed bootstrap should prefer idle-time hydration');
-const reviewedImportIndex=html.indexOf("await import('./js/features/aloy-reviewed-bootstrap.js?v=1.0.2')");
+const reviewedImportIndex=html.indexOf("await import('./js/features/aloy-reviewed-bootstrap.js?v=1.0.3')");
 assert.ok(reviewedImportIndex>0,'reviewed bootstrap import must remain registered');
 const firstModuleBlock=html.slice(html.indexOf('<script type="module">'),appIndex);
 assert.doesNotMatch(firstModuleBlock,/\n    await import\('\.\/js\/features\/aloy-reviewed-bootstrap\.js\?v=1\.0\.2'\);/,'reviewed bootstrap must not execute as a top-level await before app.js');
