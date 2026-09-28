@@ -42,7 +42,7 @@ assert.match(mobile,/team-picker-identities/,'Traveler picker identity logic mus
 assert.match(mobile,/unownedRow=event\.target\.closest\?\.\('\.team-unowned'\)/,'Allow unowned row must have an explicit mobile tap handler');
 assert.match(mobile,/checkbox\.checked=!checkbox\.checked/,'Allow unowned tap must toggle deterministically');
 assert.doesNotMatch(mobile,/Closest sourced preview/,'Owned-only results must never leak missing characters');
-assert.match(mobile,/buildFlexiblePairTeams\(\{roster:normalized,catalogCharacters:catalog\?\.characters\|\|\[\],lockedNames:cleanLocks,allowUnowned,limit:12,reaction\}\)/,'two-lock fallback must honor Team Reaction and receive catalog metadata');
+assert.match(mobile,/buildFlexiblePairTeams\(\{roster:normalized,catalogCharacters:catalog\?\.characters\|\|\[\],lockedNames:cleanLocks,allowUnowned,limit:12,reaction,exactSourceTeams:exact\.sourceResults\|\|\[\]\}\)/,'two-lock fallback must honor Team Reaction, receive catalog metadata, and preserve shared exact pair archetypes');
 assert.doesNotMatch(bootstrap,/checkbox\.dispatchEvent\(new Event\('change'/,'community bootstrap must not synthesize checkbox changes during rerender');
 for(const label of ['Lunar-Charged','Lunar-Bloom','Lunar-Crystallize','Stellar-Conduct','Stellar-Swirl'])assert.match(reactionUi,new RegExp('TEAM_REACTIONS|reactionOptionsHtml'),'reaction selector must be populated from the reaction registry');
 assert.match(reactions,/lunar-charged/);assert.match(reactions,/lunar-bloom/);assert.match(reactions,/lunar-crystallize/);assert.match(reactions,/stellar-conduct/);assert.match(reactions,/stellar-swirl/);assert.match(reactions,/vaporize/);
