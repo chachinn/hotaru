@@ -146,6 +146,26 @@ function genericPairCandidates(roster=[],locks=[],reaction='all',catalogCharacte
   return{all:deduped,coverageGap:false};
 }
 
+function exactPairSourceTeams(baseTeams=[],roster=[],locks=[],reaction='all'){
+  const owned=rosterSet(roster),seen=new Set(),out=[];
+  for(const base of Array.isArray(baseTeams)?baseTeams:[]){
+    if(!teamHasValidSource(base)||!teamMatchesReaction(base,reaction))continue;
+    const members=(base.members||[]).map(canonicalTeamCharacter);
+    if(members.length!==4||!locks.every(lock=>members.some(member=>key(member)===key(lock))))continue;
+    const comp=compositionKey(members);if(!comp||seen.has(comp))continue;seen.add(comp);
+    const missing=members.filter(name=>!owned.has(key(name))),ownedCount=4-missing.length;
+    out.push({...base,members,missing,ownedCount,ownedComplete:missing.length===0});
+  }
+  return out;
+}
+function mergePairCandidates(...groups){
+  const out=[],seen=new Set();
+  for(const team of groups.flat()){
+    const comp=compositionKey(team?.members||[]);if(!comp||seen.has(comp))continue;seen.add(comp);out.push(team);
+  }
+  return out.sort((a,b)=>b.ownedCount-a.ownedCount||b.score-a.score||a.name.localeCompare(b.name));
+}
+
 function reviewedPairCompatibility(locks=[]){
   const checks=[];
   for(const lock of locks){
@@ -157,7 +177,7 @@ function reviewedPairCompatibility(locks=[]){
   return{checks,blocked,primary:checks[0]?.result||null};
 }
 
-export function buildFlexiblePairTeams({roster=[],catalogCharacters=[],lockedNames=[],allowUnowned=false,limit=12,reaction='all'}={}){
+export function buildFlexiblePairTeams({roster=[],catalogCharacters=[],lockedNames=[],allowUnowned=false,limit=12,reaction='all',exactSourceTeams=[]}={}){
   const locks=unique(lockedNames).map(name=>{
     const row=(roster||[]).find(entry=>key(entry.name)===key(name)||key(entry.teamName)===key(name));
     return canonicalTeamCharacter(row?.teamName||name);
@@ -178,11 +198,17 @@ export function buildFlexiblePairTeams({roster=[],catalogCharacters=[],lockedNam
       rationale:'No exact sourced Odette + Flins composition is currently in Hotaru. These options preserve Flins’s sourced Lunar-Charged requirements and use Odette only as the flexible off-field slot.'
     };
   }
-  const generic=genericPairCandidates(roster,locks,reaction,catalogCharacters),eligible=allowUnowned?generic.all:generic.all.filter(team=>team.ownedComplete),pairCompatibility=reviewedGate.primary;
+  const sharedExact=exactPairSourceTeams(exactSourceTeams,roster,locks,reaction);
+  const exactOwnedSubstitutions=ownedElementSubstitutions(sharedExact,roster,catalogCharacters,locks);
+  const generic=genericPairCandidates(roster,locks,reaction,catalogCharacters);
+  const all=mergePairCandidates(exactOwnedSubstitutions,generic.all),eligible=allowUnowned?all:all.filter(team=>team.ownedComplete),pairCompatibility=reviewedGate.primary;
+  const usedExactArchetype=exactOwnedSubstitutions.length>0;
   return{
-    kind:'flexible-pair',supported:!generic.coverageGap,adapted:true,generic:true,coverageGap:generic.coverageGap,lockedNames:locks,pairCompatibility,pairCompatibilityChecks:reviewedGate.checks,
-    results:eligible.slice(0,requested),previewResults:generic.all.slice(0,requested),previewAvailable:generic.all.some(team=>!team.ownedComplete),exactPair:false,
-    rationale:`No exact sourced four-person composition currently contains both ${locks[0]} and ${locks[1]}. Hotaru is showing a clearly labeled source-backed pair bridge instead of returning a dead end.`
+    kind:'flexible-pair',supported:Boolean(all.length)||!generic.coverageGap,adapted:true,generic:!usedExactArchetype,coverageGap:!all.length&&generic.coverageGap,lockedNames:locks,pairCompatibility,pairCompatibilityChecks:reviewedGate.checks,
+    results:eligible.slice(0,requested),previewResults:all.slice(0,requested),previewAvailable:all.some(team=>!team.ownedComplete),exactPair:false,
+    rationale:usedExactArchetype
+      ?`Hotaru found sourced ${locks[0]} + ${locks[1]} team structures but your owned roster did not complete the exact four-character lineups. These options keep both selected characters and adapt only the missing slots from those shared sourced archetypes before considering the broader pair bridge.`
+      :`No fully usable exact sourced four-person composition currently contains both ${locks[0]} and ${locks[1]}. Hotaru is showing a clearly labeled source-backed pair bridge instead of returning a dead end.`
   };
 }
 

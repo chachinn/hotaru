@@ -122,7 +122,7 @@ async function generateVisibleTeam(){
     const exact=matchReviewedTeams({roster:normalized,weapons:state?.weapons||[],lockedNames:cleanLocks,allowUnowned,limit:12,reaction});
     if(exact.results?.length){setHtml(host,`<div class="team-results">${exact.results.map(sourcedCard).join('')}</div>`);return}
     if(mode==='lock2'){
-      const flexible=buildFlexiblePairTeams({roster:normalized,catalogCharacters:catalog?.characters||[],lockedNames:cleanLocks,allowUnowned,limit:12,reaction});
+      const flexible=buildFlexiblePairTeams({roster:normalized,catalogCharacters:catalog?.characters||[],lockedNames:cleanLocks,allowUnowned,limit:12,reaction,exactSourceTeams:exact.sourceResults||[]});
       if(flexible.supported){
         const shown=flexible.results||[];
         if(shown.length){setHtml(host,`<div class="notice warn"><strong>Flexible Pair Builder · Adapted, not reviewed</strong><br>${esc(flexible.rationale)}</div><div class="team-results">${shown.map(flexibleCard).join('')}</div>`);return}
