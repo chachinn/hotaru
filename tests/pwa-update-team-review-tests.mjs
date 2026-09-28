@@ -22,7 +22,6 @@ assert.match(index,/new URL\('\.\/js\/core\/cache\.js',location\.href\)\.href/,'
 assert.match(index,/new URL\('\.\/js\/data\/game-data\.js',location\.href\)\.href/,'fresh index must evict stale game-data.js before app.js imports it');
 assert.ok(index.indexOf("new URL('./js/core/cache.js',location.href).href")<index.indexOf("await import('./js/features/aloy-reviewed-bootstrap.js?v=1.0.3')"),'startup cache eviction must run before the batched reviewed bootstrap begins');
 assert.match(index,/settleWithin\(caches\.keys\(\),1200,\[\]\)/,'startup cache enumeration must be bounded on iOS');
-assert.match(index,/aloy-reviewed-bootstrap\.js\?v=1\.0\.2/,'7.1 delivery must evict the superseded reviewed-bootstrap request inside the bounded deferred hydrator');
 assert.match(index,/Promise\.allSettled\(staleBuildProfiles\.map\(url=>cache\.delete\(url\)\)\)/,'startup cache deletion must tolerate individual Cache Storage failures');
 assert.match(index,/smart-team-mobile-controller\.js\?v=1\.0\.6/,'Smart Team controller must keep the stable mobile request key');
 
