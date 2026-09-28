@@ -88,6 +88,7 @@
             new URL('./js/features/guide-item-details.js',location.href).href,
             new URL('./js/features/flexible-pair-builder.js',location.href).href,
             new URL('./js/features/aloy-reviewed-bootstrap.js?v=1.0.1',location.href).href,
+            new URL('./js/features/aloy-reviewed-bootstrap.js?v=1.0.2',location.href).href,
             new URL('./js/features/arlecchino-reviewed-bootstrap.js?v=1.0.1',location.href).href,
             new URL('./js/features/arlecchino-smart-team-guard.js?v=1.0.0',location.href).href,
             new URL('./css/character-mobile-ux.css?v=1.0.0',location.href).href,
@@ -99,7 +100,7 @@
             if(cache)await settleWithin(Promise.allSettled(staleBuildProfiles.map(url=>cache.delete(url))),1400,null);
           })),1800,null);
         }
-        await import('./js/features/aloy-reviewed-bootstrap.js?v=1.0.2');
+        await import('./js/features/aloy-reviewed-bootstrap.js?v=1.0.3');
         document.dispatchEvent(new CustomEvent('hotaru:reviewed-data-ready'));
       }catch(error){console.warn('Reviewed data hydration deferred:',error)}
     };
