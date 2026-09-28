@@ -59,7 +59,18 @@ export const WEAPON_FARM_INFO={
   "Surf's Up":{source:'Limited Weapon Event Wishes when featured',kind:'Limited 5-star Catalyst'},
   'Tome of the Eternal Flow':{source:'Limited Weapon Event Wishes when featured',kind:'Limited 5-star Catalyst'},
   'Waveriding Whirl':{source:'Wishes when available',kind:'4-star Catalyst'},
-  'Lost Prayer to the Sacred Winds':{source:'Standard Wish and Weapon Event Wishes',kind:'5-star Catalyst'}
+  'Lost Prayer to the Sacred Winds':{source:'Standard Wish and Weapon Event Wishes',kind:'5-star Catalyst'},
+  'Beyond the Chrysalis':{source:'Limited Weapon Event Wishes when featured',kind:'Limited 5-star signature Sword',sourceUrl:'https://www.icy-veins.com/genshin-impact/news/genshin-impact-7-1-overview-of-new-weapons-in-a-requiem-for-the-underworld/'},
+  'New Bough':{source:'Version 7.1 weapon event/banner availability',kind:'Limited 4-star Sword',sourceUrl:'https://www.icy-veins.com/genshin-impact/vesna-guide-best-builds'},
+  'Emberwell':{source:'Forge after obtaining the Snezhnaya forging diagram and required Sword Billet/materials',kind:'Craftable Sword',sourceUrl:'https://www.icy-veins.com/genshin-impact/vesna-guide-best-builds'},
+  'Silver Light':{source:'Silverwing in Pursuit of the Moon event reward (Version 7.1)',kind:'Limited event Sword',sourceUrl:'https://www.icy-veins.com/genshin-impact/news/genshin-impact-7-1-overview-of-new-weapons-in-a-requiem-for-the-underworld/'},
+  'Hymn of the Maelstrom':{source:'Limited Weapon Event Wishes when featured',kind:'Limited 5-star signature Catalyst',sourceUrl:'https://www.icy-veins.com/genshin-impact/weapons/14524'},
+  'Thrilling Tales of Dragon Slayers':{source:'Wishes',kind:'3-star Catalyst'},
+  'Sacrificial Fragments':{source:'Wishes',kind:'4-star Catalyst'},
+  'Mappa Mare':{source:'Forge at any blacksmith using a Catalyst Billet and required materials',kind:'Craftable Catalyst'},
+  'Magic Guide':{source:'Wishes',kind:'3-star Catalyst'},
+  "Jadefall's Splendor":{source:'Limited Weapon Event Wishes when featured',kind:'Limited 5-star Catalyst'},
+  'Everlasting Moonglow':{source:'Limited Weapon Event Wishes when featured',kind:'Limited 5-star Catalyst'}
 };
 
 export function artifactFarmInfo(name=''){

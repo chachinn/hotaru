@@ -34,6 +34,8 @@ import { LISA_REVIEWED_TEAMS } from '../data/team-profiles/lisa-reviewed.js';
 import { LYNETTE_REVIEWED_TEAMS } from '../data/team-profiles/lynette-reviewed.js';
 import { MIKA_REVIEWED_TEAMS } from '../data/team-profiles/mika-reviewed.js';
 import { NINGGUANG_REVIEWED_TEAMS } from '../data/team-profiles/ningguang-reviewed.js';
+import { VESNA_REVIEWED_TEAMS } from '../data/team-profiles/vesna-reviewed.js';
+import { VODYANITSA_REVIEWED_TEAMS } from '../data/team-profiles/vodyanitsa-reviewed.js';
 import { REMAINING_FOUR_STAR_REVIEWED_TEAMS } from '../data/team-profiles/remaining-four-stars-canonical.js';
 import { ARATAKI_ITTO_REVIEWED_TEAMS } from '../data/team-profiles/arataki-itto-reviewed.js';
 import { BAIZHU_REVIEWED_TEAMS } from '../data/team-profiles/baizhu-reviewed.js';
@@ -70,7 +72,7 @@ const REVIEWED_BOOTSTRAP_TEAMS=[
   ...ILLUGA_REVIEWED_TEAMS,...JAHODA_REVIEWED_TEAMS,...KACHINA_REVIEWED_TEAMS,...KAEYA_REVIEWED_TEAMS,
   ...KAVEH_REVIEWED_TEAMS,...KIRARA_REVIEWED_TEAMS,...KUJOU_SARA_REVIEWED_TEAMS,...KUKI_SHINOBU_REVIEWED_TEAMS,
   ...LAN_YAN_REVIEWED_TEAMS,...LAYLA_REVIEWED_TEAMS,...LISA_REVIEWED_TEAMS,...LYNETTE_REVIEWED_TEAMS,
-  ...MIKA_REVIEWED_TEAMS,...NINGGUANG_REVIEWED_TEAMS,...REMAINING_FOUR_STAR_REVIEWED_TEAMS,
+  ...MIKA_REVIEWED_TEAMS,...NINGGUANG_REVIEWED_TEAMS,...VESNA_REVIEWED_TEAMS,...VODYANITSA_REVIEWED_TEAMS,...REMAINING_FOUR_STAR_REVIEWED_TEAMS,
   ...ARATAKI_ITTO_REVIEWED_TEAMS,...BAIZHU_REVIEWED_TEAMS,...CHASCA_REVIEWED_TEAMS,...CHIORI_REVIEWED_TEAMS,
   ...CITLALI_REVIEWED_TEAMS,...CYNO_REVIEWED_TEAMS,...DEHYA_REVIEWED_TEAMS,...DILUC_REVIEWED_TEAMS,
   ...EMILIE_REVIEWED_TEAMS,...ESCOFFIER_REVIEWED_TEAMS,...EULA_REVIEWED_TEAMS,...FLINS_REVIEWED_TEAMS,
