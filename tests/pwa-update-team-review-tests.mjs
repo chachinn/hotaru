@@ -20,8 +20,9 @@ assert.match(index,/hotaru\.pwa-reload\.v48/,'inline rescue and normal updater m
 assert.ok(index.indexOf('js/pwa-update.js?v=1.1.2')<index.indexOf('app.js?v=1.12.1'),'PWA updater must start before app modules so stale installed PWAs recover promptly');
 assert.match(index,/new URL\('\.\/js\/core\/cache\.js',location\.href\)\.href/,'fresh index must evict stale cache.js before app.js imports it');
 assert.match(index,/new URL\('\.\/js\/data\/game-data\.js',location\.href\)\.href/,'fresh index must evict stale game-data.js before app.js imports it');
-assert.ok(index.indexOf("new URL('./js/core/cache.js',location.href).href")<index.indexOf("await import('./js/features/aloy-reviewed-bootstrap.js?v=1.0.2')"),'startup cache eviction must run before the batched reviewed bootstrap begins');
+assert.ok(index.indexOf("new URL('./js/core/cache.js',location.href).href")<index.indexOf("await import('./js/features/aloy-reviewed-bootstrap.js?v=1.0.3')"),'startup cache eviction must run before the batched reviewed bootstrap begins');
 assert.match(index,/settleWithin\(caches\.keys\(\),1200,\[\]\)/,'startup cache enumeration must be bounded on iOS');
+assert.match(index,/aloy-reviewed-bootstrap\.js\?v=1\.0\.2/,'7.1 delivery must evict the superseded reviewed-bootstrap request inside the bounded deferred hydrator');
 assert.match(index,/Promise\.allSettled\(staleBuildProfiles\.map\(url=>cache\.delete\(url\)\)\)/,'startup cache deletion must tolerate individual Cache Storage failures');
 assert.match(index,/smart-team-mobile-controller\.js\?v=1\.0\.6/,'Smart Team controller must keep the stable mobile request key');
 
@@ -29,6 +30,8 @@ assert.equal((reviewedBootstrap.match(/registerReviewedTeams\(/g)||[]).length,1,
 assert.match(reviewedBootstrap,/const REVIEWED_BOOTSTRAP_TEAMS=\[/,'reviewed teams must be aggregated before registration');
 assert.match(reviewedBootstrap,/\.\.\.REMAINING_FOUR_STAR_REVIEWED_TEAMS/,'batched bootstrap must retain the completed four-star catalog');
 assert.match(reviewedBootstrap,/\.\.\.REMAINING_FIVE_STAR_REVIEWED_TEAMS/,'batched bootstrap must retain the completed five-star catalog');
+assert.match(reviewedBootstrap,/\.\.\.VESNA_REVIEWED_TEAMS/,'batched bootstrap must include Vesna without adding another registration pass');
+assert.match(reviewedBootstrap,/\.\.\.VODYANITSA_REVIEWED_TEAMS/,'batched bootstrap must include Vodyanitsa without adding another registration pass');
 
 assert.match(sw,/const CACHE = 'hotaru-shell-v48'/);
 assert.match(sw,/const PREVIOUS_CACHE = 'hotaru-shell-v47'/);
