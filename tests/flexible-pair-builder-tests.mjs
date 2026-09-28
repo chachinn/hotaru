@@ -56,7 +56,7 @@ assert.equal(travelerCoverage.canonical,'Cryo Traveler');
 
 const ui=read('js/features/flexible-pair-ui.js'),sw=read('service-worker.js'),index=read('index.html');
 assert.match(ui,/buildFlexiblePairTeams/);
-assert.match(ui,/Flexible Pair Builder · Adapted, not reviewed/);
+assert.match(ui,/Additional owned alternatives · Source-informed/,'two-lock UI should label appended owned alternatives without relabeling the exact sourced team');
 assert.match(ui,/team\.adaptationTier\|\|'Adapted'/,'adapted cards must display the actual adaptation tier');
 assert.match(ui,/source\.links/,'adapted cards should show both corroborating sources');
 assert.match(index,/flexible-pair-ui\.js\?v=1\.0\.4/);
