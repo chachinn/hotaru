@@ -6,6 +6,7 @@ import { buildFlexiblePairTeams } from './flexible-pair-builder.js';
 const app=document.getElementById('app');
 let pendingGenerate=false;
 let patchQueued=false;
+let patchRunning=false;
 
 function esc(value=''){return String(value||'').replace(/[&<>'"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]))}
 function rosterFromState(state=loadState()){return(state?.roster||[]).map((entry,index)=>({...entry,id:String(entry?.id||`ui:${index}`),name:String(entry?.name||entry?.teamName||'').trim(),teamName:String(entry?.teamName||'').trim()})).filter(entry=>entry.name)}
@@ -14,7 +15,9 @@ function card(team,index){return`<article class="team-card team-adapted"><div cl
 function setHtml(node,html){if(node&&node.innerHTML!==html)node.innerHTML=html}
 
 async function patchFlexiblePair(){
-  if(!pendingGenerate)return;
+  if(!pendingGenerate||patchRunning)return;
+  patchRunning=true;
+  try{
   const smart=document.querySelector('.smart-team-card');if(!smart)return;
   const mode=smart.querySelector('#team-mode')?.value;if(mode!=='lock2'){pendingGenerate=false;return}
   const lock1=smart.querySelector('#team-lock-1')?.value||'',lock2=smart.querySelector('#team-lock-2')?.value||'';if(!lock1||!lock2||lock1===lock2){pendingGenerate=false;return}
@@ -31,6 +34,7 @@ async function patchFlexiblePair(){
   if(!shown.length){pendingGenerate=false;return}
   setHtml(host,`<div class="notice warn"><strong>Flexible Pair Builder · Adapted, not reviewed</strong><br>${esc(flexible.rationale)}</div><div class="team-results">${shown.map(card).join('')}</div>`);
   pendingGenerate=false;
+  }finally{patchRunning=false}
 }
 function schedulePatch(){
   if(patchQueued)return;
