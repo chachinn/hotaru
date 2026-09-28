@@ -2,7 +2,7 @@ import { loadState } from '../core/state.js';
 import { loadCatalog } from '../data/game-data.js';
 import { normalizeRoster, sortRoster } from './roster-intelligence.js';
 import { matchReviewedTeams } from './roster-team-matcher.js';
-import { buildFlexiblePairTeams } from './flexible-pair-builder.js';
+import { buildFlexiblePairTeams, combineTwoLockResults } from './flexible-pair-builder.js';
 import { planReviewedAbyssTeams } from './abyss-team-planner.js';
 import { applyAbyssCycleIntelligence } from './abyss-intelligence.js';
 import { inferredTravelerElement, teamPickerCharacters } from '../data/team-picker-identities.js';
@@ -120,14 +120,16 @@ async function generateVisibleTeam(){
     setHtml(host,'<div class="notice info"><strong>Creating recommendations…</strong><br>Matching your saved roster against sourced team data.</div>');
     const catalog=await getCatalog(),state=loadState(),{normalized}=ownedNameSet(state,catalog),reaction=selectedReaction(card);
     const exact=matchReviewedTeams({roster:normalized,weapons:state?.weapons||[],lockedNames:cleanLocks,allowUnowned,limit:12,reaction});
-    if(exact.results?.length){setHtml(host,`<div class="team-results">${exact.results.map(sourcedCard).join('')}</div>`);return}
     if(mode==='lock2'){
       const flexible=buildFlexiblePairTeams({roster:normalized,catalogCharacters:catalog?.characters||[],lockedNames:cleanLocks,allowUnowned,limit:12,reaction,exactSourceTeams:exact.sourceResults||[]});
-      if(flexible.supported){
-        const shown=flexible.results||[];
-        if(shown.length){setHtml(host,`<div class="notice warn"><strong>Flexible Pair Builder · Adapted, not reviewed</strong><br>${esc(flexible.rationale)}</div><div class="team-results">${shown.map(flexibleCard).join('')}</div>`);return}
+      const adapted=allowUnowned?[]:(flexible.supported?flexible.results||[]:[]);
+      const shown=combineTwoLockResults(exact.results||[],adapted,12);
+      if(shown.length){
+        const hasAdapted=shown.some(team=>team?.adaptationTier);
+        const notice=hasAdapted?`<div class="notice warn"><strong>Additional owned alternatives · Source-informed</strong><br>${esc(flexible.rationale)}</div>`:'';
+        setHtml(host,`${notice}<div class="team-results">${shown.map((team,index)=>team?.adaptationTier?flexibleCard(team,index):sourcedCard(team,index)).join('')}</div>`);return;
       }
-    }
+    }else if(exact.results?.length){setHtml(host,`<div class="team-results">${exact.results.map(sourcedCard).join('')}</div>`);return}
     if(exact.pendingLocks?.length){renderPending(host,exact.pendingLocks);return}
     if(!allowUnowned&&(exact.sourceResults?.length||mode==='lock2')){setHtml(host,`<div class="notice info"><strong>No fully owned match for these choices.</strong><br>Owned only never inserts characters you do not own. Hotaru tried source-backed teams and owned element/utility substitutions; turn on Allow unowned only if you want to preview remaining roster gaps.</div>`);return}
     setHtml(host,`<div class="notice info"><strong>No sourced pair could be built for this reaction filter.</strong><br>Try All reactions or another Team Reaction.</div>`);
