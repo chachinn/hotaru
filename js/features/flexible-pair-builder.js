@@ -165,6 +165,14 @@ function mergePairCandidates(...groups){
   }
   return out.sort((a,b)=>b.ownedCount-a.ownedCount||b.score-a.score||a.name.localeCompare(b.name));
 }
+export function combineTwoLockResults(exactResults=[],adaptedResults=[],limit=12){
+  const requested=Math.max(1,Math.min(24,Number(limit)||12)),out=[],seen=new Set();
+  for(const team of [...(exactResults||[]),...(adaptedResults||[])]){
+    const comp=compositionKey(team?.members||[]);if(!comp||seen.has(comp))continue;seen.add(comp);out.push(team);
+    if(out.length>=requested)break;
+  }
+  return out;
+}
 
 function reviewedPairCompatibility(locks=[]){
   const checks=[];
