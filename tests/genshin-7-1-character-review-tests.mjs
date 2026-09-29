@@ -11,6 +11,7 @@ import { auditVodyanitsaCompatibility, vodyanitsaCompatibilityForCharacter } fro
 import { teamMeetsRosterConstraints, matchReviewedTeams } from '../js/features/roster-team-matcher.js';
 import { parseReleasedCharacterRecords, mergeReleasedCharacters } from '../js/data/game-data.js';
 import { weaponFarmInfo } from '../js/data/equipment-farm-registry.js';
+import { enrichCharacterTaxonomy, getRegionOptions } from '../js/features/taxonomy.js';
 
 const key=value=>String(value||'').trim().toLowerCase();
 const comp=team=>[...new Set((team.members||[]).map(key))].sort().join('|');
@@ -106,6 +107,10 @@ const released=parseReleasedCharacterRecords(synthetic,Date.parse('2026-09-29T00
 assert.ok(released.some(row=>row.slug==='vesna')&&released.some(row=>row.slug==='vodyanitsa'),'release-feed parser must recognize both 7.1 characters');
 const merged=mergeReleasedCharacters([{name:'Odette',slug:'odette'}],[{name:'Vesna',slug:'vesna',source:'Hakush/Nanoka'},{name:'Vodyanitsa',slug:'vodyanitsa',source:'Hakush/Nanoka'}],new Set(['vesna','vodyanitsa']));
 assert.ok(merged.some(row=>row.name==='Vesna')&&merged.some(row=>row.name==='Vodyanitsa'),'catalog supplement must merge both released 7.1 characters without a duplicate module graph');
+
+const vesnaTaxonomy=enrichCharacterTaxonomy({id:'vesna-test',name:'Vesna',region:''},{});
+assert.equal(vesnaTaxonomy.region,'Snezhnaya','Vesna must be listed under Snezhnaya even when upstream association metadata is missing or stale');
+assert.ok(getRegionOptions([vesnaTaxonomy]).includes('Snezhnaya'),'Characters Region filter must expose Snezhnaya for Vesna');
 
 assert.match(weaponFarmInfo('Beyond the Chrysalis').kind,/5-star signature Sword/);
 assert.match(weaponFarmInfo('Hymn of the Maelstrom').kind,/5-star signature Catalyst/);
