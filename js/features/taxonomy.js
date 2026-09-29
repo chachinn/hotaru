@@ -23,6 +23,7 @@ const ASSOC_REGION={
 // Reviewed primary-region/location fallbacks for characters whose upstream association
 // metadata is missing, stale, or too generic for Hotaru's Region filter.
 const REGION_OVERRIDES={
+  Vesna:'Snezhnaya',
   Odette:'Snezhnaya',
   Alyosha:'Snezhnaya',
   Tartaglia:'Snezhnaya',
